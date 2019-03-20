@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/20/2019 4:50:47 PM
+Last modified: 3/20/2019 4:53:23 PM
 """
 
 #defaut setting for scientific caculation
@@ -23,7 +23,7 @@ import time
 import struct
 from cls_udp import CLS_UDP
 
-class CLS_FEMB_CONFIG:
+class CLS_CONFIG:
     def config_femb_mode(self, femb_addr,  pls_cs, dac_sel, fpga_dac, asic_dac, mon_cs = 0):
         if (mon_cs == 0):
             tp_sel = ((asic_dac&0x01) <<1) + (fpga_dac&0x01) + ((dac_sel&0x1)<<8)
