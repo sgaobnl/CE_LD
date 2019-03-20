@@ -1,4 +1,21 @@
-#!/usr/bin/env python33
+# -*- coding: utf-8 -*-
+"""
+File Name: cls_femb_config.py
+Author: GSS
+Mail: gao.hillhill@gmail.com
+Description: 
+Created Time: 3/20/2019 4:50:34 PM
+Last modified: 3/20/2019 4:50:47 PM
+"""
+
+#defaut setting for scientific caculation
+#import numpy
+#import scipy
+#from numpy import *
+#import numpy as np
+#import scipy as sp
+#import pylab as pl
+
 
 import sys 
 import string

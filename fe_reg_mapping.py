@@ -1,7 +1,22 @@
-#!/usr/bin/env python33
+# -*- coding: utf-8 -*-
+"""
+File Name: fe_reg_mapping.py
+Author: GSS
+Mail: gao.hillhill@gmail.com
+Description: 
+Created Time: 3/20/2019 4:50:11 PM
+Last modified: 3/20/2019 4:50:23 PM
+"""
+
+#defaut setting for scientific caculation
+#import numpy
+#import scipy
+#from numpy import *
+#import numpy as np
+#import scipy as sp
+#import pylab as pl
 
 import string
-
 class FE_REG_MAPPING:
 ####sec_chn_reg only sets a channel register, the other registers remains as before
     def set_fechn_reg(self, chip=0, chn=0, sts=0, snc=0, sg0=0, sg1=1, st0=1, st1=1, smn=0, sdf=1 ):
