@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: 3/20/2019 4:52:47 PM
+Last modified: 3/20/2019 5:55:54 PM
 """
 
 #defaut setting for scientific caculation
@@ -48,7 +48,7 @@ class CLS_UDP:
     def read_reg(self, reg ):
         regVal = int(reg)
         if (regVal < 0) or (regVal > self.MAX_REG_NUM):
-                return None
+                return -1
 
         #set up listening socket, do before sending read request
         sock_readresp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
@@ -70,13 +70,13 @@ class CLS_UDP:
         except socket.timeout:
                 self.udp_timeout_cnt = self.udp_timeout_cnt  + 1
                 sock_readresp.close()
-                return -1        
+                return -2        
         dataHex = data.encode('hex')
         sock_readresp.close()
 
         #extract register value from response
         if int(dataHex[0:4],16) != regVal :
-                return None
+                return -3
         dataHexVal = long(dataHex[4:12],16)
         return dataHexVal
 
@@ -480,14 +480,6 @@ class CLS_UDP:
     #__INIT__#
     def __init__(self):
         self.UDP_IP = "192.168.121.1"
-        self.jumbo_flag = True
-        self.wib_wr_cnt = 0
-        self.wib_wrerr_cnt = 0
-        self.femb_wr_cnt = 0
-        self.femb_wrerr_cnt = 0
-        self.femb_wrerr_log = []
-        self.udp_timeout_cnt = 0
-        self.udp_hstimeout_cnt = 0
         self.KEY1 = 0xDEAD
         self.KEY2 = 0xBEEF
         self.FOOTER = 0xFFFF
@@ -514,4 +506,13 @@ class CLS_UDP:
         self.UDPFEMB3_PORT_WREG =     32064
         self.UDPFEMB3_PORT_RREG =     32065
         self.UDPFEMB3_PORT_RREGRESP = 32066
+
+        self.jumbo_flag = False
+        self.wib_wr_cnt = 0
+        self.wib_wrerr_cnt = 0
+        self.femb_wr_cnt = 0
+        self.femb_wrerr_cnt = 0
+        self.femb_wrerr_log = []
+        self.udp_timeout_cnt = 0
+        self.udp_hstimeout_cnt = 0
 
