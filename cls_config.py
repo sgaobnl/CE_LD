@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/20/2019 6:09:39 PM
+Last modified: 3/20/2019 6:27:03 PM
 """
 
 #defaut setting for scientific caculation
@@ -25,25 +25,35 @@ from cls_udp import CLS_UDP
 class CLS_CONFIG:
     def __init__(self):
         self.UDP = CLS_UDP()
+        self.jumbo_flag = True
         self.WIB_IPs = ["192.168.121.1", "192.168.121.2", "192.168.121.3", \
                         "192.168.121.4", "192.168.121.5", "192.168.121.6",] #WIB IPs connected to host-PC
         self.MBB_IP  = "192.168.121.10"
 
     def WIB_SCAN(self, wib_verid=0x109):
+        print ("Finding available WIBs starts...")
+        active_wibs = []
         for wib_ip in self.WIB_IPs:
             self.UDP.UDP_IP = wib_ip
             self.UDP.jumbo_flag = self.jumbo_flag
             for i in range(5):
                 wib_ver_rb = self.UDP.read_reg_wib (0xFF)
-                if ((wib_ver_rb&0x0FFF) == wib_verid) and ( wib_ver_rb!= -1):
+                wib_ver_rb = self.UDP.read_reg_wib (0xFF)
+                if ((wib_ver_rb&0x0FFF) == wib_verid) and ( wib_ver_rb >= 0):
                     print ("WIB with IP = %s is found"%wib_ip) 
+                    active_wibs.append(wib_ip)
+                    break
+                elif ( wib_ver_rb == -2):
+                    print ("Timeout. WIB with IP = %s isn't mounted, mask this IP"%wib_ip) 
                     break
                 time.sleep(0.1)
                 if (i == 4):
-                    print ("WIB with IP = %s isn't mounted, mask this IP"%wib_ip) 
-                    self.WIB_IPs.remove(wib_ip)
+                    print ("WIB with IP = %s get error (code %d from CLS_UDP.read_reg()), mask this IP"%(wib_ip, wib_ver_rb)) 
+        self.WIB_IPs = active_wibs
+        print ("WIB scanning is done" )
 
-
+a = CLS_CONFIG()
+a.WIB_SCAN()
 
 #
 #    def Init_CHK(self, wib_ip, femb_loc, wib_verid=0x109, femb_ver=0x501):
