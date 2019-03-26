@@ -5,20 +5,21 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/26/2019 2:38:18 PM
+Last modified: 3/26/2019 4:33:45 PM
 """
 
 #defaut setting for scientific caculation
 #import numpy
 #import scipy
 #from numpy import *
-#import numpy as np
+import numpy as np
 #import scipy as sp
 #import pylab as pl
 
 import sys 
 import string
 import time
+from datetime import datetime
 import struct
 from cls_udp import CLS_UDP
 
@@ -62,26 +63,29 @@ class CLS_CONFIG:
                 self.UDP.write_reg_wib_checked (0x8, pwr_status )#FEMB0 ON
                 time.sleep(1)
             else:
-                pwr_status &= ~np.unit32(pwr_ctl[i])
+                pwr_status &= ~np.uint32(pwr_ctl[i])
                 self.UDP.write_reg_wib_checked (0x8, pwr_status )#FEMB0 ON
                 time.sleep(1)
 
 
     def WIB_LINK_CUR(self, wib_ip):
-        self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True)
         runtime =  datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
 
         stat_words = []
         self.UDP.write_reg_wib(0x12, 0x8000)
         self.UDP.write_reg_wib(0x12, 0x100)
         for addr in range(32, 39, 1):
-            stat_words.append( [addr, format(self.UDP.read_reg_wib(addr)], "08X") )
+            stat_words.append( [addr, format(self.UDP.read_reg_wib(addr), "08X")] )
+
+        print stat_words
         ts_words = []
         for i in range(16):
             self.UDP.write_reg_wib_checked(0x12, i)
-            timestamps.append( format( self.UDP.read_reg_wib(32), "08X") )
+            ts_words.append( format( self.UDP.read_reg_wib(32), "08X") )
+        print ts_words
 
         #current & temperature 
+        status_dict = {}
         for j in range(3):
             self.UDP.write_reg_wib_checked(5, 0x00000)
             self.UDP.write_reg_wib_checked(5, 0x00000 | 0x10000)
@@ -94,19 +98,30 @@ class CLS_CONFIG:
                 vcts.append(  self.UDP.read_reg_wib(6) & 0xFFFFFFFF )
                 time.sleep(0.001)
 
-        wib_vcts=[vcts[0],vcts[0x19], vcts[0x1A], vcts[0x1B], vcts[0x1C], vcts[0x1D] ] 
-        wib_vs = []
-        wib_ts = [] 
-        wib_cs = [] 
-        for vct in wib_vcts:
-            wib_vs.append( (((vct&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001 + 2.5 )
-        for vct in wib_vcts[0:2]:
-            wib_ts.append( (((vct[0]&0x0FFFF) & 0x3FFF) * 62.5) * 0.001 )
-        for vct in wib_vcts[3:]:
-            wib_cs = ((vct & 0x3FFF) * 19.075) * 0.000001 / 0.1
-        print (wib_vs)
-        print (wib_ts)
-        print (wib_cs)
+        wib_vcc   = (((vcts[0x19]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001  + 2.5
+        wib_t     = (((vcts[0x19]&0x0FFFF) & 0x3FFF) * 62.5) * 0.001 
+        wib_vbias = (((vcts[0x1A]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
+        wib_ibias = ((vcts[0x1A]& 0x3FFF) * 19.075) * 0.000001 / 0.1
+        wib_v18   = (((vcts[0x1B]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
+        wib_i18   = ((vcts[0x1B]& 0x3FFF) * 19.075) * 0.000001 / 0.01
+        wib_v36   = (((vcts[0x1C]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
+        wib_i36   = ((vcts[0x1C]& 0x3FFF) * 19.075) * 0.000001 / 0.01
+        wib_v28   = (((vcts[0x1D]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
+        wib_i28   = ((vcts[0x1D]& 0x3FFF) * 19.075) * 0.000001 / 0.01
+        status_dict["WIB_2991_VCC"] = wib_vcc 
+        status_dict["WIB_2991_T"] = wib_t 
+        status_dict["WIB_BIAS_V"] = wib_vbias 
+        status_dict["WIB_BIAS_I"] = wib_ibias 
+        status_dict["WIB_V18_V"]  = wib_v18 
+        status_dict["WIB_V18_I"]  = wib_i18 
+        status_dict["WIB_V36_V"]  = wib_v36 
+        status_dict["WIB_V36_I"]  = wib_i36 
+        status_dict["WIB_V28_V"]  = wib_v28 
+        status_dict["WIB_V28_I"]  = wib_i28 
+        bias_vcc  = (((vcts[0x00]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001  + 2.5
+        bias_t    = (((vcts[0x00]&0x0FFFF) & 0x3FFF) * 62.5) * 0.001
+        status_dict["BIAS_2991_V"]  = bias_vcc 
+        status_dict["BIAS_2991_T"]  = bias_t 
 
         for fembno in range(4):
             vct = []
@@ -115,49 +130,72 @@ class CLS_CONFIG:
             cs  = []
 
             femb_vcts=vcts[fembno*6+1: fembno*6+7]
-            vc25 = vcts[31+fembno]
             vct = np.array(femb_vcts)
+            vc25 = vcts[31+fembno]
+            status_dict["FEMB%d_2991_VCC"%fembno] = (((vct[0]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001 + 2.5
+            status_dict["FEMB%d_2991_T"%fembno  ]   = (((vct[0]&0x0FFFF) & 0x3FFF) * 62.5) * 0.001
+            status_dict["FEMB%d_FMV39_V"%fembno] = (((vct[1]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
+            status_dict["FEMB%d_FMV39_I"%fembno] = ((vct[1]& 0x3FFF) * 19.075) * 0.000001 / 0.1
+            status_dict["FEMB%d_FMV30_V"%fembno] = (((vct[2]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
+            status_dict["FEMB%d_FMV30_I"%fembno] = ((vct[2]& 0x3FFF) * 19.075) * 0.000001 / 0.1
+            status_dict["FEMB%d_FMV18_V"%fembno] = (((vct[4]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
+            status_dict["FEMB%d_FMV18_I"%fembno] = ((vct[4]& 0x3FFF) * 19.075) * 0.000001 / 0.1
+            status_dict["FEMB%d_AMV33_V"%fembno] = (((vct[3]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
+            status_dict["FEMB%d_AMV33_I"%fembno] = ((vct[3]& 0x3FFF) * 19.075) * 0.000001 / 0.01
+            status_dict["FEMB%d_BIAS_V"%fembno ]  = (((vct[5]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
+            status_dict["FEMB%d_BIAS_I"%fembno ]  = ((vct[5]& 0x3FFF) * 19.075) * 0.000001 / 0.1
+            status_dict["FEMB%d_AMV28_V"%fembno] = (((vc25&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
+            status_dict["FEMB%d_AMV28_I"%fembno] = ((vc25& 0x3FFF) * 19.075) * 0.000001 / 0.01
+            status_dict["FEMB%d_AMV33_I"%fembno] -= status_dict["FEMB%d_AMV28_I"%fembno]
 
-            vcs = np.append(vct[1:6], vc25) 
-            vcsh = (vcs&0x0FFFF0000) >> 16 
-            vcshx = vcsh & 0x4000
-            for i in range(len(vcsh)):
-                if (vcshx[i] == 0 ):
-                    vs.append(vcsh[i])
-                else:
-                    vs.append(0)
-            vs = ((np.array(vs) & 0x3FFF) * 305.18) * 0.000001
- 
-            vcsl = (vcs&0x0FFFF) 
-            cs = ((vcsl & 0x3FFF) * 19.075) * 0.000001 / 0.1
-            cs[2] = cs[2] / 0.1
-            cs[5] = cs[5] / 0.1
-            cs_tmp =[]
-            for csi in cs:
-                if csi < 3.1 :
-                    cs_tmp.append(csi)
-                else:
-                    cs_tmp.append(0)
-            cs = np.array(cs_tmp)
+        print ( status_dict["FEMB1_2991_T"] )
+        print ( status_dict["FEMB1_BIAS_V"] , status_dict["FEMB1_BIAS_I"]  )
+        print ( status_dict["FEMB1_FMV39_V"], status_dict["FEMB1_FMV39_I"] )
+        print ( status_dict["FEMB1_FMV30_V"], status_dict["FEMB1_FMV30_I"] )
+        print ( status_dict["FEMB1_FMV18_V"], status_dict["FEMB1_FMV18_I"] )
+        print ( status_dict["FEMB1_AMV33_V"], status_dict["FEMB1_AMV33_I"] )
+        print ( status_dict["FEMB1_AMV28_V"], status_dict["FEMB1_AMV28_I"] )
 
-            spl_in = (((vct[0]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001 + 2.5
-            temp = (((vct[0]&0x0FFFF) & 0x3FFF) * 62.5) * 0.001
+#            vcs = np.append(vct[1:6], vc25) 
+#            vcsh = (vcs&0x0FFFF0000) >> 16 
+#            vcshx = vcsh & 0x4000
+#            for i in range(len(vcsh)):
+#                if (vcshx[i] == 0 ):
+#                    vs.append(vcsh[i])
+#                else:
+#                    vs.append(0)
+#            vs = ((np.array(vs) & 0x3FFF) * 305.18) * 0.000001
+# 
+#            status_dict["BIAS_2991_V"]  = bias_vcc 
+#
+#            vcsl = (vcs&0x0FFFF) 
+#            cs = ((vcsl & 0x3FFF) * 19.075) * 0.000001 / 0.1
+#            cs[2] = cs[2] / 0.1
+#            cs[5] = cs[5] / 0.1
+#            cs_tmp =[]
+#            for csi in cs:
+#                if csi < 3.1 :
+#                    cs_tmp.append(csi)
+#                else:
+#                    cs_tmp.append(0)
+#            cs = np.array(cs_tmp)
+#
 
 #            monlogs.append ( mon_pre + "LINK/LINK_READ" + " " + str( (wib_link >> (8*fembno))&0xFF ) )
 #            monlogs.append ( mon_pre + "EQER/EQER_READ" + " " + str((wib_eq >> (4*fembno))&0xF ) )
-            print (  "TEMP/TEMP_READ" + " " + "%3.3f"%temp )
-            print (  "BS50/VOLT_READ" + " " + "%3.3f"%vs[4] ) 
-            print (  "FM42/VOLT_READ" + " " + "%3.3f"%vs[0] ) 
-            print (  "FM30/VOLT_READ" + " " + "%3.3f"%vs[1] ) 
-            print (  "FM15/VOLT_READ" + " " + "%3.3f"%vs[3] ) 
-            print (  "AM36/VOLT_READ" + " " + "%3.3f"%vs[2] ) 
-            print (  "AM25/VOLT_READ" + " " + "%3.3f"%vs[5] ) 
-            print (  "BS50/CURR_READ" + " " + "%3.3f"%cs[4] ) 
-            print (  "FM42/CURR_READ" + " " + "%3.3f"%cs[0] ) 
-            print (  "FM30/CURR_READ" + " " + "%3.3f"%cs[1] ) 
-            print (  "FM15/CURR_READ" + " " + "%3.3f"%cs[3] ) 
-            print (  "AM36/CURR_READ" + " " + "%3.3f"%cs[2] ) 
-            print (  "AM25/CURR_READ" + " " + "%3.3f"%cs[5] ) 
+            #print (  "TEMP/TEMP_READ" + " " + "%3.3f"%temp )
+            #print (  "BS50/VOLT_READ" + " " + "%3.3f"%vs[4] ) 
+            #print (  "FM42/VOLT_READ" + " " + "%3.3f"%vs[0] ) 
+            #print (  "FM30/VOLT_READ" + " " + "%3.3f"%vs[1] ) 
+            #print (  "FM15/VOLT_READ" + " " + "%3.3f"%vs[3] ) 
+            #print (  "AM36/VOLT_READ" + " " + "%3.3f"%vs[2] ) 
+            #print (  "AM25/VOLT_READ" + " " + "%3.3f"%vs[5] ) 
+            #print (  "BS50/CURR_READ" + " " + "%3.3f"%cs[4] ) 
+            #print (  "FM42/CURR_READ" + " " + "%3.3f"%cs[0] ) 
+            #print (  "FM30/CURR_READ" + " " + "%3.3f"%cs[1] ) 
+            #print (  "FM15/CURR_READ" + " " + "%3.3f"%cs[3] ) 
+            #print (  "AM36/CURR_READ" + " " + "%3.3f"%cs[2] ) 
+            #print (  "AM25/CURR_READ" + " " + "%3.3f"%cs[5] ) 
 
 
     #def WIB_PWR_CTRL(self, wib_ip,  sw=True):
@@ -195,7 +233,10 @@ class CLS_CONFIG:
 #        print ("WIB scanning is done" )
 
 a = CLS_CONFIG()
-a.WIBs_SCAN()
+#a.WIBs_SCAN()
+#a.WIB_PWR_FEMB("192.168.121.1", femb_sws=[0,0,0,0])
+#a.WIB_PWR_FEMB("192.168.121.1", femb_sws=[1,1,1,1])
+a.WIB_LINK_CUR("192.168.121.1")
 
 #
 #    def Init_CHK(self, wib_ip, femb_loc, wib_verid=0x109, femb_ver=0x501):
