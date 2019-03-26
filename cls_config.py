@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/20/2019 6:27:03 PM
+Last modified: 3/26/2019 2:38:18 PM
 """
 
 #defaut setting for scientific caculation
@@ -29,8 +29,9 @@ class CLS_CONFIG:
         self.WIB_IPs = ["192.168.121.1", "192.168.121.2", "192.168.121.3", \
                         "192.168.121.4", "192.168.121.5", "192.168.121.6",] #WIB IPs connected to host-PC
         self.MBB_IP  = "192.168.121.10"
+        self.fembs = []
 
-    def WIB_SCAN(self, wib_verid=0x109):
+    def WIBs_SCAN(self, wib_verid=0x109):
         print ("Finding available WIBs starts...")
         active_wibs = []
         for wib_ip in self.WIB_IPs:
@@ -52,8 +53,149 @@ class CLS_CONFIG:
         self.WIB_IPs = active_wibs
         print ("WIB scanning is done" )
 
+    def WIB_PWR_FEMB(self, wib_ip, femb_sws=[1,1,1,1]):
+        pwr_status = self.UDP.read_reg_wib (0x8)
+        pwr_ctl = [0x31000F, 0x5200F0, 0x940F00, 0x118F000]
+        for i in range(len(femb_sws)):
+            if ( femb_sws[i] == 1):
+                pwr_status |= np.uint32(pwr_ctl[i])
+                self.UDP.write_reg_wib_checked (0x8, pwr_status )#FEMB0 ON
+                time.sleep(1)
+            else:
+                pwr_status &= ~np.unit32(pwr_ctl[i])
+                self.UDP.write_reg_wib_checked (0x8, pwr_status )#FEMB0 ON
+                time.sleep(1)
+
+
+    def WIB_LINK_CUR(self, wib_ip):
+        self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True)
+        runtime =  datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
+
+        stat_words = []
+        self.UDP.write_reg_wib(0x12, 0x8000)
+        self.UDP.write_reg_wib(0x12, 0x100)
+        for addr in range(32, 39, 1):
+            stat_words.append( [addr, format(self.UDP.read_reg_wib(addr)], "08X") )
+        ts_words = []
+        for i in range(16):
+            self.UDP.write_reg_wib_checked(0x12, i)
+            timestamps.append( format( self.UDP.read_reg_wib(32), "08X") )
+
+        #current & temperature 
+        for j in range(3):
+            self.UDP.write_reg_wib_checked(5, 0x00000)
+            self.UDP.write_reg_wib_checked(5, 0x00000 | 0x10000)
+            self.UDP.write_reg_wib_checked(5, 0x00000)
+            time.sleep(0.1)
+            vcts =[]
+            for i in range(35):
+                self.UDP.write_reg_wib_checked(5, i)
+                time.sleep(0.001)
+                vcts.append(  self.UDP.read_reg_wib(6) & 0xFFFFFFFF )
+                time.sleep(0.001)
+
+        wib_vcts=[vcts[0],vcts[0x19], vcts[0x1A], vcts[0x1B], vcts[0x1C], vcts[0x1D] ] 
+        wib_vs = []
+        wib_ts = [] 
+        wib_cs = [] 
+        for vct in wib_vcts:
+            wib_vs.append( (((vct&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001 + 2.5 )
+        for vct in wib_vcts[0:2]:
+            wib_ts.append( (((vct[0]&0x0FFFF) & 0x3FFF) * 62.5) * 0.001 )
+        for vct in wib_vcts[3:]:
+            wib_cs = ((vct & 0x3FFF) * 19.075) * 0.000001 / 0.1
+        print (wib_vs)
+        print (wib_ts)
+        print (wib_cs)
+
+        for fembno in range(4):
+            vct = []
+            vcs = []
+            vs  = []
+            cs  = []
+
+            femb_vcts=vcts[fembno*6+1: fembno*6+7]
+            vc25 = vcts[31+fembno]
+            vct = np.array(femb_vcts)
+
+            vcs = np.append(vct[1:6], vc25) 
+            vcsh = (vcs&0x0FFFF0000) >> 16 
+            vcshx = vcsh & 0x4000
+            for i in range(len(vcsh)):
+                if (vcshx[i] == 0 ):
+                    vs.append(vcsh[i])
+                else:
+                    vs.append(0)
+            vs = ((np.array(vs) & 0x3FFF) * 305.18) * 0.000001
+ 
+            vcsl = (vcs&0x0FFFF) 
+            cs = ((vcsl & 0x3FFF) * 19.075) * 0.000001 / 0.1
+            cs[2] = cs[2] / 0.1
+            cs[5] = cs[5] / 0.1
+            cs_tmp =[]
+            for csi in cs:
+                if csi < 3.1 :
+                    cs_tmp.append(csi)
+                else:
+                    cs_tmp.append(0)
+            cs = np.array(cs_tmp)
+
+            spl_in = (((vct[0]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001 + 2.5
+            temp = (((vct[0]&0x0FFFF) & 0x3FFF) * 62.5) * 0.001
+
+#            monlogs.append ( mon_pre + "LINK/LINK_READ" + " " + str( (wib_link >> (8*fembno))&0xFF ) )
+#            monlogs.append ( mon_pre + "EQER/EQER_READ" + " " + str((wib_eq >> (4*fembno))&0xF ) )
+            print (  "TEMP/TEMP_READ" + " " + "%3.3f"%temp )
+            print (  "BS50/VOLT_READ" + " " + "%3.3f"%vs[4] ) 
+            print (  "FM42/VOLT_READ" + " " + "%3.3f"%vs[0] ) 
+            print (  "FM30/VOLT_READ" + " " + "%3.3f"%vs[1] ) 
+            print (  "FM15/VOLT_READ" + " " + "%3.3f"%vs[3] ) 
+            print (  "AM36/VOLT_READ" + " " + "%3.3f"%vs[2] ) 
+            print (  "AM25/VOLT_READ" + " " + "%3.3f"%vs[5] ) 
+            print (  "BS50/CURR_READ" + " " + "%3.3f"%cs[4] ) 
+            print (  "FM42/CURR_READ" + " " + "%3.3f"%cs[0] ) 
+            print (  "FM30/CURR_READ" + " " + "%3.3f"%cs[1] ) 
+            print (  "FM15/CURR_READ" + " " + "%3.3f"%cs[3] ) 
+            print (  "AM36/CURR_READ" + " " + "%3.3f"%cs[2] ) 
+            print (  "AM25/CURR_READ" + " " + "%3.3f"%cs[5] ) 
+
+
+    #def WIB_PWR_CTRL(self, wib_ip,  sw=True):
+
+
+#    def FEMBs_SCAN(self, femb_verid=0x501):
+#        print ("Finding available FEMBs starts...")
+#        for wib_ip in self.WIB_IPs:
+#            self.UDP.UDP_IP = wib_ip
+#            self.UDP.jumbo_flag = self.jumbo_flag
+#
+#            self.UDP.write_reg_wib_checked (0x8, 0x1FFFFFF )#FEMB0&1&2&3 ON
+#            time.sleep(3)
+#            #
+#
+#
+#        active_wibs = []
+#        for wib_ip in self.WIB_IPs:
+#            self.UDP.UDP_IP = wib_ip
+#            self.UDP.jumbo_flag = self.jumbo_flag
+#            for i in range(5):
+#                wib_ver_rb = self.UDP.read_reg_wib (0xFF)
+#                wib_ver_rb = self.UDP.read_reg_wib (0xFF)
+#                if ((wib_ver_rb&0x0FFF) == wib_verid) and ( wib_ver_rb >= 0):
+#                    print ("WIB with IP = %s is found"%wib_ip) 
+#                    active_wibs.append(wib_ip)
+#                    break
+#                elif ( wib_ver_rb == -2):
+#                    print ("Timeout. WIB with IP = %s isn't mounted, mask this IP"%wib_ip) 
+#                    break
+#                time.sleep(0.1)
+#                if (i == 4):
+#                    print ("WIB with IP = %s get error (code %d from CLS_UDP.read_reg()), mask this IP"%(wib_ip, wib_ver_rb)) 
+#        self.WIB_IPs = active_wibs
+#        print ("WIB scanning is done" )
+
 a = CLS_CONFIG()
-a.WIB_SCAN()
+a.WIBs_SCAN()
 
 #
 #    def Init_CHK(self, wib_ip, femb_loc, wib_verid=0x109, femb_ver=0x501):
@@ -593,4 +735,7 @@ a.WIB_SCAN()
 #        self.d58_idl1_step = 4
 #        self.d58_idl1_ud   = 0
 #        self.d58_phase_en  = 1
-#    
+#        self.fembs=[]
+#        for wib_ip in self.WIB_IPs:
+#            self.fembs.append({"WIB_IP":wib_ip, "FEMB":[1,1,1,1]})
+    
