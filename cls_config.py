@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/26/2019 6:04:54 PM
+Last modified: 3/26/2019 6:36:51 PM
 """
 
 #defaut setting for scientific caculation
@@ -71,77 +71,74 @@ class CLS_CONFIG:
 
     def FEMB_DECTECT(self, wib_ip):
         self.WIB_PWR_FEMB(wib_ip, femb_sws=[1,1,1,1])
-        stats = WIB_STATUS(wib_ip)
-        keys = list(stats.keys)
+        stats = self.WIB_STATUS(wib_ip)
+        keys = list(stats.keys())
         fembs_found = [True, True, True, True]
-        for i in range(4)
+        for i in range(4):
             for key in keys:
-                if key in "FEMB%d_LINK"%d:
+                if key in "FEMB%d_LINK"%i:
                     if (stats[key] != 0xF):
                         print ("FEMB%d LINK is broken!")
                         fembs_found[i] = False
-                elif key in "FEMB%d_EQ"%d:
+                elif key in "FEMB%d_EQ"%i:
                     if (stats[key] != 0x1):
                         print ("FEMB%d EQ is broken!")
                         fembs_found[i] = False
-                elif key in "FEMB%d_BIAS_I"%d:
+                elif key in "FEMB%d_BIAS_I"%i:
                     if (stats[key] < 0.001 ):
                         print ("FEMB%d BIAS current (%fA) is lower than expected"%(i, stats[key]) )
                         fembs_found[i] = False
                     elif (stats[key] > 0.1 ):
                         print ("FEMB%d BIAS current (%fA) is higer than expected"%(i, stats[key]) )
                         fembs_found[i] = False
-                elif key in "FEMB%d_FMV39_I"%d:
+                elif key in "FEMB%d_FMV39_I"%i:
                     if (stats[key] < 0.010 ):
-                        print ("FEMB%d FM_V39 current (%fA) is lower than expected"%(i, %stats[key] ))
+                        print ("FEMB%d FM_V39 current (%fA) is lower than expected"%(i, stats[key] ))
                         fembs_found[i] = False
                     elif (stats[key] > 0.2 ):
-                        print ("FEMB%d FM_V39 current (%fA) is higer than expected"%(i, %stats[key] ))
+                        print ("FEMB%d FM_V39 current (%fA) is higer than expected"%(i, stats[key] ))
                         fembs_found[i] = False
-                elif key in "FEMB%d_FMV30_I"%d:
+                elif key in "FEMB%d_FMV30_I"%i:
                     if (stats[key] < 0.050 ):
-                        print ("FEMB%d FM_V30 current (%fA) is lower than expected"%(i, %stats[key] ))
+                        print ("FEMB%d FM_V30 current (%fA) is lower than expected"%(i, stats[key] ))
                         fembs_found[i] = False
                     elif (stats[key] > 0.5 ):
-                        print ("FEMB%d FM_V30 current (%fA) is higer than expected"%(i, %stats[key] ))
+                        print ("FEMB%d FM_V30 current (%fA) is higer than expected"%(i, stats[key] ))
                         fembs_found[i] = False
-                elif key in "FEMB%d_FMV18_I"%d:
+                elif key in "FEMB%d_FMV18_I"%i:
                     if (stats[key] < 0.250 ):
-                        print ("FEMB%d FM_V30 current (%fA) is lower than expected"%(i, %stats[key] ))
+                        print ("FEMB%d FM_V30 current (%fA) is lower than expected"%(i, stats[key] ))
                         fembs_found[i] = False
                     elif (stats[key] > 1.0 ):
-                        print ("FEMB%d FM_V30 current (%fA) is higer than expected"%(i, %stats[key] ))
+                        print ("FEMB%d FM_V30 current (%fA) is higer than expected"%(i, stats[key] ))
                         fembs_found[i] = False
-                elif key in "FEMB%d_AMV33_I"%d:
+                elif key in "FEMB%d_AMV33_I"%i:
                     if (stats[key] < 0.100 ):
-                        print ("FEMB%d AM_V33 current (%fA) is lower than expected"%(i, %stats[key] ))
+                        print ("FEMB%d AM_V33 current (%fA) is lower than expected"%(i, stats[key] ))
                         fembs_found[i] = False
                     elif (stats[key] > 1.0 ):
-                        print ("FEMB%d AM_V33 current (%fA) is higer than expected"%(i, %stats[key] ))
+                        print ("FEMB%d AM_V33 current (%fA) is higer than expected"%(i, stats[key] ))
                         fembs_found[i] = False
-                elif key in "FEMB%d_AMV28_I"%d:
+                elif key in "FEMB%d_AMV28_I"%i:
                     if (stats[key] < 0.100 ):
-                        print ("FEMB%d AM_V28 current (%fA) is lower than expected"%(i, %stats[key] ))
+                        print ("FEMB%d AM_V28 current (%fA) is lower than expected"%(i, stats[key] ))
                         fembs_found[i] = False
                     elif (stats[key] > 1.0 ):
-                        print ("FEMB%d AM_V28 current (%fA) is higer than expected"%(i, %stats[key] ))
+                        print ("FEMB%d AM_V28 current (%fA) is higer than expected"%(i, stats[key] ))
                         fembs_found[i] = False
             if (fembs_found[i]): #Link and current are good
-                self.UDP.write_reg_femb(i, 0x0)
+                self.UDP.write_reg_femb(i, 0x0, 0x0)
                 self.UDP.read_reg_femb(i, 0x102)
                 ver_value = self.UDP.read_reg_femb(i, 0x101)
                 if (ver_value > 0 ):
-                    if (ver_value != FEMB_ver):
-                        print ("FEMB%d FE version is %x, which is different from default (%x)!"%(ver_value, FEMB_ver))
+                    if (ver_value&0xFFFF != self.FEMB_ver):
+                        print ("FEMB%d FE version is %x, which is different from default (%x)!"%(i, ver_value, self.FEMB_ver))
                 elif (ver_value <= 0 ):
                         print ("I2C of FEMB%d is broken"%i)
                         fembs_found[i] = False
-            if (fembs_found[i]): #Link and current and I2C are good
-
         self.act_fembs = {wib_ip: fembs_found}
         print self.act_fembs
                         
-
 
     def WIB_STATUS(self, wib_ip):
         runtime =  datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
@@ -179,7 +176,12 @@ class CLS_CONFIG:
             for i in range(35):
                 self.UDP.write_reg_wib_checked(5, i)
                 time.sleep(0.001)
-                vcts.append(  self.UDP.read_reg_wib(6) & 0xFFFFFFFF )
+                tmp = self.UDP.read_reg_wib(6) & 0xFFFFFFFF
+                if ( (tmp&0x40000000)>>16 == 0x4000 ):
+                    tmp = tmp & 0x3fff
+                if (tmp&0x3f00 == 0x3f00):
+                    tmp = tmp & 0x3fff0000
+                vcts.append(tmp)
                 time.sleep(0.001)
 
         wib_vcc   = (((vcts[0x19]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001  + 2.5
@@ -206,10 +208,10 @@ class CLS_CONFIG:
         bias_t    = (((vcts[0x00]&0x0FFFF) & 0x3FFF) * 62.5) * 0.001
         status_dict["BIAS_2991_V"]  = bias_vcc 
         status_dict["BIAS_2991_T"]  = bias_t 
-        status_dict["WIB_PC"] = status_dict["WIB_BIAS_V"] * status_dict["WIB_BIAS_I"] + 
-                                status_dict["WIB_V18_V"] * status_dict["WIB_V18_I"] + 
-                                status_dict["WIB_V36_V"] * status_dict["WIB_V36_I"] + 
-                                status_dict["WIB_V28_V"] * status_dict["WIB_V28_I"]  
+#        status_dict["WIB_PC"] = status_dict["WIB_BIAS_V"] * status_dict["WIB_BIAS_I"] + 
+#                                status_dict["WIB_V18_V"] * status_dict["WIB_V18_I"] + 
+#                                status_dict["WIB_V36_V"] * status_dict["WIB_V36_I"] + 
+#                                status_dict["WIB_V28_V"] * status_dict["WIB_V28_I"]  
 
         for fembno in range(4):
             vct = []
@@ -235,12 +237,12 @@ class CLS_CONFIG:
             status_dict["FEMB%d_AMV28_V"%fembno] = (((vc25&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
             status_dict["FEMB%d_AMV28_I"%fembno] = ((vc25& 0x3FFF) * 19.075) * 0.000001 / 0.01
             status_dict["FEMB%d_AMV33_I"%fembno] -= status_dict["FEMB%d_AMV28_I"%fembno]
-            status_dict["FEMB%d_PC"%fembno] =   status_dict["FEMB%d_FMV39_V"%fembno] * status_dict["FEMB%d_FMV39_I"%fembno] + 
-                                                status_dict["FEMB%d_FMV30_V"%fembno] * status_dict["FEMB%d_FMV30_I"%fembno] + 
-                                                status_dict["FEMB%d_FMV18_V"%fembno] * status_dict["FEMB%d_FMV18_I"%fembno] + 
-                                                status_dict["FEMB%d_AMV33_V"%fembno] * status_dict["FEMB%d_AMV33_I"%fembno] + 
-                                                status_dict["FEMB%d_BIAS_V"%fembno ] * status_dict["FEMB%d_BIAS_I"%fembno ] + 
-                                                status_dict["FEMB%d_AMV28_V"%fembno] * status_dict["FEMB%d_AMV28_I"%fembno] 
+#            status_dict["FEMB%d_PC"%fembno] =   status_dict["FEMB%d_FMV39_V"%fembno] * status_dict["FEMB%d_FMV39_I"%fembno] + 
+#                                                status_dict["FEMB%d_FMV30_V"%fembno] * status_dict["FEMB%d_FMV30_I"%fembno] + 
+#                                                status_dict["FEMB%d_FMV18_V"%fembno] * status_dict["FEMB%d_FMV18_I"%fembno] + 
+#                                                status_dict["FEMB%d_AMV33_V"%fembno] * status_dict["FEMB%d_AMV33_I"%fembno] + 
+#                                                status_dict["FEMB%d_BIAS_V"%fembno ] * status_dict["FEMB%d_BIAS_I"%fembno ] + 
+#                                                status_dict["FEMB%d_AMV28_V"%fembno] * status_dict["FEMB%d_AMV28_I"%fembno] 
         return status_dict
 
 
@@ -334,7 +336,8 @@ a = CLS_CONFIG()
 #a.WIBs_SCAN()
 #a.WIB_PWR_FEMB("192.168.121.1", femb_sws=[0,0,0,0])
 #a.WIB_PWR_FEMB("192.168.121.1", femb_sws=[1,1,1,1])
-a.WIB_LINK_CUR("192.168.121.1")
+a.WIB_STATUS("192.168.121.1")
+a.FEMB_DECTECT("192.168.121.1")
 
 #
 #    def Init_CHK(self, wib_ip, femb_loc, wib_verid=0x109, femb_ver=0x501):
