@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/27/2019 7:12:41 PM
+Last modified: 3/27/2019 7:15:59 PM
 """
 
 #defaut setting for scientific caculation
@@ -81,11 +81,11 @@ class CLS_CONFIG:
             for key in keys:
                 if key in "FEMB%d_LINK"%i:
                     if (stats[key] != 0xF):
-                        print ("FEMB%d LINK is broken!")
+                        print ("FEMB%d LINK is broken!"%i)
                         fembs_found[i] = False
                 elif key in "FEMB%d_EQ"%i:
                     if (stats[key] != 0x1):
-                        print ("FEMB%d EQ is broken!")
+                        print ("FEMB%d EQ is broken!"%i)
                         fembs_found[i] = False
                 elif key in "FEMB%d_BIAS_I"%i:
                     if (stats[key] < 0.001 ):
