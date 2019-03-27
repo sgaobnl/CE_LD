@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/27/2019 4:56:44 PM
+Last modified: 3/27/2019 6:20:15 PM
 """
 
 #defaut setting for scientific caculation
@@ -25,7 +25,6 @@ from cls_udp import CLS_UDP
 
 class CLS_CONFIG:
     def __init__(self):
-        self.UDP = CLS_UDP()
         self.jumbo_flag = False 
         self.FEMB_ver = 0x501
         self.WIB_ver = 0x109
@@ -33,17 +32,18 @@ class CLS_CONFIG:
                         "192.168.121.4", "192.168.121.5", "192.168.121.6",] #WIB IPs connected to host-PC
         self.MBB_IP  = "192.168.121.10"
         self.act_fembs = {}
+        self.UDP = CLS_UDP()
+        self.UDP.jumbo_flag = self.jumbo_flag
 
     def WIBs_SCAN(self, wib_verid=0x109):
         print ("Finding available WIBs starts...")
         active_wibs = []
         for wib_ip in self.WIB_IPs:
             self.UDP.UDP_IP = wib_ip
-            self.UDP.jumbo_flag = self.jumbo_flag
             for i in range(5):
                 wib_ver_rb = self.UDP.read_reg_wib (0xFF)
                 wib_ver_rb = self.UDP.read_reg_wib (0xFF)
-                if ((wib_ver_rb&0x0FFF) == wib_verid) and ( wib_ver_rb >= 0):
+                if ((wib_ver_rb&0x0F00) == wib_verid&0x0F00) and ( wib_ver_rb >= 0):
                     print ("WIB with IP = %s is found"%wib_ip) 
                     active_wibs.append(wib_ip)
                     break
@@ -52,11 +52,13 @@ class CLS_CONFIG:
                     break
                 time.sleep(0.1)
                 if (i == 4):
-                    print ("WIB with IP = %s get error (code %d from CLS_UDP.read_reg()), mask this IP"%(wib_ip, wib_ver_rb)) 
+                    print ("WIB with IP = %s get error (%x readback from CLS_UDP.read_reg()), mask this IP"%(wib_ip, wib_ver_rb)) 
         self.WIB_IPs = active_wibs
         print ("WIB scanning is done" )
 
     def WIB_PWR_FEMB(self, wib_ip, femb_sws=[1,1,1,1]):
+        print ("FEMBs power operation on the WIB with IP = %s, wait a moment"%wib_ip)
+        self.UDP.UDP_IP = wib_ip
         pwr_status = self.UDP.read_reg_wib (0x8)
         pwr_ctl = [0x31000F, 0x5200F0, 0x940F00, 0x118F000]
         for i in range(len(femb_sws)):
@@ -70,6 +72,7 @@ class CLS_CONFIG:
                 time.sleep(1)
 
     def FEMB_DECTECT(self, wib_ip):
+        self.UDP.UDP_IP = wib_ip
         self.WIB_PWR_FEMB(wib_ip, femb_sws=[1,1,1,1])
         stats = self.WIB_STATUS(wib_ip)
         keys = list(stats.keys())
@@ -336,8 +339,13 @@ a = CLS_CONFIG()
 #a.WIBs_SCAN()
 #a.WIB_PWR_FEMB("192.168.121.1", femb_sws=[0,0,0,0])
 #a.WIB_PWR_FEMB("192.168.121.1", femb_sws=[1,1,1,1])
-a.WIB_STATUS("192.168.121.1")
-a.FEMB_DECTECT("192.168.121.1")
+#a.WIB_STATUS("192.168.121.1")
+#a.FEMB_DECTECT("192.168.121.1")
+#a.WIB_PWR_FEMB("192.168.121.2", femb_sws=[1,1,1,1])
+#a.WIB_STATUS("192.168.121.2")
+a.WIBs_SCAN()
+for wib_ip in a.WIB_IPs:
+    a.FEMB_DECTECT(wib_ip)
 
 #
 #    def Init_CHK(self, wib_ip, femb_loc, wib_verid=0x109, femb_ver=0x501):
