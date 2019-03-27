@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/27/2019 7:03:20 PM
+Last modified: 3/27/2019 7:09:11 PM
 """
 
 #defaut setting for scientific caculation
@@ -139,10 +139,8 @@ class CLS_CONFIG:
                 elif (ver_value <= 0 ):
                         print ("I2C of FEMB%d is broken"%i)
                         fembs_found[i] = False
-        self.act_fembs = {wib_ip: fembs_found}
+        self.act_fembs[wib_ip] = fembs_found
         print self.act_fembs 
-        print type(self.act_fembs )
-                        
 
     def WIB_STATUS(self, wib_ip):
         runtime =  datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
@@ -155,10 +153,10 @@ class CLS_CONFIG:
         link_status = self.UDP.read_reg_wib(0x21)
         eq_status   = self.UDP.read_reg_wib(0x24)
 
-        status_dict = {"FEMB0_LINK": link_status&0xF, "FEMB0_EQ": eq_status&0x01} 
-        status_dict = {"FEMB1_LINK": (link_status&0xF0)>>4, "FEMB1_EQ": (eq_status&0x02)>>1} 
-        status_dict = {"FEMB2_LINK": (link_status&0xF00)>>8, "FEMB2_EQ": (eq_status&0x04)>>2} 
-        status_dict = {"FEMB3_LINK": (link_status&0xF000)>>12, "FEMB3_EQ": (eq_status&0x08)>>3} 
+        status_dict["FEMB0_LINK"] = link_status&0xF, "FEMB0_EQ": eq_status&0x01 
+        status_dict["FEMB1_LINK"] = (link_status&0xF0)>>4, "FEMB1_EQ": (eq_status&0x02)>>1 
+        status_dict["FEMB2_LINK"] = (link_status&0xF00)>>8, "FEMB2_EQ": (eq_status&0x04)>>2 
+        status_dict["FEMB3_LINK"] = (link_status&0xF000)>>12, "FEMB3_EQ": (eq_status&0x08)>>3 
                        
         for i in range(4):
             self.UDP.write_reg_wib_checked(0x12, (i<<8) + i)
@@ -167,9 +165,9 @@ class CLS_CONFIG:
             chkerr_cnt = (reg34&0xFFFF)
             reg35 = self.UDP.read_reg_wib(0x25)
             frameerr_cnt =(reg35&0xFFFF) 
-            status_dict = {"FEMB%d_TS"%i: femb_ts_cnt} 
-            status_dict = {"FEMB%d_CHK_ERR"%i: chkerr_cnt} 
-            status_dict = {"FEMB%d_FRAME_ERR"%i: frameerr_cnt} 
+            status_dict["FEMB%d_TS"%i       ] = femb_ts_cnt 
+            status_dict["FEMB%d_CHK_ERR"    ] = chkerr_cnt 
+            status_dict["FEMB%d_FRAME_ERR"  ] = frameerr_cnt 
 
         for j in range(3):
             self.UDP.write_reg_wib_checked(5, 0x00000)
