@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/27/2019 7:22:48 PM
+Last modified: 3/27/2019 7:31:37 PM
 """
 
 #defaut setting for scientific caculation
@@ -81,12 +81,10 @@ class CLS_CONFIG:
             for key in keys:
                 if key in "FEMB%d_LINK"%i:
                     if (stats[key] != 0xFF):
-                        print stats[key]
                         print ("FEMB%d LINK is broken!"%i)
                         fembs_found[i] = False
                 elif key in "FEMB%d_EQ"%i:
                     if (stats[key] != 0xF):
-                        print stats[key]
                         print ("FEMB%d EQ is broken!"%i)
                         fembs_found[i] = False
                 elif key in "FEMB%d_BIAS_I"%i:
@@ -138,6 +136,7 @@ class CLS_CONFIG:
                 if (ver_value > 0 ):
                     if (ver_value&0xFFFF != self.FEMB_ver):
                         print ("FEMB%d FE version is %x, which is different from default (%x)!"%(i, ver_value, self.FEMB_ver))
+                        fembs_found[i] = False
                 elif (ver_value <= 0 ):
                         print ("I2C of FEMB%d is broken"%i)
                         fembs_found[i] = False
@@ -146,6 +145,7 @@ class CLS_CONFIG:
 
     def WIB_STATUS(self, wib_ip):
         runtime =  datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
+        self.UDP.UDP_IP = wib_ip
         status_dict = {}
         self.UDP.write_reg_wib(0x12, 0x8000)
         self.UDP.write_reg_wib(0x12, 0x100)
@@ -349,13 +349,13 @@ a = CLS_CONFIG()
 #a.WIB_PWR_FEMB("192.168.121.1", femb_sws=[0,0,0,0])
 #a.WIB_PWR_FEMB("192.168.121.1", femb_sws=[1,1,1,1])
 #a.WIB_STATUS("192.168.121.1")
-#a.FEMB_DECTECT("192.168.121.1")
+a.FEMB_DECTECT("192.168.121.2")
 #a.WIB_PWR_FEMB("192.168.121.2", femb_sws=[1,1,1,1])
 #a.WIB_STATUS("192.168.121.2")
-a.WIBs_SCAN()
-for wib_ip in a.WIB_IPs:
-    a.FEMB_DECTECT(wib_ip)
-print a.act_fembs
+#a.WIBs_SCAN()
+#for wib_ip in a.WIB_IPs:
+#    a.FEMB_DECTECT(wib_ip)
+#print a.act_fembs
 
 #
 #    def Init_CHK(self, wib_ip, femb_loc, wib_verid=0x109, femb_ver=0x501):
