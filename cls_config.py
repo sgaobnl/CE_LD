@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/27/2019 6:59:53 PM
+Last modified: 3/27/2019 7:03:20 PM
 """
 
 #defaut setting for scientific caculation
@@ -351,6 +351,7 @@ a = CLS_CONFIG()
 a.WIBs_SCAN()
 for wib_ip in a.WIB_IPs:
     a.FEMB_DECTECT(wib_ip)
+print a.act_fembs
 
 #
 #    def Init_CHK(self, wib_ip, femb_loc, wib_verid=0x109, femb_ver=0x501):
