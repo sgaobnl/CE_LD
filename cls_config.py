@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/27/2019 6:20:15 PM
+Last modified: 3/27/2019 6:59:53 PM
 """
 
 #defaut setting for scientific caculation
@@ -140,7 +140,8 @@ class CLS_CONFIG:
                         print ("I2C of FEMB%d is broken"%i)
                         fembs_found[i] = False
         self.act_fembs = {wib_ip: fembs_found}
-        print self.act_fembs
+        print self.act_fembs 
+        print type(self.act_fembs )
                         
 
     def WIB_STATUS(self, wib_ip):
@@ -248,6 +249,10 @@ class CLS_CONFIG:
                                                 status_dict["FEMB%d_AMV28_V"%fembno] * status_dict["FEMB%d_AMV28_I"%fembno] 
         return status_dict
 
+    def FEMBs_SCAN(self, femb_verid=0x501):
+        print ("Finding available FEMBs starts...")
+        for wib_ip in self.WIB_IPs:
+            self.FEMB_DECTECT(wib_ip)
 
 
 
