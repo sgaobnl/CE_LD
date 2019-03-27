@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/27/2019 7:36:59 PM
+Last modified: 3/27/2019 7:40:02 PM
 """
 
 #defaut setting for scientific caculation
@@ -147,6 +147,7 @@ class CLS_CONFIG:
         runtime =  datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
         self.UDP.UDP_IP = wib_ip
         status_dict = {}
+        self.UDP.write_reg_wib(0x4, 0x8) #Internal clock is selected
         self.UDP.write_reg_wib(0x12, 0x8000)
         self.UDP.write_reg_wib(0x12, 0x100)
         #stat= self.UDP.read_reg_wib(32) #reg32 is for ProtoDUNE, reserved but not used
