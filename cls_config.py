@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/26/2019 6:36:51 PM
+Last modified: 3/26/2019 6:41:38 PM
 """
 
 #defaut setting for scientific caculation
@@ -208,10 +208,10 @@ class CLS_CONFIG:
         bias_t    = (((vcts[0x00]&0x0FFFF) & 0x3FFF) * 62.5) * 0.001
         status_dict["BIAS_2991_V"]  = bias_vcc 
         status_dict["BIAS_2991_T"]  = bias_t 
-#        status_dict["WIB_PC"] = status_dict["WIB_BIAS_V"] * status_dict["WIB_BIAS_I"] + 
-#                                status_dict["WIB_V18_V"] * status_dict["WIB_V18_I"] + 
-#                                status_dict["WIB_V36_V"] * status_dict["WIB_V36_I"] + 
-#                                status_dict["WIB_V28_V"] * status_dict["WIB_V28_I"]  
+        status_dict["WIB_PC"] = status_dict["WIB_BIAS_V"] * status_dict["WIB_BIAS_I"] + \
+                                status_dict["WIB_V18_V"] * status_dict["WIB_V18_I"] + \
+                                status_dict["WIB_V36_V"] * status_dict["WIB_V36_I"] + \
+                                status_dict["WIB_V28_V"] * status_dict["WIB_V28_I"]  
 
         for fembno in range(4):
             vct = []
@@ -237,12 +237,13 @@ class CLS_CONFIG:
             status_dict["FEMB%d_AMV28_V"%fembno] = (((vc25&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
             status_dict["FEMB%d_AMV28_I"%fembno] = ((vc25& 0x3FFF) * 19.075) * 0.000001 / 0.01
             status_dict["FEMB%d_AMV33_I"%fembno] -= status_dict["FEMB%d_AMV28_I"%fembno]
-#            status_dict["FEMB%d_PC"%fembno] =   status_dict["FEMB%d_FMV39_V"%fembno] * status_dict["FEMB%d_FMV39_I"%fembno] + 
-#                                                status_dict["FEMB%d_FMV30_V"%fembno] * status_dict["FEMB%d_FMV30_I"%fembno] + 
-#                                                status_dict["FEMB%d_FMV18_V"%fembno] * status_dict["FEMB%d_FMV18_I"%fembno] + 
-#                                                status_dict["FEMB%d_AMV33_V"%fembno] * status_dict["FEMB%d_AMV33_I"%fembno] + 
-#                                                status_dict["FEMB%d_BIAS_V"%fembno ] * status_dict["FEMB%d_BIAS_I"%fembno ] + 
-#                                                status_dict["FEMB%d_AMV28_V"%fembno] * status_dict["FEMB%d_AMV28_I"%fembno] 
+#            print (status_dict["FEMB%d_FMV30_V"%fembno] * status_dict["FEMB%d_FMV30_I"%fembno] ) 
+            status_dict["FEMB%d_PC"%fembno] =   status_dict["FEMB%d_FMV39_V"%fembno] * status_dict["FEMB%d_FMV39_I"%fembno] + \
+                                                status_dict["FEMB%d_FMV30_V"%fembno] * status_dict["FEMB%d_FMV30_I"%fembno] + \
+                                                status_dict["FEMB%d_FMV18_V"%fembno] * status_dict["FEMB%d_FMV18_I"%fembno] + \
+                                                status_dict["FEMB%d_AMV33_V"%fembno] * status_dict["FEMB%d_AMV33_I"%fembno] + \
+                                                status_dict["FEMB%d_BIAS_V"%fembno ] * status_dict["FEMB%d_BIAS_I"%fembno ] + \
+                                                status_dict["FEMB%d_AMV28_V"%fembno] * status_dict["FEMB%d_AMV28_I"%fembno] 
         return status_dict
 
 
