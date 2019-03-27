@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/26/2019 6:41:38 PM
+Last modified: 3/27/2019 4:56:44 PM
 """
 
 #defaut setting for scientific caculation
@@ -237,7 +237,6 @@ class CLS_CONFIG:
             status_dict["FEMB%d_AMV28_V"%fembno] = (((vc25&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
             status_dict["FEMB%d_AMV28_I"%fembno] = ((vc25& 0x3FFF) * 19.075) * 0.000001 / 0.01
             status_dict["FEMB%d_AMV33_I"%fembno] -= status_dict["FEMB%d_AMV28_I"%fembno]
-#            print (status_dict["FEMB%d_FMV30_V"%fembno] * status_dict["FEMB%d_FMV30_I"%fembno] ) 
             status_dict["FEMB%d_PC"%fembno] =   status_dict["FEMB%d_FMV39_V"%fembno] * status_dict["FEMB%d_FMV39_I"%fembno] + \
                                                 status_dict["FEMB%d_FMV30_V"%fembno] * status_dict["FEMB%d_FMV30_I"%fembno] + \
                                                 status_dict["FEMB%d_FMV18_V"%fembno] * status_dict["FEMB%d_FMV18_I"%fembno] + \
