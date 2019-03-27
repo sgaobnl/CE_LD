@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/27/2019 7:19:01 PM
+Last modified: 3/27/2019 7:22:48 PM
 """
 
 #defaut setting for scientific caculation
@@ -80,12 +80,12 @@ class CLS_CONFIG:
         for i in range(4):
             for key in keys:
                 if key in "FEMB%d_LINK"%i:
-                    if (stats[key] != 0xF):
+                    if (stats[key] != 0xFF):
                         print stats[key]
                         print ("FEMB%d LINK is broken!"%i)
                         fembs_found[i] = False
                 elif key in "FEMB%d_EQ"%i:
-                    if (stats[key] != 0x1):
+                    if (stats[key] != 0xF):
                         print stats[key]
                         print ("FEMB%d EQ is broken!"%i)
                         fembs_found[i] = False
@@ -155,14 +155,14 @@ class CLS_CONFIG:
         link_status = self.UDP.read_reg_wib(0x21)
         eq_status   = self.UDP.read_reg_wib(0x24)
 
-        status_dict["FEMB0_LINK"] = link_status&0xF
-        status_dict["FEMB0_EQ"  ] = eq_status&0x01 
-        status_dict["FEMB1_LINK"] = (link_status&0xF0)>>4
-        status_dict["FEMB1_EQ"  ] = (eq_status&0x02)>>1 
-        status_dict["FEMB2_LINK"] = (link_status&0xF00)>>8
-        status_dict["FEMB2_EQ"  ] = (eq_status&0x04)>>2 
-        status_dict["FEMB3_LINK"] = (link_status&0xF000)>>12
-        status_dict["FEMB3_EQ"  ] = (eq_status&0x08)>>3 
+        status_dict["FEMB0_LINK"] = link_status&0xFF
+        status_dict["FEMB0_EQ"  ] = eq_status&0x0F 
+        status_dict["FEMB1_LINK"] = (link_status&0xFF00)>>8
+        status_dict["FEMB1_EQ"  ] = (eq_status&0xF0)>>4 
+        status_dict["FEMB2_LINK"] = (link_status&0xFF0000)>>16
+        status_dict["FEMB2_EQ"  ] = (eq_status&0xF00)>>8 
+        status_dict["FEMB3_LINK"] = (link_status&0xFF000000)>>24
+        status_dict["FEMB3_EQ"  ] = (eq_status&0xF000)>>12 
                        
         for i in range(4):
             self.UDP.write_reg_wib_checked(0x12, (i<<8) + i)
