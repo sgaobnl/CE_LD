@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/27/2019 7:31:37 PM
+Last modified: 3/27/2019 7:36:59 PM
 """
 
 #defaut setting for scientific caculation
@@ -253,12 +253,15 @@ class CLS_CONFIG:
                                                 status_dict["FEMB%d_AMV28_V"%fembno] * status_dict["FEMB%d_AMV28_I"%fembno] 
         return status_dict
 
-    def FEMBs_SCAN(self, femb_verid=0x501):
+    def FEMBs_SCAN(self):
         print ("Finding available FEMBs starts...")
         for wib_ip in self.WIB_IPs:
             self.FEMB_DECTECT(wib_ip)
 
 
+a = CLS_CONFIG()
+a.WIBs_SCAN()
+a.FEMBs_SCAN()
 
 #        print ( status_dict["FEMB1_2991_T"] )
 #        print ( status_dict["FEMB1_BIAS_V"] , status_dict["FEMB1_BIAS_I"]  )
@@ -344,12 +347,11 @@ class CLS_CONFIG:
 #        self.WIB_IPs = active_wibs
 #        print ("WIB scanning is done" )
 
-a = CLS_CONFIG()
 #a.WIBs_SCAN()
 #a.WIB_PWR_FEMB("192.168.121.1", femb_sws=[0,0,0,0])
 #a.WIB_PWR_FEMB("192.168.121.1", femb_sws=[1,1,1,1])
 #a.WIB_STATUS("192.168.121.1")
-a.FEMB_DECTECT("192.168.121.2")
+#a.FEMB_DECTECT("192.168.121.2")
 #a.WIB_PWR_FEMB("192.168.121.2", femb_sws=[1,1,1,1])
 #a.WIB_STATUS("192.168.121.2")
 #a.WIBs_SCAN()
