@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/27/2019 7:40:02 PM
+Last modified: 3/28/2019 10:16:31 AM
 """
 
 #defaut setting for scientific caculation
@@ -165,16 +165,19 @@ class CLS_CONFIG:
         status_dict["FEMB3_LINK"] = (link_status&0xFF000000)>>24
         status_dict["FEMB3_EQ"  ] = (eq_status&0xF000)>>12 
                        
+        self.UDP.write_reg_wib(0x12, 0x000)
         for i in range(4):
-            self.UDP.write_reg_wib_checked(0x12, (i<<8) + i)
-            reg34 = self.UDP.read_reg_wib(0x22)
-            femb_ts_cnt = (reg34&0xFFFF0000)>>16
-            chkerr_cnt = (reg34&0xFFFF)
-            reg35 = self.UDP.read_reg_wib(0x25)
-            frameerr_cnt =(reg35&0xFFFF) 
-            status_dict["FEMB%d_TS"%i       ] = femb_ts_cnt 
-            status_dict["FEMB%d_CHK_ERR"    ] = chkerr_cnt 
-            status_dict["FEMB%d_FRAME_ERR"  ] = frameerr_cnt 
+            for j in range(4)
+                self.UDP.write_reg_wib_checked(0x12, (i<<2) + j)
+                reg34 = self.UDP.read_reg_wib(0x22)
+                femb_ts_cnt = (reg34&0xFFFF0000)>>16
+                chkerr_cnt = (reg34&0xFFFF)
+                reg35 = self.UDP.read_reg_wib(0x25)
+                frameerr_cnt =(reg35&0xFFFF) 
+
+                status_dict["FEMB%d_TS_LINK%d"%(i, j)         ] = femb_ts_cnt 
+                status_dict["FEMB%d_CHK_ERR_LINK%d"%(i, j)    ] = chkerr_cnt 
+                status_dict["FEMB%d_FRAME_ERR_LINK%d"%(i, j)  ] = frameerr_cnt 
 
         for j in range(3):
             self.UDP.write_reg_wib_checked(5, 0x00000)
