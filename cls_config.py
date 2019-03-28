@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/28/2019 10:24:32 AM
+Last modified: 3/28/2019 12:56:41 PM
 """
 
 #defaut setting for scientific caculation
@@ -34,6 +34,8 @@ class CLS_CONFIG:
         self.act_fembs = {}
         self.UDP = CLS_UDP()
         self.UDP.jumbo_flag = self.jumbo_flag
+        self.Int_CLK = True
+        self.pllfile ="./Si5344-RevD-SBND_V3.txt" 
 
     def WIBs_SCAN(self, wib_verid=0x109):
         print ("Finding available WIBs starts...")
@@ -142,6 +144,7 @@ class CLS_CONFIG:
                         fembs_found[i] = False
         self.act_fembs[wib_ip] = fembs_found
         print self.act_fembs 
+        self.WIB_PWR_FEMB(wib_ip, femb_sws=[0,0,0,0])
 
     def WIB_STATUS(self, wib_ip):
         runtime =  datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
@@ -261,6 +264,109 @@ class CLS_CONFIG:
         for wib_ip in self.WIB_IPs:
             self.FEMB_DECTECT(wib_ip)
 
+
+    def WIB_CFG_INIT(self, wib_ip):
+        self.UDP.UDP_IP = wib_ip
+        self.UDP.write_reg_wib_checked(0x0F, 0x0) #normal operation
+#####clean status 
+
+    def WIB_PLL_wr(self, wib_ip, addr, din):
+        self.UDP.UDP_IP = wib_ip
+        value = 0x01 + ((addr&0xFF)<<8) + ((din&0x00FF)<<16)
+        self.UDP.write_reg_wib_checked (11,value)
+        time.sleep(0.01)
+        self.UDP.write_reg_wib_checked (10,1)
+        time.sleep(0.01)
+        self.UDP.write_reg_wib_checked (10,0)
+        time.sleep(0.02)
+
+    def WIB_PLL_cfg(self, wib_ip ):
+        self.UDP.UDP_IP = wib_ip
+        with open(self.pllfile,"r") as f:
+            line = f.readline()
+            adrs_h = []
+            adrs_l = []
+            datass = []
+            cnt = 0
+            while line:
+                cnt = cnt + 1
+                line = f.readline()
+                tmp = line.find(",")
+                if tmp > 0:
+                    adr = int(line[2:tmp],16)
+                    adrs_h.append((adr&0xFF00)>>8)
+                    adrs_l.append((adr&0xFF))
+                    datass.append((int(line[tmp+3:-2],16))&0xFF)
+        for wib_ip in self.wib_ips:
+        lol_flg = False
+
+        self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True)
+        for i in range(5):
+            print ("check PLL status, please wait...")
+            time.sleep(1)
+            self.UDP.UDP_IP = wib_ip
+            ver_value = self.UDP.read_reg_wib (12)
+            ver_value = self.UDP.read_reg_wib (12)
+            lol = (ver_value & 0x10000)>>16
+            lolXAXB = (ver_value & 0x20000)>>17
+            INTR = (ver_value & 0x40000)>>18
+            if (lol == 1):
+                lol_flg = True
+                break
+        if (lol_flg):
+            print ("PLL of WIB (%s) has locked"%wib_ip)
+            print ("Select system clock and CMD from MBB")
+            self.UDP.write_reg_wib_checked (4, 0x03)
+
+        else:
+            print "configurate PLL of WIB (%s), please wait..."%wib_ip
+            p_addr = 1
+            #step1
+            page4 = adrs_h[0]
+            self.WIB_PLL_wr( wib_ip, p_addr, page4)
+            self.WIB_PLL_wr( wib_ip, adrs_l[0], datass[0])
+            #step2
+            page4 = adrs_h[1]
+            self.WIB_PLL_wr( wib_ip, p_addr, page4)
+            self.WIB_PLL_wr( wib_ip, adrs_l[1], datass[1])
+            #step3
+            page4 = adrs_h[2]
+            self.WIB_PLL_wr( wib_ip, p_addr, page4)
+            self.WIB_PLL_wr( wib_ip, adrs_l[2], datass[2])
+            time.sleep(0.5)
+            #step4
+            for cnt in range(len(adrs_h)):
+                if (page4 == adrs_h[cnt]):
+                    tmpadr = adrs_l[2]
+                    self.WIB_PLL_wr(wib_ip, adrs_l[cnt], datass[cnt])
+                else:
+                    page4 = adrs_h[cnt]
+                    self.WIB_PLL_wr( wib_ip, p_addr, page4)
+                    self.WIB_PLL_wr(wib_ip, adrs_l[cnt], datass[cnt])
+            for i in range(10):
+                time.sleep(3)
+                print "check PLL status, please wait..."
+                self.UDP.UDP_IP = wib_ip
+                ver_value = self.UDP.read_reg_wib (12)
+                ver_value = self.UDP.read_reg_wib (12)
+                lol = (ver_value & 0x10000)>>16
+                lolXAXB = (ver_value & 0x20000)>>17
+                INTR = (ver_value & 0x40000)>>18
+                if (lol == 1):
+                    print "PLL of WIB(%s) is locked"%wib_ip
+                    self.UDP.write_reg_wib_checked (4, 0x03)
+                    break
+                if (i ==9):
+                    print "Fail to configurate PLL of WIB(%s), please check if MBB is on or 16MHz from dAQ"%wib_ip
+                    print "Exit anyway"
+                    sys.exit()
+
+    def WIB_CLKCMD_cs(self, wib_ip ):
+        self.UDP.UDP_IP = wib_ip
+        if (self.Int_CLK ):
+            self.UDP.write_reg_wib_checked(0x04, 0x08) #select WIB onboard system clock and CMD
+        else:
+            self.WIB_PLL_cfg(wib_ip ) #select system clock and CMD from MBB
 
 a = CLS_CONFIG()
 a.WIBs_SCAN()
