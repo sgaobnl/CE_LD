@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/28/2019 10:16:31 AM
+Last modified: 3/28/2019 10:23:50 AM
 """
 
 #defaut setting for scientific caculation
@@ -167,7 +167,7 @@ class CLS_CONFIG:
                        
         self.UDP.write_reg_wib(0x12, 0x000)
         for i in range(4):
-            for j in range(4)
+            for j in range(4):
                 self.UDP.write_reg_wib_checked(0x12, (i<<2) + j)
                 reg34 = self.UDP.read_reg_wib(0x22)
                 femb_ts_cnt = (reg34&0xFFFF0000)>>16
