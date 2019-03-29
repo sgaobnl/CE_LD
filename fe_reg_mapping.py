@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:11 PM
-Last modified: 3/20/2019 4:50:23 PM
+Last modified: 3/29/2019 3:31:47 PM
 """
 
 #defaut setting for scientific caculation
@@ -47,7 +47,7 @@ class FE_REG_MAPPING:
                  sts=0, snc=0, sg0=0, sg1=1, st0=1, st1=1, smn=0, sdf=1,
                  slk0=0, stb1=0, stb=0, s16=0, slk1=0, sdc=0, swdac1=0, swdac2=0, dac=0):
         for chn in range(16):
-            self.set_fechn_reg(chip=chip, chn=chn, sts=sts, snc=snc, sg0, sg1, st0, st1, smn=smn, sdf=sdf)     
+            self.set_fechn_reg(chip=chip, chn=chn, sts=sts, snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=smn, sdf=sdf)     
 
         self.set_fechip_global (chip, slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac)
 
