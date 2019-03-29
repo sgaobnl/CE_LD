@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: 3/20/2019 5:55:54 PM
+Last modified: 3/29/2019 4:45:15 PM
 """
 
 #defaut setting for scientific caculation
@@ -267,6 +267,7 @@ class CLS_UDP:
             pkg_chk = True
             if (pkg_chk):
                 try_n = try_n + 1
+                print (try_n)
                 lost_pkg_fg = False
                 #check data 
                 smps = len(rawdata_str) / 2 / 16
