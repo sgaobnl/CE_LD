@@ -1,0 +1,10 @@
+#comment,Failure Mode Code,Failure Mode Item,,,,,,,
+#,P,Pass,,,,,,,
+#,F0,Power cycle failure,,,,,,,
+#,F1,Abnormal current faiure,,,,,,,
+#,F2,Data link failure,,,,,,,
+#,F3,EQ failure,,,,,,,
+#,F4,I2C failure,,,,,,,
+#,F5,Channel mapping error,,,,,,,
+#,F6,JTAG failure,,,,,,,
+#,ENV,FM#,P/F,JTAG P/F,V0 date,V0 P/F,V1 date,V1 P/F,V1 note

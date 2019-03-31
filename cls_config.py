@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/31/2019 4:29:17 PM
+Last modified: 3/31/2019 6:06:20 PM
 """
 
 #defaut setting for scientific caculation
@@ -42,11 +42,10 @@ class CLS_CONFIG:
         self.fecfg_f ="./fecfg.csv" 
         self.FEREG_MAP = FE_REG_MAPPING()
         self.DAQstream_en =  True
-#        self.datalog = []
         self.pwr_dly = 3 #delay(s) after power operation
-        self.sts_num = 0 #how many times statitics data are collected
-        self.val = 2000 #how many UDP HS package are collected per time
-        self.f_save = True #if False, no raw data is saved, if True, no further data analysis 
+        self.sts_num = 1 #how many times statitics data are collected
+        self.val = 100 #how many UDP HS package are collected per time
+        self.f_save = False #if False, no raw data is saved, if True, no further data analysis 
         self.savedir = "./" 
 
     def WIB_UDP_CTL(self, wib_ip, WIB_UDP_EN = False):
@@ -448,7 +447,10 @@ class CLS_CONFIG:
                     self.UDP.write_reg_femb_checked (femb_addr,  5, reg_5_value)
                     self.UDP.write_reg_femb_checked (femb_addr, 16, tp_sel&0x0000ffff)
                     self.UDP.write_reg_femb_checked (femb_addr, 18, pls_cs_value)
-                    self.UDP.write_reg_femb_checked (femb_addr, 42, data_cs)
+                    if ( data_cs&0x0F != 0):
+                        self.UDP.write_reg_femb_checked (femb_addr, 42, ((femb_addr&0x0F)<<4) + (data_cs&0x0F))
+                    else:
+                        self.UDP.write_reg_femb_checked (femb_addr, 42, 0)
 
                     #FE configuration
                     if (self.fecfg_loadflg ):
@@ -492,7 +494,7 @@ class CLS_CONFIG:
                         fe_rb_regs.append( val )
                     j = 0
                     for j in range(len(fe_regs)):
-                        if fe_regs[j] != fe_rb_regs[j]:
+                        if (fe_regs[j] != fe_rb_regs[j]) and (data_cs == 0 ):
                             print ("%dth, %8x,%8x"%(j, fe_regs[j],fe_rb_regs[j]))
                             if ( j<= 9 ):
                                 print ("FE-ADC 0 SPI failed")
@@ -576,21 +578,13 @@ class CLS_CONFIG:
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
         return tmp
 
-#    def WIBs_Post_UDPACQ(self):
-#        for wib_ip in list(self.act_fembs.keys):
-#            self.UDP.UDP_IP = wib_ip
-#            self.UDP.write_reg_wib_checked(0x01, 0x2) #Time Stamp Reset command encoded in 2MHz 
-#            self.UDP.write_reg_wib_checked(0x01, 0x0) 
-#            self.UDP.write_reg_wib_checked(18, 0x8000) 
 
-#        time.sleep(0.1)
-
-a = CLS_CONFIG()
-a.WIB_IPs = ["192.168.121.1", "192.168.121.2"]
-a.WIBs_SCAN()
-a.FEMBs_SCAN()
-a.WIBs_CFG_INIT()
-cfglog = a.CE_CHK_CFG()
-#a.FEMB_UDPACQ("192.168.121.1", 0, cfglog, val=100)
-a.TPC_UDPACQ(cfglog)
-a.FEMBs_CE_OFF()
+#a = CLS_CONFIG()
+#a.WIB_IPs = ["192.168.121.1", "192.168.121.2"]
+#a.WIBs_SCAN()
+#a.FEMBs_SCAN()
+#a.WIBs_CFG_INIT()
+#cfglog = a.CE_CHK_CFG()
+##a.FEMB_UDPACQ("192.168.121.1", 0, cfglog, val=100)
+#a.TPC_UDPACQ(cfglog)
+#a.FEMBs_CE_OFF()
