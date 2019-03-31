@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/29/2019 4:01:45 PM
+Last modified: 3/31/2019 4:29:17 PM
 """
 
 #defaut setting for scientific caculation
@@ -43,6 +43,10 @@ class CLS_CONFIG:
         self.FEREG_MAP = FE_REG_MAPPING()
         self.DAQstream_en =  True
 #        self.datalog = []
+        self.pwr_dly = 3 #delay(s) after power operation
+        self.sts_num = 0 #how many times statitics data are collected
+        self.val = 2000 #how many UDP HS package are collected per time
+        self.f_save = True #if False, no raw data is saved, if True, no further data analysis 
         self.savedir = "./" 
 
     def WIB_UDP_CTL(self, wib_ip, WIB_UDP_EN = False):
@@ -93,6 +97,7 @@ class CLS_CONFIG:
                     pwr_status &= (~np.uint32(pwr_ctl[i]) | 0x00100000)
                 self.UDP.write_reg_wib_checked (0x8, pwr_status )
                 time.sleep(1)
+        time.sleep(self.pwr_dly)
 
     def FEMB_DECTECT(self, wib_ip):
         self.UDP.UDP_IP = wib_ip
@@ -164,21 +169,25 @@ class CLS_CONFIG:
                         print ("I2C of FEMB%d is broken"%i)
                         fembs_found[i] = False
         self.act_fembs[wib_ip] = fembs_found
-        print self.act_fembs 
+        print self.act_fembs
         self.WIB_PWR_FEMB(wib_ip, femb_sws=[0,0,0,0])
 
     def WIB_STATUS(self, wib_ip):
         runtime =  datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
         self.UDP.UDP_IP = wib_ip
         status_dict = {}
-        self.UDP.write_reg_wib(0x4, 0x8) #Internal clock is selected
-        self.UDP.write_reg_wib(0x12, 0x8000)
-        self.UDP.write_reg_wib(0x12, 0x100)
+        self.UDP.write_reg_wib_checked(0x4, 0x8) #Internal clock is selected
+        self.UDP.write_reg_wib_checked(0x12, 0x8000)
+        self.UDP.write_reg_wib_checked(0x12, 0x100)
+        time.sleep(0.02)
+
         #stat= self.UDP.read_reg_wib(32) #reg32 is for ProtoDUNE, reserved but not used
         #adc_errcnt =(stat&0x0FFFF0000) >> 16  
         #header_errcnt =(stat&0x0FFFF)   
-        link_status = self.UDP.read_reg_wib(0x21)
-        eq_status   = self.UDP.read_reg_wib(0x24)
+        for i in range(5):
+            link_status = self.UDP.read_reg_wib(0x21)
+            eq_status   = self.UDP.read_reg_wib(0x24)
+            time.sleep(0.001)
 
         status_dict["FEMB0_LINK"] = link_status&0xFF
         status_dict["FEMB0_EQ"  ] = eq_status&0x0F 
@@ -189,7 +198,7 @@ class CLS_CONFIG:
         status_dict["FEMB3_LINK"] = (link_status&0xFF000000)>>24
         status_dict["FEMB3_EQ"  ] = (eq_status&0xF000)>>12 
                        
-        self.UDP.write_reg_wib(0x12, 0x000)
+        self.UDP.write_reg_wib_checked(0x12, 0x000)
         for i in range(4):
             for j in range(4):
                 self.UDP.write_reg_wib_checked(0x12, (i<<2) + j)
@@ -203,10 +212,11 @@ class CLS_CONFIG:
                 status_dict["FEMB%d_FRAME_ERR_LINK%d"%(i, j)] = frameerr_cnt 
 
         for j in range(3):
-            self.UDP.write_reg_wib_checked(5, 0x00000)
-            self.UDP.write_reg_wib_checked(5, 0x00000 | 0x10000)
-            self.UDP.write_reg_wib_checked(5, 0x00000)
-            time.sleep(0.1)
+            for k in range(5):
+                self.UDP.write_reg_wib_checked(5, 0x00000)
+                self.UDP.write_reg_wib_checked(5, 0x00000 | 0x10000)
+                time.sleep(0.01)
+                self.UDP.write_reg_wib_checked(5, 0x00000)
             vcts =[]
             for i in range(35):
                 self.UDP.write_reg_wib_checked(5, i)
@@ -280,6 +290,7 @@ class CLS_CONFIG:
                                                 status_dict["FEMB%d_AMV28_V"%fembno] * status_dict["FEMB%d_AMV28_I"%fembno] 
         return status_dict
 
+
     def FEMBs_SCAN(self):
         print ("Finding available FEMBs starts...")
         for wib_ip in self.WIB_IPs:
@@ -289,14 +300,22 @@ class CLS_CONFIG:
         for wib_ip in list(self.act_fembs.keys()):
             self.UDP.UDP_IP = wib_ip
             self.WIB_UDP_CTL( wib_ip, WIB_UDP_EN = False) #disable Highspeed data
+            if (self.jumbo_flag):
+                self.UDP.write_reg_wib_checked(0x1F, 0xEFB) #normal operation
+            else:
+                self.UDP.write_reg_wib_checked(0x1F, 0x1FB) #normal operation
             self.UDP.write_reg_wib_checked(0x0F, 0x0) #normal operation
             self.WIB_CLKCMD_cs(wib_ip )# choose clock source
             femb_sws = [0, 0, 0, 0]
             for femb_addr in range(4):
                 if self.act_fembs[wib_ip][femb_addr] == True:
                     femb_sws[femb_addr] = 1
-            print femb_sws
             self.WIB_PWR_FEMB(wib_ip, femb_sws)
+
+    def FEMBs_CE_OFF(self):
+        for wib_ip in list(self.act_fembs.keys()):
+            self.UDP.UDP_IP = wib_ip
+            self.WIB_PWR_FEMB(wib_ip, [0, 0, 0, 0])
 
     def WIB_PLL_wr(self, wib_ip, addr, din):
         self.UDP.UDP_IP = wib_ip
@@ -437,13 +456,13 @@ class CLS_CONFIG:
                         print "Exit anyway"
                         sys.exit()
                     else:
-                        fe_regs_b = self.FEREG_MAP.set_fe_board(sts, snc, sg0, sg1, st0, st1, smn, sdf,\
-                                                slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac)
+                        self.FEREG_MAP.set_fe_board(sts, snc, sg0, sg1, st0, st1, smn, sdf,\
+                                                    slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac)
                         fe_regs = [0x00000000]*(8+1)*4
                         for chip in [0,2,4,6]:
                             chip_bits_len = 8*(16+2)
-                            chip_fe_regs0 = fe_regs_b[   chip*chip_bits_len: (chip+1)* chip_bits_len]
-                            chip_fe_regs1 = fe_regs_b[   (chip+1)*chip_bits_len: (chip+2)* chip_bits_len]
+                            chip_fe_regs0 = self.FEREG_MAP.REGS[   chip*chip_bits_len: (chip+1)* chip_bits_len]
+                            chip_fe_regs1 = self.FEREG_MAP.REGS[   (chip+1)*chip_bits_len: (chip+2)* chip_bits_len]
                             chip_regs = []
                             for onebit in chip_fe_regs0:
                                 chip_regs.append(onebit)
@@ -461,6 +480,8 @@ class CLS_CONFIG:
                     for regNum in range(0x200,0x200+len(fe_regs),1):
                         self.UDP.write_reg_femb_checked (femb_addr, regNum, fe_regs[i])
                         i = i + 1
+                    self.UDP.write_reg_femb (femb_addr, 2, 1) #SPI write
+                    time.sleep(0.001)
                     self.UDP.write_reg_femb (femb_addr, 2, 1) #SPI write
                     time.sleep(0.001)
                     self.UDP.write_reg_femb (femb_addr, 2, 1) #SPI write
@@ -506,38 +527,54 @@ class CLS_CONFIG:
         self.UDP.UDP_IP = wib_ip
         femb_asic = asic & 0x0F
         wib_asic =  ( ((femb_addr << 16)&0x000F0000) + ((femb_asic << 8) &0xFF00) )
-        self.femb.write_reg_wib_checked ( 7, wib_asic | 0x80000000)
-        self.femb.write_reg_wib_checked ( 7, wib_asic)
+        self.UDP.write_reg_wib_checked ( 7, wib_asic | 0x80000000)
+        self.UDP.write_reg_wib_checked ( 7, wib_asic)
 
-    def WIBs_UDPACQ(self, cfglog, val=100):
+    def TPC_UDPACQ(self, cfglog):
+        tpc_data = []
         for wib_ip in list(self.act_fembs.keys()):
-            self.UDP.UDP_IP = wib_ip
-            self.UDP.write_reg_wib_checked(0x01, 0x2) #Time Stamp Reset command encoded in 2MHz 
-            self.UDP.write_reg_wib_checked(0x01, 0x0) 
-            self.UDP.write_reg_wib_checked(18, 0x8000) #reset error counters
-            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True) #Enable HS data from the WIB to PC through UDP
-            if (self.DAQstream_en):
-                self.UDP.write_reg_wib_checked(20, 0x03) #disable data stream and synchronize to Nevis
-                self.UDP.write_reg_wib_checked(20, 0x00) #enable data stream to Nevis
-            d_sts = self.WIB_STATUS(wib_ip)
-            for femb_addr in range(4):
-                if self.act_fembs[wib_ip][femb_addr] == True:
-                    raw_asic = []
-                    for asic in range(8):
-                        self.FEMB_ASIC_CS(wib_ip, femb_addr, asic)
-                        raw_asic.append( self.UDP.get_rawdata_packets(val) )
-                    for cfg in cfglog:
-                        tmp = cfg
-                        if (cfg[0] == wib_ip) and (cfg[1] == femb_addr):
-                            tmp = cfg + d_sts
-                            fn = self.savedir + "/" + "WIB" + cfg[0].replace(".", "_") + "_FEMB%d"%cfg[1] + "_%d_%02d"%(cfg[3], cfg[12]) + \
-                                 "FE_%d%d%d%d%d%d%d%d%02d"%(sts, snc, sg0, sg1, st0, st1, swdac1, swdac2, dac)
-                            #self.datalog.append ( cfg.append(raw_asic) )
-                            tmp = tmp + raw_aisc
-                            with open(fn, "wb") as fp:
-                                pickle.dump(tmp, fp)
-                            break
-            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
+            tpc_data += self.WIB_UDPACQ( wib_ip, cfglog)
+        print len(tpc_data)
+        return tpc_data
+
+    def WIB_UDPACQ(self, wib_ip, cfglog):
+        d_wib = []
+        for femb_addr in range(4):
+            if self.act_fembs[wib_ip][femb_addr] == True:
+                d_wib.append( self.FEMB_UDPACQ(wib_ip, femb_addr, cfglog) )
+        return d_wib
+
+    def FEMB_UDPACQ(self, wib_ip, femb_addr, cfglog):
+        self.UDP.UDP_IP = wib_ip
+        self.UDP.write_reg_wib_checked(0x01, 0x2) #Time Stamp Reset command encoded in 2MHz 
+        self.UDP.write_reg_wib_checked(0x01, 0x0) 
+        self.UDP.write_reg_wib_checked(18, 0x8000) #reset error counters
+        if (self.DAQstream_en):
+            self.UDP.write_reg_wib_checked(20, 0x03) #disable data stream and synchronize to Nevis
+            self.UDP.write_reg_wib_checked(20, 0x00) #enable data stream to Nevis
+        d_sts = []
+        for i in range(self.sts_num):
+            d_sts.append( self.WIB_STATUS(wib_ip) )
+        self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True) #Enable HS data from the WIB to PC through UDP
+        if self.act_fembs[wib_ip][femb_addr] == True:
+            print ("Take data from WIB%s FEMB%d"%(wib_ip, femb_addr))
+            raw_asic = []
+            for asic in range(8):
+                self.FEMB_ASIC_CS(wib_ip, femb_addr, asic)
+                raw_asic.append( self.UDP.get_rawdata_packets(self.val) )
+            for cfg in cfglog:
+                tmp = cfg
+                if (cfg[0] == wib_ip) and (cfg[1] == femb_addr):
+                    tmp += raw_asic + d_sts
+                    if self.f_save :
+                        fn = self.savedir + "/" + "WIB" + cfg[0].replace(".", "_") + "_FEMB%d"%cfg[1] + "_%d_%02d"%(cfg[3], cfg[12]) + \
+                             "FE_%d%d%d%d%d%d%d%d%02d"%(cfg[13], cfg[14], cfg[15], cfg[16], cfg[17], cfg[18], cfg[27], cfg[28], cfg[29]) + ".bin"
+                        with open(fn, "wb") as fp:
+                            pickle.dump(tmp, fp)
+                        tmp = None
+                    break
+        self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
+        return tmp
 
 #    def WIBs_Post_UDPACQ(self):
 #        for wib_ip in list(self.act_fembs.keys):
@@ -552,8 +589,8 @@ a = CLS_CONFIG()
 a.WIB_IPs = ["192.168.121.1", "192.168.121.2"]
 a.WIBs_SCAN()
 a.FEMBs_SCAN()
-print ("aBC:=")
 a.WIBs_CFG_INIT()
 cfglog = a.CE_CHK_CFG()
-a.WIBs_UDPACQ(cfglog, val=100)
- 
+#a.FEMB_UDPACQ("192.168.121.1", 0, cfglog, val=100)
+a.TPC_UDPACQ(cfglog)
+a.FEMBs_CE_OFF()
