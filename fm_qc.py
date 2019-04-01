@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Mon Apr  1 11:38:13 2019
+Last modified: 4/1/2019 1:44:36 PM
 """
 
 #defaut setting for scientific caculation
@@ -31,6 +31,7 @@ class FM_QC:
         self.WIB_IPs = ["192.168.121.1"]
         CLS.WIB_IPs = self.WIB_IPs 
         self.pwr_n = 5
+        self.act_fembs = {self.WIB_IPs: [True, True, True, True] }
 
     def FM_INDEX_LOAD(self):
         self.fm_qclist = []
@@ -71,19 +72,16 @@ class FM_QC:
 
     def FM_QC_ACQ(self):
         CLS.val = 10
-        CLS.sts_num = 3
+        CLS.sts_num = 1
         CLS.f_save = False
-        CLS.WIBs_SCAN()
-        CLS.FEMBs_SCAN()
+#        CLS.WIBs_SCAN()
+#        CLS.FEMBs_SCAN()
         CLS.WIBs_CFG_INIT()
         # channel_mapping
         cfglog = CLS.CE_CHK_CFG(data_cs = 3)
         qc_data = CLS.TPC_UDPACQ(cfglog)
         CLS.FEMBs_CE_OFF()
         return qc_data
-
-    def FM_STATUS(self, sts):
-
 
     def FM_QC_ANA(self, FM_ids, qc_data):
         for fm_id in FM_ids:
@@ -93,18 +91,10 @@ class FM_QC:
                     if (femb_data[0][1] == femb_addr) :
                         fdata =  femb_data
                         break
-            #power & link checkout
-            if fdata[0][2] == True:
-                f_pass = True
-            else:
+            sts_d = fdata[2][0]
+            print (sts_d)
 
-#Power & LINK checkout
-#        perr =         for pe in perr:
-#            if len(pe[2]) == False:
-#Power Cycle test
-#        for pn in range(self.pwr_n) : 
-#            print ("%d Power Cycle Test, please wait"%(pn+1))
-#            time.sleep(30)
-
-
-
+a = FM_QC()
+FM_ids = a.FM_QC_Input()
+qc_data = a.FM_QC_ACQ()
+a.FM_QC_ANA(FM_ids, qc_data)
