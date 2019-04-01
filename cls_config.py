@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Mon Apr  1 10:57:22 2019
+Last modified: 4/1/2019 5:46:37 PM
 """
 
 #defaut setting for scientific caculation
@@ -28,7 +28,7 @@ import pickle
 class CLS_CONFIG:
     def __init__(self):
         self.jumbo_flag = False 
-        self.FEMB_ver = 0x501
+        self.FEMB_ver = 0x405
         self.WIB_ver = 0x109
         self.WIB_IPs = ["192.168.121.1", "192.168.121.2", "192.168.121.3", \
                         "192.168.121.4", "192.168.121.5", "192.168.121.6",] #WIB IPs connected to host-PC
@@ -47,6 +47,7 @@ class CLS_CONFIG:
         self.val = 100 #how many UDP HS package are collected per time
         self.f_save = False #if False, no raw data is saved, if True, no further data analysis 
         self.savedir = "./" 
+        self.FM_only_f = False #Only FM, no AM
 
     def WIB_UDP_CTL(self, wib_ip, WIB_UDP_EN = False):
         self.UDP.UDP_IP = wib_ip
@@ -145,17 +146,17 @@ class CLS_CONFIG:
                 elif key in "FEMB%d_AMV33_I"%i:
                     if (stats[key] < 0.100 ):
                         print ("FEMB%d AM_V33 current (%fA) is lower than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
+                        fembs_found[i] = False if not self.FM_only_f else True
                     elif (stats[key] > 1.0 ):
                         print ("FEMB%d AM_V33 current (%fA) is higer than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
+                        fembs_found[i] = False if not self.FM_only_f else True
                 elif key in "FEMB%d_AMV28_I"%i:
                     if (stats[key] < 0.100 ):
                         print ("FEMB%d AM_V28 current (%fA) is lower than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
+                        fembs_found[i] = False if not self.FM_only_f else True
                     elif (stats[key] > 1.0 ):
                         print ("FEMB%d AM_V28 current (%fA) is higer than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
+                        fembs_found[i] = False if not self.FM_only_f else True
             if (fembs_found[i]): #Link and current are good
                 self.UDP.write_reg_femb(i, 0x0, 0x0)
                 self.UDP.read_reg_femb(i, 0x102)
@@ -168,7 +169,7 @@ class CLS_CONFIG:
                         print ("I2C of FEMB%d is broken"%i)
                         fembs_found[i] = False
         self.act_fembs[wib_ip] = fembs_found
-        print self.act_fembs
+        print (self.act_fembs)
         self.WIB_PWR_FEMB(wib_ip, femb_sws=[0,0,0,0])
 
     def WIB_STATUS(self, wib_ip):
@@ -479,7 +480,7 @@ class CLS_CONFIG:
                                 for i in range(len32):
                                     if ( i*32 <= len(chip_regs) ):
                                         bits32 = chip_regs[i*32: (i+1)*32]
-                                        fe_regs[chip/2*len32 + i ] = (sum(v<<j for j, v in enumerate(bits32)))
+                                        fe_regs[int(chip/2*len32) + i ] = (sum(v<<j for j, v in enumerate(bits32)))
                     i = 0
                     for regNum in range(0x200,0x200+len(fe_regs),1):
                         self.UDP.write_reg_femb_checked (femb_addr, regNum, fe_regs[i])
@@ -538,7 +539,7 @@ class CLS_CONFIG:
         tpc_data = []
         for wib_ip in list(self.act_fembs.keys()):
             tpc_data += self.WIB_UDPACQ( wib_ip, cfglog)
-        print len(tpc_data)
+#        print (len(tpc_data))
         return tpc_data
 
     def WIB_UDPACQ(self, wib_ip, cfglog):

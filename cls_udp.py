@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: Sun Mar 31 18:46:05 2019
+Last modified: 4/1/2019 5:20:51 PM
 """
 
 #defaut setting for scientific caculation
@@ -23,6 +23,7 @@ import socket
 import time
 import copy
 from socket import AF_INET, SOCK_DGRAM
+import codecs
 
 class CLS_UDP:
     def write_reg(self, reg , data ):
@@ -71,13 +72,15 @@ class CLS_UDP:
                 self.udp_timeout_cnt = self.udp_timeout_cnt  + 1
                 sock_readresp.close()
                 return -2        
-        dataHex = data.encode('hex')
+        #dataHex = data.encode('hex')
+        #dataHex = codecs.encode(bytes(data, 'utf-8'), 'hex')
+        dataHex = codecs.encode(data, 'hex')
         sock_readresp.close()
 
         #extract register value from response
         if int(dataHex[0:4],16) != regVal :
                 return -3
-        dataHexVal = long(dataHex[4:12],16)
+        dataHexVal = int(dataHex[4:12],16)
         return dataHexVal
 
 
@@ -171,7 +174,9 @@ class CLS_UDP:
                 self.udp_timeout_cnt = self.udp_timeout_cnt  + 1
                 sock_readresp.close()
                 return -1        
-        dataHex = data.encode('hex')
+        #dataHex = data.encode('hex')
+        #dataHex = codecs.encode(bytes(data, 'utf-8'), 'hex')
+        dataHex = codecs.encode(data, 'hex')
         sock_readresp.close()
 
         #extract register value from response
@@ -242,7 +247,7 @@ class CLS_UDP:
             sock_data.bind(('',self.UDP_PORT_HSDATA))
             sock_data.settimeout(3)
             #write N data packets to file
-            rawdataPackets = [] 
+            rawdataPackets = b""
             for packet in range(0,numVal,1):
                 data = None
                 try:
@@ -260,23 +265,22 @@ class CLS_UDP:
                         time.sleep(3)
                         continue
                 if data != None :
-                    rawdataPackets.append(data)
+                    rawdataPackets += data
             sock_data.close()
 
-            rawdata_str = ''.join(rawdataPackets)
             pkg_chk = True
             if (pkg_chk):
                 try_n = try_n + 1
                 lost_pkg_fg = False
                 #check data 
-                smps = len(rawdata_str) / 2 / 16
-                dataNtuple =struct.unpack_from(">%dH"%(smps*16),rawdata_str)
+                smps = len(rawdataPackets) / 2 / 16
+                dataNtuple =struct.unpack_from(">%dH"%(smps*16),rawdataPackets)
                 if (self.jumbo_flag):
-                    pkg_len = 0x1E06/2
+                    pkg_len = int(0x1E06/2)
                 else:
-                    pkg_len = 0x406/2
+                    pkg_len = int(0x406/2)
                 pkg_index  = []
-                datalength = long( (len(dataNtuple) // pkg_len) -3) * (pkg_len) 
+                datalength = int( (len(dataNtuple) // pkg_len) -3) * (pkg_len) 
                 i = 0 
                 while (i <= datalength ):
                     pkg_cnt0 =  ((dataNtuple[i+0]<<16)&0x00FFFFFFFF) + (dataNtuple[i+1]& 0x00FFFFFFFF) + 0x00000001
@@ -333,7 +337,7 @@ class CLS_UDP:
 
             else:
                 lost_pkg_fg = False
-        return rawdata_str
+        return rawdataPackets
 
 ########################################################################################################
 #Code below for Bloomberg mode
@@ -435,7 +439,7 @@ class CLS_UDP:
             for femb in fembs_np:
                 for asic in range(0,8,2):
                     self.select_femb_asic_bromberg(sock_write, femb, asic )
-                    rawdataPackets = [] 
+                    rawdataPackets = b"" 
                     filename = path + "/" + step +"_FEMB" + str(femb) + "CHIP" + str(asic) + "_" + format(fe_cfg_r,'02X') + "_" + format(read_no,'04d') + ".bin"
 
                     self.bl_write_reg_send(sock_write, read_mode, wib=True) #
@@ -448,13 +452,13 @@ class CLS_UDP:
                             self.udp_hstimeout_cnt = self.udp_hstimeout_cnt  + 1
                             timeout_flg = True
                         if data != None :
-                            rawdataPackets.append(data)
+                            #rawdataPackets.append(data)
+                            rawdataPackets +=data
                         if (timeout_flg):
                             break
         
-                    rawdata_str = ''.join(rawdataPackets)
                     with open(filename,"wb") as f:
-                        f.write(rawdata_str) 
+                        f.write(rawdataPackets) 
 
         self.bl_write_reg_send(sock_write, nor_mode, wib=True) #
         time.sleep(0.1)
