@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/1/2019 5:45:35 PM
+Last modified: 4/1/2019 6:09:23 PM
 """
 
 #defaut setting for scientific caculation
@@ -32,6 +32,7 @@ class FM_QC:
         self.pwr_n = 5
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs 
+        self.CLS.FEMB_ver = 0x405
         self.CLS.FM_only_f = True
 #        self.CLS.act_fembs = {"192.168.121.1": [True, True, True, True] }
 

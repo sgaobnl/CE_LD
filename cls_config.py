@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/1/2019 5:46:37 PM
+Last modified: 4/1/2019 6:08:48 PM
 """
 
 #defaut setting for scientific caculation
@@ -28,7 +28,7 @@ import pickle
 class CLS_CONFIG:
     def __init__(self):
         self.jumbo_flag = False 
-        self.FEMB_ver = 0x405
+        self.FEMB_ver = 0x501
         self.WIB_ver = 0x109
         self.WIB_IPs = ["192.168.121.1", "192.168.121.2", "192.168.121.3", \
                         "192.168.121.4", "192.168.121.5", "192.168.121.6",] #WIB IPs connected to host-PC
