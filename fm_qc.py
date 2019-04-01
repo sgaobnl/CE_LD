@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Mon Apr  1 10:54:29 2019
+Last modified: Mon Apr  1 11:38:13 2019
 """
 
 #defaut setting for scientific caculation
@@ -82,7 +82,7 @@ class FM_QC:
         CLS.FEMBs_CE_OFF()
         return qc_data
 
-    def FM_STATUS(self, qc_data):
+    def FM_STATUS(self, sts):
 
 
     def FM_QC_ANA(self, FM_ids, qc_data):
@@ -90,11 +90,11 @@ class FM_QC:
             if (fm_id[0] == 1):
                 femb_addr = FM_ids(fm_id)
                 for femb_data in tpc_data:
-                    if (femb_data[1] == femb_addr) :
+                    if (femb_data[0][1] == femb_addr) :
                         fdata =  femb_data
                         break
             #power & link checkout
-            if fdata[2] == True:
+            if fdata[0][2] == True:
                 f_pass = True
             else:
 
