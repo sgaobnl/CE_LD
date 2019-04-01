@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: 3/29/2019 5:43:22 PM
+Last modified: Sun Mar 31 18:46:05 2019
 """
 
 #defaut setting for scientific caculation
@@ -465,10 +465,10 @@ class CLS_UDP:
                 data = sock_data.recv(8192)
             except socket.timeout:
                 self.udp_hstimeout_cnt = self.udp_hstimeout_cnt  + 1
-                print "Can't return to normal mode"
+                print ("Can't return to normal mode")
                 sys.exit()
             if data!= None: 
-                print "Brombreg mode is DONE, return to normal mode sucessfully"
+                print ("Brombreg mode is DONE, return to normal mode sucessfully")
                 empty_udp = True 
                 break
 

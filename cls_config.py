@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/31/2019 6:06:20 PM
+Last modified: Mon Apr  1 10:57:22 2019
 """
 
 #defaut setting for scientific caculation
@@ -175,6 +175,8 @@ class CLS_CONFIG:
         runtime =  datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
         self.UDP.UDP_IP = wib_ip
         status_dict = {}
+        status_dict["TIME"] = runtime
+
         self.UDP.write_reg_wib_checked(0x4, 0x8) #Internal clock is selected
         self.UDP.write_reg_wib_checked(0x12, 0x8000)
         self.UDP.write_reg_wib_checked(0x12, 0x100)
@@ -361,7 +363,7 @@ class CLS_CONFIG:
             self.UDP.write_reg_wib_checked (4, 0x03)
 
         else:
-            print "configurate PLL of WIB (%s), please wait..."%wib_ip
+            print ("configurate PLL of WIB (%s), please wait..."%wib_ip)
             p_addr = 1
             #step1
             page4 = adrs_h[0]
@@ -387,7 +389,7 @@ class CLS_CONFIG:
                     self.WIB_PLL_wr(wib_ip, adrs_l[cnt], datass[cnt])
             for i in range(10):
                 time.sleep(3)
-                print "check PLL status, please wait..."
+                print ("check PLL status, please wait...")
                 self.UDP.UDP_IP = wib_ip
                 ver_value = self.UDP.read_reg_wib (12)
                 ver_value = self.UDP.read_reg_wib (12)
@@ -395,12 +397,12 @@ class CLS_CONFIG:
                 lolXAXB = (ver_value & 0x20000)>>17
                 INTR = (ver_value & 0x40000)>>18
                 if (lol == 1):
-                    print "PLL of WIB(%s) is locked"%wib_ip
+                    print ("PLL of WIB(%s) is locked"%wib_ip)
                     self.UDP.write_reg_wib_checked (4, 0x03)
                     break
                 if (i ==9):
-                    print "Fail to configurate PLL of WIB(%s), please check if MBB is on or 16MHz from dAQ"%wib_ip
-                    print "Exit anyway"
+                    print ("Fail to configurate PLL of WIB(%s), please check if MBB is on or 16MHz from dAQ"%wib_ip)
+                    print ("Exit anyway")
                     sys.exit()
 
     def WIB_CLKCMD_cs(self, wib_ip ):
@@ -455,7 +457,7 @@ class CLS_CONFIG:
                     #FE configuration
                     if (self.fecfg_loadflg ):
                         print ("ERROR: code to be added later")
-                        print "Exit anyway"
+                        print ("Exit anyway")
                         sys.exit()
                     else:
                         self.FEREG_MAP.set_fe_board(sts, snc, sg0, sg1, st0, st1, smn, sdf,\
@@ -472,7 +474,7 @@ class CLS_CONFIG:
                                 chip_regs.append(onebit)
                             len32 = len(chip_regs)//32
                             if (len32 != 9):
-                                print "ERROR FE register mapping"
+                                print ("ERROR FE register mapping")
                             else:
                                 for i in range(len32):
                                     if ( i*32 <= len(chip_regs) ):
@@ -565,9 +567,9 @@ class CLS_CONFIG:
                 self.FEMB_ASIC_CS(wib_ip, femb_addr, asic)
                 raw_asic.append( self.UDP.get_rawdata_packets(self.val) )
             for cfg in cfglog:
-                tmp = cfg
+                tmp = [cfg]
                 if (cfg[0] == wib_ip) and (cfg[1] == femb_addr):
-                    tmp += raw_asic + d_sts
+                    tmp += [raw_asic] + [d_sts]
                     if self.f_save :
                         fn = self.savedir + "/" + "WIB" + cfg[0].replace(".", "_") + "_FEMB%d"%cfg[1] + "_%d_%02d"%(cfg[3], cfg[12]) + \
                              "FE_%d%d%d%d%d%d%d%d%02d"%(cfg[13], cfg[14], cfg[15], cfg[16], cfg[17], cfg[18], cfg[27], cfg[28], cfg[29]) + ".bin"
