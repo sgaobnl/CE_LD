@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/2/2019 3:34:53 PM
+Last modified: 4/2/2019 6:21:44 PM
 """
 
 #defaut setting for scientific caculation
@@ -106,6 +106,7 @@ class CLS_CONFIG:
         stats = self.WIB_STATUS(wib_ip)
         keys = list(stats.keys())
         fembs_found = [True, True, True, True]
+        self.err_code += "#TIME" + stats["TIME"]
         for i in range(4):
             self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
             for key in keys:
@@ -192,7 +193,7 @@ class CLS_CONFIG:
         return self.err_code
 
     def WIB_STATUS(self, wib_ip):
-        runtime =  datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
+        runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
         self.UDP.UDP_IP = wib_ip
         status_dict = {}
         status_dict["TIME"] = runtime

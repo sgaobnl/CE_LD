@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/2/2019 4:38:17 PM
+Last modified: 4/2/2019 6:27:42 PM
 """
 
 #defaut setting for scientific caculation
@@ -58,7 +58,8 @@ class FM_QC:
 
     def FM_QC_Input(self):
         FMlist = self.FM_INDEX_LOAD()
-        FM_ids = []
+        FM_infos = []
+        env = input("Test is performed at (RT or LN)? :")
         for i in range(4):
             while (True):
                 FM_id = input("Please enter ID of FM in WIB slot%d (input \"OFF\" if no FM): "%i)
@@ -68,11 +69,16 @@ class FM_QC:
             if FM_id in FMlist:
                 print ("FM ID#%s has been tested before, please input a short note for this retest\n"%FM_id)
                 c_ret = input("Reason for retest: ")
-                for fm_i in range(len(self.fm_qclist)):
-                    if self.fm_qclist[i][1] == FM_id :
-                        self.fm_qclist[i].append(c_ret)
-            FM_ids.append("SLOT%d_"%i + FM_id)
-        return FM_ids
+                rerun_f = "Y"
+            else:
+                c_ret = ""
+                rerun_f = "N"
+
+#                for fm_i in range(len(self.fm_qclist)):
+#                    if self.fm_qclist[i][1] == FM_id :
+#                        self.fm_qclist[i].append(c_ret)
+            FM_infos.append("SLOT%d"%i + "\n" + FM_id + "\n" + env + "\n" + rerun_f + "\n" + c_ret )
+        return FM_infos
 
     def FM_QC_ACQ(self):
         self.CLS.val = 10 
@@ -82,28 +88,42 @@ class FM_QC:
         self.CLS.WIBs_SCAN()
         self.CLS.FEMBs_SCAN()
         self.CLS.WIBs_CFG_INIT()
-        # channel_mapping
-        cfglog = self.CLS.CE_CHK_CFG(data_cs = 3)
+        cfglog = self.CLS.CE_CHK_CFG(data_cs = 3)# channel_mapping data
         qc_data = self.CLS.TPC_UDPACQ(cfglog)
         self.CLS.FEMBs_CE_OFF()
-        return [self.CLS.err_code, qc_data]
+        return qc_data
 
-    def FM_QC_ANA(self, FM_ids, qc_data):
-        for fm_id in FM_ids:
-            femb_addr = int(fm_id[4])
-            for femb_data in qc_data:
-                if (femb_data[0][1] == femb_addr) :
-                    fdata =  femb_data
-                    sts_r = fdata[2][0]
-                    fmdata = fdata[1]
-                    map_r = self.FM_MAP_CHK(femb_addr, fmdata)
-
-                    #print (len(fmdata))
-                    #apath = "./a.bin"
-                    #import pickle
-                    #with open(apath, 'wb') as f:
-                    #    pickle.dump(fmdata, f)
+    def FM_QC_ANA(self, FM_infos, qc_data):
+        for fm_info in FM_infos:
+            fms = fm_info.split("\n")
+            femb_addr = int(fms[0][4])
+            fm_id = fms[1]
+            fm_env = fms[2]
+            fm_rerun_f = fms[3]
+            fm_c_ret = fms[4]
+            fm_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") : self.CLS.err_code.index("#IP")] 
+            errs = self.CLS.err_code.split("SLOT")
+            for er in errs:
+                if( int(er[0]) == femb_ddr ):
+                    if (len(er) <2 ):
+                        er = ""
+                    else
+                        fm_errlog = [2:] 
                     break
+
+            if  "OFF" in fm_id:
+                pass
+            else
+                for femb_data in qc_data:
+                    if (femb_data[0][1] == femb_addr) 
+                        fdata =  femb_data
+                        sts_r = fdata[2][0]
+                        fmdata = fdata[1]
+                        map_r = self.FM_MAP_CHK(femb_addr, fmdata)
+                        break
+                    else
+
+        self.fm_qclist.append( "")
 
     def FM_MAP_CHK(self, femb_addr, fmdata):
         chn_rb = []
@@ -116,7 +136,7 @@ class FM_QC:
             if (wib_pos + chn) != (chn_rb[chn]&0x0FFF):
                 err_code = "-F5_MAP_ERR"
                 return (False, err_code, chn_rb)
-        return (True, "-", chn_rb)
+        return (True, "-PASS", chn_rb)
 
 
  #   def FM_STS_ANA(self, fm_id, sts_d):
@@ -124,17 +144,25 @@ class FM_QC:
 a = FM_QC()
 ##FM_ids = a.FM_QC_Input()
 #FM_ids = ["SLOT0_OFF", "SLOT1_OFF", "SLOT2_OFF", "SLOT3_S1"]  
-#err_code, qc_data = a.FM_QC_ACQ()
-#print (err_code)
+qc_data = a.FM_QC_ACQ()
+#print (self.CLS.err_code)
 #a.FM_QC_ANA(FM_ids, qc_data)
 
 
-apath = "./a.bin"
-import pickle
-with open(apath, 'rb') as f:
-    fmdata = pickle.load(f)
-print (a.FM_MAP_CHK(3, fmdata))
+#apath = "./a.bin"
+#import pickle
+#with open(apath, 'rb') as f:
+#    fmdata = pickle.load(f)
+#print (a.FM_MAP_CHK(3, fmdata))
 #data = a.RAW_C.raw_conv(data)
 #print (data[0][0:10])
 #print (len(data[0]))
 #
+
+
+#print (len(fmdata))
+#apath = "./a.bin"
+#import pickle
+#with open(apath, 'wb') as f:
+#    pickle.dump(fmdata, f)
+
