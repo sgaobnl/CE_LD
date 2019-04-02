@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/1/2019 6:09:23 PM
+Last modified: 4/2/2019 2:01:05 PM
 """
 
 #defaut setting for scientific caculation
@@ -77,12 +77,12 @@ class FM_QC:
         self.CLS.FM_only_f = True
         self.CLS.WIBs_SCAN()
         self.CLS.FEMBs_SCAN()
-        self.CLS.WIBs_CFG_INIT()
+#        self.CLS.WIBs_CFG_INIT()
         # channel_mapping
-        cfglog = self.CLS.CE_CHK_CFG(data_cs = 3)
-        qc_data = self.CLS.TPC_UDPACQ(cfglog)
-        self.CLS.FEMBs_CE_OFF()
-        return qc_data
+#        cfglog = self.CLS.CE_CHK_CFG(data_cs = 3)
+#        qc_data = self.CLS.TPC_UDPACQ(cfglog)
+#        self.CLS.FEMBs_CE_OFF()
+#        return qc_data
 
     def FM_QC_ANA(self, FM_ids, qc_data):
         for fm_id in FM_ids:
@@ -95,10 +95,10 @@ class FM_QC:
                     print (codecs.encode((data), 'hex') )
                     break
 
-    def FM_STS_ANA(self, fm_id, sts_d):
+ #   def FM_STS_ANA(self, fm_id, sts_d):
 
 a = FM_QC()
 #FM_ids = a.FM_QC_Input()
 FM_ids = ["SLOT0_OFF", "SLOT1_OFF", "SLOT2_OFF", "SLOT3_S1"]  
 qc_data = a.FM_QC_ACQ()
-a.FM_QC_ANA(FM_ids, qc_data)
+#a.FM_QC_ANA(FM_ids, qc_data)
