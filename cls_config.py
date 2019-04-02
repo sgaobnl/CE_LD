@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/2/2019 2:01:42 PM
+Last modified: 4/2/2019 2:04:15 PM
 """
 
 #defaut setting for scientific caculation
@@ -189,7 +189,6 @@ class CLS_CONFIG:
         self.act_fembs[wib_ip] = fembs_found
         print (self.act_fembs)
         self.WIB_PWR_FEMB(wib_ip, femb_sws=[0,0,0,0])
-        print (err_code)
         return err_code
 
     def WIB_STATUS(self, wib_ip):

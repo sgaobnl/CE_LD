@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/2/2019 2:01:05 PM
+Last modified: 4/2/2019 3:24:28 PM
 """
 
 #defaut setting for scientific caculation
@@ -23,9 +23,11 @@ from datetime import datetime
 import struct
 import codecs
 from cls_config import CLS_CONFIG
+from raw_convertor import RAW_CONV
 
 class FM_QC:
     def __init__(self):
+        self.jumbo_flag = False
         self.f_fm_qcindex = "./FM_QCindex.csv"
         self.fm_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
@@ -34,7 +36,9 @@ class FM_QC:
         self.CLS.WIB_IPs = self.WIB_IPs 
         self.CLS.FEMB_ver = 0x405
         self.CLS.FM_only_f = True
-#        self.CLS.act_fembs = {"192.168.121.1": [True, True, True, True] }
+        self.CLS.jumbo_flag = self.jumbo_flag 
+        self.RAW_C = RAW_CONV()
+        self.RAW_C.jumbo_flag = self.jumbo_flag 
 
     def FM_INDEX_LOAD(self):
         self.fm_qclist = []
@@ -71,18 +75,18 @@ class FM_QC:
         return FM_ids
 
     def FM_QC_ACQ(self):
-        self.CLS.val = 10
-        self.CLS.sts_num = 1
+        self.CLS.val = 2 
+        self.CLS.sts_num = 0
         self.CLS.f_save = False
         self.CLS.FM_only_f = True
         self.CLS.WIBs_SCAN()
-        self.CLS.FEMBs_SCAN()
-#        self.CLS.WIBs_CFG_INIT()
+        err_code = self.CLS.FEMBs_SCAN()
+        self.CLS.WIBs_CFG_INIT()
         # channel_mapping
-#        cfglog = self.CLS.CE_CHK_CFG(data_cs = 3)
-#        qc_data = self.CLS.TPC_UDPACQ(cfglog)
-#        self.CLS.FEMBs_CE_OFF()
-#        return qc_data
+        cfglog = self.CLS.CE_CHK_CFG(data_cs = 3)
+        qc_data = self.CLS.TPC_UDPACQ(cfglog)
+        self.CLS.FEMBs_CE_OFF()
+        return [err_code, qc_data]
 
     def FM_QC_ANA(self, FM_ids, qc_data):
         for fm_id in FM_ids:
@@ -92,7 +96,9 @@ class FM_QC:
                     fdata =  femb_data
                     sts_d = fdata[2][0]
                     data = fdata[1][0][0:100]
-                    print (codecs.encode((data), 'hex') )
+                    a = self.RAW_C.raw_conv(data, smps=1)
+                    print (a)
+                    #print (codecs.encode((data), 'hex') )
                     break
 
  #   def FM_STS_ANA(self, fm_id, sts_d):
