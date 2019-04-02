@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 7/15/2016 11:47:39 AM
-Last modified: 4/2/2019 3:19:49 PM
+Last modified: 4/2/2019 4:03:49 PM
 """
 
 #defaut setting for scientific caculation
@@ -18,21 +18,23 @@ Last modified: 4/2/2019 3:19:49 PM
 import numpy as np
 import struct
 
-class RAW_CONV()
-    def raw_conv_feedloc(self, raw_data, smps):
-        dataNtuple =struct.unpack_from(">%dH"%(smps*16),raw_data)
+class RAW_CONV():
+    def raw_conv_feedloc(self, raw_data):
+        smps = int(len(raw_data) //2)
+        dataNtuple =struct.unpack_from(">%dH"%(smps),raw_data)
+        if (self.jumbo_flag == True):
+            pkg_len = int(0x1E06/2)
+        else:
+            pkg_len = int(0x406/2)
+
         chn_data=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],]
         feed_loc=[]
-        if (self.jumbo_flag == True):
-            pkg_len = 0x1E06/2
-        else:
-            pkg_len = 0x406/2
         pkg_index  = []
-        datalength = long( (len(dataNtuple) // pkg_len) -3) * (pkg_len) 
+        datalength = int( (len(dataNtuple) // pkg_len) -3) * (pkg_len) 
     
-        i = 0 
+        i = int(0) 
         k = []
-        j = 0
+        j = int(0)
         while (i <= datalength ):
             data_a =  ((dataNtuple[i+0]<<16)&0x00FFFFFFFF) + (dataNtuple[i+1]& 0x00FFFFFFFF) + 0x0000000001
             data_b =  ((dataNtuple[i+0+pkg_len]<<16)&0x00FFFFFFFF) + (dataNtuple[i+1+pkg_len]& 0x00FFFFFFFF)
@@ -50,9 +52,9 @@ class RAW_CONV()
                 j = j + 1
         
         if ( len(k) != 0 ):
-            print "raw_convertor_m.py: There are defective packages start at %d"%k[0] 
+            print ("raw_convertor.py: There are defective packages start at %d"%k[0] )
         if j != 0 :
-            print "raw_convertor_m.py: drop %d packages"%(j)
+            print ("raw_convertor.py: drop %d packages"%(j) )
     
         tmpa = pkg_index[0]
         tmpb = pkg_index[-1]
@@ -75,8 +77,8 @@ class RAW_CONV()
             missed_pkgs = missed_pkgs + add1 -1
     
         if (missed_pkgs > 0 ):
-            print "raw_convertor_m.py: missing udp pkgs = %d, total pkgs = %d "%(missed_pkgs, pkg_sum)
-            print "raw_convertor_m.py: missing %.8f%% udp packages"%(100.0*missed_pkgs/pkg_sum)
+            print ("raw_convertor.py: missing udp pkgs = %d, total pkgs = %d "%(missed_pkgs, pkg_sum) )
+            print ("raw_convertor.py: missing %.8f%% udp packages"%(100.0*missed_pkgs/pkg_sum) )
         else:
             pass
     
@@ -114,12 +116,12 @@ class RAW_CONV()
                 i = i + 13 
         return chn_data, feed_loc
     
-    def raw_conv(self, raw_data, smps):
-        chn_data, feed_loc = raw_convertor_feedloc(raw_data, smps)
+    def raw_conv(self, raw_data):
+        chn_data, feed_loc = self.raw_conv_feedloc(raw_data)
         return chn_data
     
-    def raw_conv_peak(self, raw_data, smps):
-        chn_data, feed_loc = raw_convertor_feedloc(raw_data, smps)
+    def raw_conv_peak(self, raw_data):
+        chn_data, feed_loc = self.raw_conv_feedloc(raw_data)
         if ( len(feed_loc)  ) > 2 :
             chn_peakp=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],]
             chn_peakn=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],]

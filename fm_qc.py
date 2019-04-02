@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/2/2019 3:24:28 PM
+Last modified: 4/2/2019 4:38:17 PM
 """
 
 #defaut setting for scientific caculation
@@ -75,18 +75,18 @@ class FM_QC:
         return FM_ids
 
     def FM_QC_ACQ(self):
-        self.CLS.val = 2 
-        self.CLS.sts_num = 0
+        self.CLS.val = 10 
+        self.CLS.sts_num = 1
         self.CLS.f_save = False
         self.CLS.FM_only_f = True
         self.CLS.WIBs_SCAN()
-        err_code = self.CLS.FEMBs_SCAN()
+        self.CLS.FEMBs_SCAN()
         self.CLS.WIBs_CFG_INIT()
         # channel_mapping
         cfglog = self.CLS.CE_CHK_CFG(data_cs = 3)
         qc_data = self.CLS.TPC_UDPACQ(cfglog)
         self.CLS.FEMBs_CE_OFF()
-        return [err_code, qc_data]
+        return [self.CLS.err_code, qc_data]
 
     def FM_QC_ANA(self, FM_ids, qc_data):
         for fm_id in FM_ids:
@@ -94,17 +94,47 @@ class FM_QC:
             for femb_data in qc_data:
                 if (femb_data[0][1] == femb_addr) :
                     fdata =  femb_data
-                    sts_d = fdata[2][0]
-                    data = fdata[1][0][0:100]
-                    a = self.RAW_C.raw_conv(data, smps=1)
-                    print (a)
-                    #print (codecs.encode((data), 'hex') )
+                    sts_r = fdata[2][0]
+                    fmdata = fdata[1]
+                    map_r = self.FM_MAP_CHK(femb_addr, fmdata)
+
+                    #print (len(fmdata))
+                    #apath = "./a.bin"
+                    #import pickle
+                    #with open(apath, 'wb') as f:
+                    #    pickle.dump(fmdata, f)
                     break
+
+    def FM_MAP_CHK(self, femb_addr, fmdata):
+        chn_rb = []
+        for adata in fmdata:
+            atmp = self.RAW_C.raw_conv(adata)
+            for chndata in atmp:
+                chn_rb.append(chndata[0])
+        wib_pos = femb_addr<<8
+        for chn in range(128):
+            if (wib_pos + chn) != (chn_rb[chn]&0x0FFF):
+                err_code = "-F5_MAP_ERR"
+                return (False, err_code, chn_rb)
+        return (True, "-", chn_rb)
+
 
  #   def FM_STS_ANA(self, fm_id, sts_d):
 
 a = FM_QC()
-#FM_ids = a.FM_QC_Input()
-FM_ids = ["SLOT0_OFF", "SLOT1_OFF", "SLOT2_OFF", "SLOT3_S1"]  
-qc_data = a.FM_QC_ACQ()
+##FM_ids = a.FM_QC_Input()
+#FM_ids = ["SLOT0_OFF", "SLOT1_OFF", "SLOT2_OFF", "SLOT3_S1"]  
+#err_code, qc_data = a.FM_QC_ACQ()
+#print (err_code)
 #a.FM_QC_ANA(FM_ids, qc_data)
+
+
+apath = "./a.bin"
+import pickle
+with open(apath, 'rb') as f:
+    fmdata = pickle.load(f)
+print (a.FM_MAP_CHK(3, fmdata))
+#data = a.RAW_C.raw_conv(data)
+#print (data[0][0:10])
+#print (len(data[0]))
+#
