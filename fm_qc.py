@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/2/2019 6:27:42 PM
+Last modified: 4/3/2019 2:21:19 PM
 """
 
 #defaut setting for scientific caculation
@@ -120,10 +120,16 @@ class FM_QC:
                         sts_r = fdata[2][0]
                         fmdata = fdata[1]
                         map_r = self.FM_MAP_CHK(femb_addr, fmdata)
+                        qc_r = "PASS" if mar_r[0] else "FAIL"
+                        self.fm_qclist.append( ["", fm_env, fm_id, fm_return_f, qc_r, fm_date, fm_errlog, fm_c_ret] )
+                        print (["", fm_env, fm_id, fm_return_f, qc_r, fm_date, fm_errlog, fm_c_ret] )
                         break
                     else
+                        qc_r = "FAIL"
+                        self.fm_qclist.append( ["", fm_env, fm_id, fm_return_f, qc_r, fm_date, fm_errlog, fm_c_ret] )
+                        print (["", fm_env, fm_id, fm_return_f, qc_r, fm_date, fm_errlog, fm_c_ret] )
 
-        self.fm_qclist.append( "")
+#        self.fm_qclist.append( "")
 
     def FM_MAP_CHK(self, femb_addr, fmdata):
         chn_rb = []
