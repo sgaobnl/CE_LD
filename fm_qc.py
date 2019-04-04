@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/3/2019 2:21:19 PM
+Last modified: 4/3/2019 11:22:16 PM
 """
 
 #defaut setting for scientific caculation
@@ -101,33 +101,38 @@ class FM_QC:
             fm_env = fms[2]
             fm_rerun_f = fms[3]
             fm_c_ret = fms[4]
-            fm_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") : self.CLS.err_code.index("#IP")] 
+            fm_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
             errs = self.CLS.err_code.split("SLOT")
-            for er in errs:
-                if( int(er[0]) == femb_ddr ):
+            for er in errs[1:]:
+                if( int(er[0]) == femb_addr ):
                     if (len(er) <2 ):
-                        er = ""
-                    else
-                        fm_errlog = [2:] 
+                        fm_errlog = ""
+                    else:
+                        fm_errlog = er[2: er.index("#IP")]
                     break
 
             if  "OFF" in fm_id:
                 pass
-            else
+            else :
+                qc_list = ["", fm_env, fm_id, fm_rerun_f, fm_date, fm_errlog, fm_c_ret, "FAIL"] 
                 for femb_data in qc_data:
-                    if (femb_data[0][1] == femb_addr) 
+                    if (femb_data[0][1] == femb_addr): 
                         fdata =  femb_data
                         sts_r = fdata[2][0]
                         fmdata = fdata[1]
                         map_r = self.FM_MAP_CHK(femb_addr, fmdata)
-                        qc_r = "PASS" if mar_r[0] else "FAIL"
-                        self.fm_qclist.append( ["", fm_env, fm_id, fm_return_f, qc_r, fm_date, fm_errlog, fm_c_ret] )
-                        print (["", fm_env, fm_id, fm_return_f, qc_r, fm_date, fm_errlog, fm_c_ret] )
+
+                        if (len(fm_errlog) == 0):
+                            if map_r[0] : 
+                            #self.fm_qclist.append( ["", fm_env, fm_id, fm_rerun_f, qc_r, fm_date, fm_errlog, fm_c_ret] )
+                                qc_list[-1] = "PASS" 
+                            else:
+                                qc_list[-1] = "FAIL" 
+                                qc_list[-3] += map_r[1]
                         break
-                    else
-                        qc_r = "FAIL"
-                        self.fm_qclist.append( ["", fm_env, fm_id, fm_return_f, qc_r, fm_date, fm_errlog, fm_c_ret] )
-                        print (["", fm_env, fm_id, fm_return_f, qc_r, fm_date, fm_errlog, fm_c_ret] )
+                print (qc_list )
+                        #self.fm_qclist.append( ["", fm_env, fm_id, fm_rerun_f, qc_r, fm_date, fm_errlog, fm_c_ret] )
+                        #print (["", fm_env, fm_id, fm_rerun_f, qc_r, fm_date, fm_errlog, fm_c_ret] )
 
 #        self.fm_qclist.append( "")
 
@@ -148,11 +153,12 @@ class FM_QC:
  #   def FM_STS_ANA(self, fm_id, sts_d):
 
 a = FM_QC()
-##FM_ids = a.FM_QC_Input()
+FM_infos = a.FM_QC_Input()
 #FM_ids = ["SLOT0_OFF", "SLOT1_OFF", "SLOT2_OFF", "SLOT3_S1"]  
 qc_data = a.FM_QC_ACQ()
+#qc_data = a.FM_QC_ACQ()
 #print (self.CLS.err_code)
-#a.FM_QC_ANA(FM_ids, qc_data)
+a.FM_QC_ANA(FM_infos, qc_data)
 
 
 #apath = "./a.bin"
