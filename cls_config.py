@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/2/2019 6:21:44 PM
+Last modified: 4/5/2019 6:50:16 PM
 """
 
 #defaut setting for scientific caculation
@@ -520,23 +520,36 @@ class CLS_CONFIG:
                     for j in range(len(fe_regs)):
                         if (fe_regs[j] != fe_rb_regs[j]) and (data_cs == 0 ):
                             print ("%dth, %8x,%8x"%(j, fe_regs[j],fe_rb_regs[j]))
+                            fid = "IP%s-SLOT%d"%(wib_ip, femb_addr)
                             if ( j<= 9 ):
                                 print ("FE-ADC 0 SPI failed")
+                                spi_err ="-F8_FE01"
                             elif ( j<= 18 ):
                                 print ("FE-ADC 1 SPI failed")
+                                spi_err ="-F8_FE23"
                             elif ( j<= 27 ):
                                 print ("FE-ADC 2 SPI failed")
+                                spi_err ="-F8_FE34"
                             elif ( j<= 36 ):
                                 print ("FE-ADC 3 SPI failed")
+                                spi_err ="-F8_FE56"
                             elif ( j<= 45 ):
                                 print ("FE-ADC 4 SPI failed")
+                                spi_err ="-F8_IDLE0"
                             elif ( j<= 54 ):
                                 print ("FE-ADC 5 SPI failed")
+                                spi_err ="-F8_IDLE1"
                             elif ( j<= 64 ):
                                 print ("FE-ADC 6 SPI failed")
+                                spi_err ="-F8_IDLE2"
                             elif ( j<= 72 ):
                                 print ("FE-ADC 7 SPI failed")
-
+                                spi_err ="-F8_IDLE3"
+                            else:
+                                spi_err =""
+                            if  fid in self.err_code:  
+                                t = self.err_code.index (fid) + len(fid)
+                                self.err_code = self.err_code[0:t] + spi_err + self.err_code[t:]
                     #enable data stream to WIB and reset transceiver
                     self.UDP.write_reg_femb_checked (femb_addr, 9, 9)
                 cfglog.append( [ wib_ip, femb_addr,\
