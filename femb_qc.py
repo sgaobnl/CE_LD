@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Mon Apr  8 15:20:04 2019
+Last modified: 4/8/2019 3:34:03 PM
 """
 
 #defaut setting for scientific caculation
@@ -125,7 +125,7 @@ class FEMB_QC:
                         sts_r = fdata[2][0]
                         fembdata = fdata[1]
                         map_r = self.FEMB_CHK(femb_addr, fembdata)
-
+###############################################################################3
 
                         sts = fdata[2]
                         if (len(fm_errlog) == 0):
@@ -139,7 +139,7 @@ class FEMB_QC:
                         break
         return qcs
 
-    def FEMB_CHK(self, femb_addr, fembdata):
+    def FEMB_CHK(self, femb_id, femb_addr, fembdata,):
         for adata in fembdata:
             chn_rmss = []
             chn_peds = []
@@ -155,8 +155,33 @@ class FEMB_QC:
                 apeakn = int(np.mean(chn_peakn[achn]))
                 chn_rmss.append(arms)
                 chn_peds.append(aped)
-                chn_pkps.append(apeakp)
-                chn_pkns.append(apeakn)
+                chn_pkps.append(apeakp-aped)
+                chn_pkns.append(apeakn-aped)
+        err_code = ""
+        rms_mean = np.mean(chn_rmss)
+        rms_thr = np.std(chn_rmss) if (np.std(chn_rmss) < 0.3*rms_mean) else 0.3*rms_mean
+        for chn in range(128):
+            if abs(chn_rmss(chn) - rms_mean) < rms_thr :
+                pass
+            else:
+                err_code += "-F9_RMS_CHN%d"%(chn)
+
+        if "-SA" in femb_id: #side AM
+            ped_mean = np.mean(chn_peds)
+            ped_thr= 20 
+            for chn in range(128):
+                if abs(chn_peds(chn) - ped_mean) < ped_thr :
+                    pass
+                else:
+                    err_code += "-F9_PED_CHN%d"%(chn)
+
+            pkp_mean = np.mean(chn_pkps)
+            pkn_mean = np.mean(chn_pkns)
+        elif "-TA" in femb_id: #top AM 
+            pass
+        else:
+            err_code += "-F10_WRONG_ID"
+            
 
 
 

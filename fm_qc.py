@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/4/2019 3:57:33 PM
+Last modified: 4/4/2019 5:49:12 PM
 """
 
 #defaut setting for scientific caculation
@@ -25,18 +25,21 @@ import codecs
 from cls_config import CLS_CONFIG
 from raw_convertor import RAW_CONV
 import pickle
+from shutil import copyfile
 
 class FM_QC:
     def __init__(self):
         self.jumbo_flag = False
-        self.datadir = "D:/SBND_QC/"
-        self.f_fm_qcindex = self.datadir + "FM_QCindex.csv"
+        self.userdir = "D:/SBND_QC/"
+        self.user_fm_f = self.userdir + "FM_QCindex.csv"
+        self.databkdir = "D:/SBND_QC/FM_QC/"
+        self.f_fm_qcindex = self.databkdir + "FM_QCindex.csv"
         self.fm_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
         self.pwr_n = 5
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs 
-        self.CLS.FEMB_ver = 0x405
+        self.CLS.FEMB_ver = 0x501
         self.CLS.FM_only_f = True
         self.CLS.jumbo_flag = self.jumbo_flag 
         self.RAW_C = RAW_CONV()
@@ -53,10 +56,10 @@ class FM_QC:
                     x.append(i.replace(" ", ""))
                 x = x[:-1]
                 if (x[0][0] != "#"):
-                    self.fm_qclist.append(x[1:])
+                    self.fm_qclist.append(x)
         fm_ids = []
         for fm in self.fm_qclist:
-            fm_ids.append(fm[1])
+            fm_ids.append(fm[2])
         return fm_ids
 
     def FM_QC_Input(self):
@@ -70,7 +73,7 @@ class FM_QC:
                 if (cf == "Y"):
                     break
             if FM_id in FMlist:
-                print ("FM ID#%s has been tested before, please input a short note for this retest\n"%FM_id)
+                print ("FM ID#%s has been tested before, please input a short note for this rerun"%FM_id)
                 c_ret = input("Reason for retest: ")
                 rerun_f = "Y"
             else:
@@ -108,13 +111,15 @@ class FM_QC:
                     if (len(er) <2 ):
                         fm_errlog = ""
                     else:
-                        fm_errlog = er[2: er.index("#IP")]
+                        fm_errlog = er[2: er.index("#IP")] if "#IP" in er else er[2: ]
                     break
 
             if  "OFF" in fm_id:
                 pass
             else :
-                qc_list = ["FAIL", fm_env, fm_id, fm_rerun_f, fm_date, fm_errlog, fm_c_ret, "PWR%d"%pwr_i] 
+                qc_list = ["FAIL", fm_env, fm_id, fm_rerun_f, fm_date, fm_errlog, fm_c_ret, "PWR%d"%(pwr_i+1)] 
+                map_r = None
+                sts = None
                 for femb_data in qc_data:
                     if (femb_data[0][1] == femb_addr): 
                         fdata =  femb_data
@@ -129,9 +134,10 @@ class FM_QC:
                             else:
                                 qc_list[0] = "FAIL" 
                                 qc_list[-3] += map_r[1]
-                        qcs.append(qc_list )
-                        self.raw_data.append([qc_list, map_r, sts])
                         break
+                qcs.append(qc_list )
+                self.raw_data.append([qc_list, map_r, sts])
+
         return qcs
 
     def FM_MAP_CHK(self, femb_addr, fmdata):
@@ -150,11 +156,15 @@ class FM_QC:
 
     def FM_QC_PWR(self, FM_infos):
         pwr_qcs = []
-        for pwr_i in range(self.pwr_n )
+        for pwr_i in range(self.pwr_n ):
+            print ("Power Cycle %d of %d starts..."%(pwr_i, self.pwr_n))
             qc_data = self.FM_QC_ACQ()
             qcs = self.FM_QC_ANA(FM_infos, qc_data, pwr_i)
             pwr_qcs += qcs
+            print ("Power Cycle %d of %d is done, wait 30 seconds"%(pwr_i, self.pwr_n))
+            time.sleep(30)
 
+        saves = []
         for fm_info in FM_infos:
             fms = fm_info.split("\n")
             fm_id = fms[1]
@@ -162,29 +172,30 @@ class FM_QC:
             for qct in pwr_qcs:
                 if qct[2] == fm_id :
                     if qct[1] == "FAIL" :
-                        self.fm_qclist.append(qct)
+                        saves.append(qct)
                         break
                     else:
                         pass_qct = qct
                         flg = True
             if (flg):
-                self.fm_qclist.append(pass_qct)
+                saves.append(pass_qct)
 
         with open (self.f_fm_qcindex , 'a') as fp:
             print ("Result,ENV,FM_ID,Retun Test,Date,Error_Code,Note,Powr Cycle,")
-            for x in self.fm_qclist:
+            for x in saves:
                 fp.write(",".join(str(i) for i in x) +  "," + "\n")
                 print (x)
+        copyfile(self.f_fm_qcindex, self.user_fm_f )
 
-        if (len(self.fm_qclist) > 0 ):
-            fn =self.datadir + "FM_QC/" + "FM_QC_" + self.fm_qclist[1] +"_" + self.fm_qclist[4] + ".bin" 
+        if (len(pwr_qcs) > 0 ):
+            fn =self.databkdir  + "FM_QC_" + pwr_qcs[0][1] +"_" + pwr_qcs[0][4] + ".bin" 
             with open(fn, 'wb') as f:
                 pickle.dump(self.raw_data, f)
+        print ("Result is saved in %s"%self.user_fm_f )
+        print ("Well Done")
 
 
 a = FM_QC()
 FM_infos = a.FM_QC_Input()
 a.FM_QC_PWR( FM_infos)
-
-
 
