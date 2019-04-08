@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/8/2019 3:34:03 PM
+Last modified: 4/8/2019 4:28:07 PM
 """
 
 #defaut setting for scientific caculation
@@ -26,7 +26,6 @@ from cls_config import CLS_CONFIG
 from raw_convertor import RAW_CONV
 import pickle
 
-from FM_QC import FM_QC()
 
 class FEMB_QC:
     def __init__(self):
@@ -36,10 +35,6 @@ class FEMB_QC:
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
         self.pwr_n = 5
-        self.FMQC = FM_QC()
-        self.FMQC.jumbo_flag = self.jumbo_flag 
-        self.FMQC.CLS.FM_only_f = True
-
 #        self.CLS.FEMB_ver = 0x405
 #        self.RAW_C = RAW_CONV()
 #        self.RAW_C.jumbo_flag = self.jumbo_flag 
@@ -99,13 +94,13 @@ class FEMB_QC:
     def FEMB_CHK_ANA(self, FEMB_infos, qc_data, pwr_i = 0):
         qcs = []
         for femb_info in FEMB_infos:
-            fms = femb_info.split("\n")
-            femb_addr = int(fms[0][4])
-            fm_id = fms[1]
-            fm_env = fms[2]
-            fm_rerun_f = fms[3]
-            fm_c_ret = fms[4]
-            fm_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
+            fembs = femb_info.split("\n")
+            femb_addr = int(fembs[0][4])
+            femb_id = fembs[1]
+            femb_env = fembs[2]
+            femb_rerun_f = fembs[3]
+            femb_c_ret = fembs[4]
+            femb_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
             errs = self.CLS.err_code.split("SLOT")
             for er in errs[1:]:
                 if( int(er[0]) == femb_addr ):
@@ -115,18 +110,16 @@ class FEMB_QC:
                         fm_errlog = er[2: er.index("#IP")]
                     break
 
-            if  "OFF" in fm_id:
+            if  "OFF" in femb_id:
                 pass
             else :
-                qc_list = ["FAIL", fm_env, fm_id, fm_rerun_f, fm_date, fm_errlog, fm_c_ret, "PWR%d"%pwr_i] 
+                qc_list = ["FAIL", femb_env, femb_id, femb_rerun_f, femb_date, fm_errlog, femb_c_ret, "PWR%d"%pwr_i] 
                 for femb_data in qc_data:
                     if (femb_data[0][1] == femb_addr): 
                         fdata =  femb_data
                         sts_r = fdata[2][0]
                         fembdata = fdata[1]
-                        map_r = self.FEMB_CHK(femb_addr, fembdata)
-###############################################################################3
-
+                        map_r = self.FEMB_CHK( femb_addr, fembdata)
                         sts = fdata[2]
                         if (len(fm_errlog) == 0):
                             if map_r[0] : 
@@ -139,12 +132,13 @@ class FEMB_QC:
                         break
         return qcs
 
-    def FEMB_CHK(self, femb_id, femb_addr, fembdata,):
+    def FEMB_CHK(self,  femb_addr, fembdata):
         for adata in fembdata:
             chn_rmss = []
             chn_peds = []
             chn_pkps = []
             chn_pkns = []
+            chn_waves = []
             chn_data, feed_loc, chn_peakp, chn_peakn = self.RAW_C.raw_conv_peak(adata)
             for achn in range(len(chn_data)):
                 for af in range(len(feed_loc[0:-2])):
@@ -157,105 +151,74 @@ class FEMB_QC:
                 chn_peds.append(aped)
                 chn_pkps.append(apeakp-aped)
                 chn_pkns.append(apeakn-aped)
-        err_code = ""
+                chn_waves.append( chn_data[achn][leed_loc[0]: leed_loc[1]] )
+        ana_err_code = ""
         rms_mean = np.mean(chn_rmss)
-        rms_thr = np.std(chn_rmss) if (np.std(chn_rmss) < 0.3*rms_mean) else 0.3*rms_mean
+        rms_thr = 5*np.std(chn_rmss) if 5*(np.std(chn_rmss) < 0.5*rms_mean) else 0.5*rms_mean
         for chn in range(128):
             if abs(chn_rmss(chn) - rms_mean) < rms_thr :
                 pass
             else:
-                err_code += "-F9_RMS_CHN%d"%(chn)
+                ana_err_code += "-F9_RMS_CHN%d"%(chn)
 
-        if "-SA" in femb_id: #side AM
-            ped_mean = np.mean(chn_peds)
-            ped_thr= 20 
-            for chn in range(128):
-                if abs(chn_peds(chn) - ped_mean) < ped_thr :
-                    pass
-                else:
-                    err_code += "-F9_PED_CHN%d"%(chn)
-
-            pkp_mean = np.mean(chn_pkps)
-            pkn_mean = np.mean(chn_pkns)
-        elif "-TA" in femb_id: #top AM 
-            pass
+        for gi in range(4): 
+            ped_mean = np.mean(chn_peds[gi*32 : (gi+1)*32])
+            pkp_mean = np.mean(chn_pkps[gi*32 : (gi+1)*32])
+            pkn_mean = np.mean(chn_pkns[gi*32 : (gi+1)*32])
+            ped_thr= 30 
+            for chn in range(gi*32, (gi+1)*32, 1):
+                if chn_pkps(chn) - chn_peds(chn) < 200:
+                    ana_err_code += "-F9_NORESP_CHN%d"%(chn)
+                if chn_peds(chn) - chn_pkns(chn) < 200:
+                    ana_err_code += "-F9_NORESN_CHN%d"%(chn)
+                if abs(chn_peds(chn) - ped_mean) > ped_thr :
+                    ana_err_code += "-F9_PED_CHN%d"%(chn)
+                if abs(1- chn_pkps(chn)/pkp_mean) > 0.2:
+                    ana_err_code += "-F9_PEAKP_CHN%d"%(chn)
+                if abs(1- chn_pkps(chn)/pkp_mean) > 0.2:
+                    ana_err_code += "-F9_PEAKN_CHN%d"%(chn)
+        if len(ana_err_code) > 0:
+            return (False, ana_err_code, [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves])
         else:
-            err_code += "-F10_WRONG_ID"
-            
+            return (True, "-PASS", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves])
 
-
-
-        chn_rb = []
-            for chndata in atmp:
-                chn_rb.append(chndata[0])
-        wib_pos = femb_addr<<8
-        for chn in range(128):
-            if (wib_pos + chn) != (chn_rb[chn]&0x0FFF):
-                err_code = "-F5_MAP_ERR"
-                return (False, err_code, chn_rb)
-        return (True, "-PASS", chn_rb)
-
-
-
-
-    def FM_MAP_CHK(self, femb_addr, fmdata):
-        for adata in fmdata:
-            chn_data, feed_loc, chn_peakp, chn_peakn = self.RAW_C.raw_conv_peak(adata)
-            for chn in range(len(feed_loc)):
-                achn_ped = []
-                for ai in range(len(feed_loc[0:-2])):
-                    achn_ped += chn_data[chn][leed_loc[ai]+100: leed_loc[ai+1] ] 
-                aped = np.mean(achn_ped)
-                arms = np.rms(achn_ped)
-
-        chn_rb = []
-            for chndata in atmp:
-                chn_rb.append(chndata[0])
-        wib_pos = femb_addr<<8
-        for chn in range(128):
-            if (wib_pos + chn) != (chn_rb[chn]&0x0FFF):
-                err_code = "-F5_MAP_ERR"
-                return (False, err_code, chn_rb)
-        return (True, "-PASS", chn_rb)
-
-
-    def FM_QC_PWR(self, FM_infos):
+    def FEMB_QC_PWR(self, FEMB_infos):
         pwr_qcs = []
         for pwr_i in range(self.pwr_n )
-            qc_data = self.FM_QC_ACQ()
-            qcs = self.FM_QC_ANA(FM_infos, qc_data, pwr_i)
+            qc_data = self.FEMB_CHK_ACQ()
+            qcs = self.FEMB_CHK_ANA(FEMB_infos, qc_data, pwr_i)
             pwr_qcs += qcs
 
-        for fm_info in FM_infos:
-            fms = fm_info.split("\n")
-            fm_id = fms[1]
+        for femb_info in FEMB_infos:
+            fembs = femb_info.split("\n")
+            femb_id = fembs[1]
             flg = False
             for qct in pwr_qcs:
-                if qct[2] == fm_id :
+                if qct[2] == femb_id :
                     if qct[1] == "FAIL" :
-                        self.fm_qclist.append(qct)
+                        self.femb_qclist.append(qct)
                         break
                     else:
                         pass_qct = qct
                         flg = True
             if (flg):
-                self.fm_qclist.append(pass_qct)
+                self.femb_qclist.append(pass_qct)
 
-        with open (self.f_fm_qcindex , 'a') as fp:
-            print ("Result,ENV,FM_ID,Retun Test,Date,Error_Code,Note,Powr Cycle,")
-            for x in self.fm_qclist:
+        with open (self.f_femb_qcindex , 'a') as fp:
+            print ("Result,ENV,FEMB_ID,Retun Test,Date,Error_Code,Note,Powr Cycle,")
+            for x in self.femb_qclist:
                 fp.write(",".join(str(i) for i in x) +  "," + "\n")
                 print (x)
 
-        if (len(self.fm_qclist) > 0 ):
-            fn =self.datadir + "FM_QC/" + "FM_QC_" + self.fm_qclist[1] +"_" + self.fm_qclist[4] + ".bin" 
+        if (len(self.femb_qclist) > 0 ):
+            fn =self.datadir + "FEMB_QC/" + "FEMB_QC_" + self.femb_qclist[1] +"_" + self.femb_qclist[4] + ".bin" 
             with open(fn, 'wb') as f:
                 pickle.dump(self.raw_data, f)
 
 
-a = FM_QC()
-FM_infos = a.FM_QC_Input()
-a.FM_QC_PWR( FM_infos)
+a = FEMB_QC()
+FEMB_infos = a.FEMB_QC_Input()
+a.FM_QC_PWR( FEMB_infos)
 
 
 
