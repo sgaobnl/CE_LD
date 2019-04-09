@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 7/15/2016 11:47:39 AM
-Last modified: 4/2/2019 4:03:49 PM
+Last modified: 4/8/2019 6:44:50 PM
 """
 
 #defaut setting for scientific caculation
@@ -127,8 +127,8 @@ class RAW_CONV():
             chn_peakn=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],]
             for tmp in range(len(feed_loc)-1):
                 for chn in range(16):
-                    chn_peakp[chn].append ( np.max(chn_data[chn][feed_loc[ tmp]:feed_loc[tmp]+50 ]) )
-                    chn_peakn[chn].append ( np.min(chn_data[chn][feed_loc[ tmp]:feed_loc[tmp]+50 ]) )
+                    chn_peakp[chn].append ( np.max(chn_data[chn][feed_loc[ tmp]:feed_loc[tmp]+100 ]) )
+                    chn_peakn[chn].append ( np.min(chn_data[chn][feed_loc[ tmp]:feed_loc[tmp]+100 ]) )
         else:
             chn_peakp = None
             chn_peakn = None
