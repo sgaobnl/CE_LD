@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/9/2019 6:02:36 PM
+Last modified: 4/9/2019 6:17:35 PM
 """
 
 #defaut setting for scientific caculation
@@ -134,6 +134,8 @@ class FEMB_QC:
                 pass
             else :
                 qc_list = ["FAIL", femb_env, femb_id, femb_rerun_f, femb_date, femb_errlog, femb_c_ret, "PWR%d"%pwr_i] 
+                map_r = None
+                sts = None
                 for femb_data in qc_data:
                     if (femb_data[0][1] == femb_addr): 
                         fdata =  femb_data
@@ -147,9 +149,9 @@ class FEMB_QC:
                             else:
                                 qc_list[0] = "FAIL" 
                                 qc_list[-3] += map_r[1]
-                        qcs.append(qc_list )
-                        self.raw_data.append([qc_list, map_r, sts])
                         break
+                qcs.append(qc_list )
+                self.raw_data.append([qc_list, map_r, sts])
         return qcs
 
     def FEMB_CHK(self,  femb_addr, fembdata):
@@ -243,6 +245,10 @@ class FEMB_QC:
         print ("Result is saved in %s"%self.user_f )
         print ("Well Done")
 
+
+    def FEMB_PLOT(self):
+        if len(self.raw_data) != 0: 
+            for 
 
 a = FEMB_QC()
 FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nOFF\nRT\nN\n', 'SLOT3\nOFF\nRT\nN\n']
