@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/8/2019 6:08:41 PM
+Last modified: 4/9/2019 6:21:35 PM
 """
 
 #defaut setting for scientific caculation
@@ -79,7 +79,12 @@ class CLS_CONFIG:
                     print ("WIB with IP = %s get error (%x readback from CLS_UDP.read_reg()), mask this IP"%(wib_ip, wib_ver_rb)) 
             self.WIB_UDP_CTL( wib_ip, WIB_UDP_EN = False)
         self.WIB_IPs = active_wibs
-        print ("WIB scanning is done" )
+
+        if len(active_wibs) == 0:
+            print ("No WIB is availabe, please check power for WIB is ON! Exit Anyway!")
+            sys.exit()
+        else:
+            print ("WIB scanning is done" )
 
     def WIB_PWR_FEMB(self, wib_ip, femb_sws=[1,1,1,1]):
         print ("FEMBs power operation on the WIB with IP = %s, wait a moment"%wib_ip)
