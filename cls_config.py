@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/9/2019 6:21:35 PM
+Last modified: 4/9/2019 6:25:23 PM
 """
 
 #defaut setting for scientific caculation
@@ -323,6 +323,12 @@ class CLS_CONFIG:
         self.err_code = "" 
         for wib_ip in self.WIB_IPs:
             self.FEMB_DECTECT(wib_ip)
+        if len(self.act_fembs) == 0:
+            print ("No FEMB is availabe, please double check! Exit Anyway!")
+            sys.exit()
+        else:
+            print ("FEMB scanning is done" )
+
 
     def WIBs_CFG_INIT(self):
         for wib_ip in list(self.act_fembs.keys()):
