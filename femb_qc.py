@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/9/2019 6:17:35 PM
+Last modified: 4/9/2019 6:18:13 PM
 """
 
 #defaut setting for scientific caculation
@@ -246,9 +246,9 @@ class FEMB_QC:
         print ("Well Done")
 
 
-    def FEMB_PLOT(self):
-        if len(self.raw_data) != 0: 
-            for 
+#    def FEMB_PLOT(self):
+#        if len(self.raw_data) != 0: 
+#            for 
 
 a = FEMB_QC()
 FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nOFF\nRT\nN\n', 'SLOT3\nOFF\nRT\nN\n']
