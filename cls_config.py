@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Apr 10 10:25:21 2019
+Last modified: Wed Apr 10 16:41:49 2019
 """
 
 #defaut setting for scientific caculation
@@ -568,22 +568,15 @@ class CLS_CONFIG:
                     bl_mean = 0
                     bl_rms = 0
                     if (self.fe_monflg):
-                        self.CLS.CLS_UDP.write_reg_wib (38, 1)
-                        time.sleep(0.1)
-                        rinc = int (femb_addr // 2)
-                        rloc =  int (femb_addr % 2)
                         bl = []
-                        for i in range(20)
-                            tmp = self.CLS.CLS_UDP.read_reg_wib (38+rinc, 1)
-                            if rloc == 0:
-                                bl.append(tmp&0x0000FFFF)
-                            else:
-                                bl.append((tmp>>16)&0x0000FFFF)
+                        for i in range(10):
+                            adc_v = self.FEMB_MON(femb_addr = femb_addr)
+                            bl.append(adc_v )
                         bl.remove(max(bl))
                         bl.remove(min(bl))
                         bl_mean=int(np.mean(bl))
                         bl_rms=np.mean(std)
-                        self.CLS.CLS_UDP.write_reg_wib (38, 0)
+                    print (bl_mean, bl_rms)
 
                 cfglog.append( [ wib_ip, femb_addr,\
                            self.act_fembs[wib_ip][femb_addr], self.fecfg_loadflg, \
@@ -595,6 +588,21 @@ class CLS_CONFIG:
                            bl_mean, bl_rms ] )
         return cfglog
 
+    def FEMB_MON(self,femb_addr=0):
+        self.CLS.CLS_UDP.write_reg_wib (38, 0)
+        self.CLS.CLS_UDP.write_reg_wib (38, 1)
+        self.CLS.CLS_UDP.write_reg_wib (38, 0)
+        self.CLS.CLS_UDP.write_reg_wib (38, 1)
+        self.CLS.CLS_UDP.write_reg_wib (38, 0)
+        self.CLS.CLS_UDP.write_reg_wib (38, 1)
+        self.CLS.CLS_UDP.write_reg_wib (38, 0)
+        rinc = int (femb_addr // 2)
+        rloc =  int (femb_addr % 2)
+        tmp = self.CLS.CLS_UDP.read_reg_wib (38+rinc)
+        mondac_v = (tmp&0x0000FFFF) if rloc == 0 else (tmp>>16)&0x0000FFFF)
+        return mondac_v
+
+ 
     def FEMB_ASIC_CS(self,wib_ip, femb_addr=0, asic=0):
         self.UDP.UDP_IP = wib_ip
         femb_asic = asic & 0x0F
