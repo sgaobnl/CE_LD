@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/9/2019 6:18:13 PM
+Last modified: Wed Apr 10 10:24:05 2019
 """
 
 #defaut setting for scientific caculation
@@ -110,6 +110,28 @@ class FEMB_QC:
         qc_data = self.CLS.TPC_UDPACQ(cfglog)
         self.CLS.FEMBs_CE_OFF()
         return qc_data
+
+    def FEMB_BL_RB(self,  chn = 0, snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1): #default 14mV/fC, 2.0us, 200mV
+        #snc = 1, 200mVBL.  snc=0, 900mVBL
+            #print ("Baseline of %d of WIB IP#%s FEMB#%s is being measured"
+            self.CLS.FEREG_MAP.set_fe_board(snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=0, sdf=sdf, slk0=slk0, slk1=slk1 )
+            chipn = int(chn//16)
+            chipnchn = int(chn%16)
+
+            self.CLS.fecfg_loadflg = True
+            self.CLS.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn, snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=1, sdf=sdf )
+            self.CLS.REGS = self.CLS.FEREG_MAP.REGS
+            self.CLS.CE_CHK_CFG()
+            self.CLS.fecfg_loadflg = False
+            self.CLS.CLS_UDP.write_reg_wib (38, 1)
+            time.sleep(0.1)
+            
+            for i in range(10)
+            self.CLS.CLS_UDP.read_reg_wib (38, 1)
+
+
+
+
 
     def FEMB_CHK_ANA(self, FEMB_infos, qc_data, pwr_i = 0):
         qcs = []
