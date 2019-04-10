@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Apr 10 10:24:05 2019
+Last modified: 4/10/2019 5:25:07 PM
 """
 
 #defaut setting for scientific caculation
@@ -111,8 +111,18 @@ class FEMB_QC:
         self.CLS.FEMBs_CE_OFF()
         return qc_data
 
-    def FEMB_BL_RB(self,  chn = 0, snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1): #default 14mV/fC, 2.0us, 200mV
-        #snc = 1, 200mVBL.  snc=0, 900mVBL
+    def FEMB_BL_RB(self,  snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1): #default 14mV/fC, 2.0us, 200mV
+        self.CLS.val = 10 
+        self.CLS.sts_num = 1
+        self.CLS.f_save = False
+        self.CLS.FM_only_f = False
+        self.CLS.WIBs_SCAN()
+        self.CLS.FEMBs_SCAN()
+        self.CLS.WIBs_CFG_INIT()
+
+        w_f_bs = []
+        for chn in range(128):
+            #snc = 1, 200mVBL.  snc=0, 900mVBL
             #print ("Baseline of %d of WIB IP#%s FEMB#%s is being measured"
             self.CLS.FEREG_MAP.set_fe_board(snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=0, sdf=sdf, slk0=slk0, slk1=slk1 )
             chipn = int(chn//16)
@@ -121,18 +131,26 @@ class FEMB_QC:
             self.CLS.fecfg_loadflg = True
             self.CLS.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn, snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=1, sdf=sdf )
             self.CLS.REGS = self.CLS.FEREG_MAP.REGS
-            self.CLS.CE_CHK_CFG()
+            cfglog = self.CLS.CE_CHK_CFG()
             self.CLS.fecfg_loadflg = False
-            self.CLS.CLS_UDP.write_reg_wib (38, 1)
-            time.sleep(0.1)
+            for acfg in cfglog:
+                w_f_b_new = True
+                for i in range(len(w_f_bs)):
+                    if w_f_bs[i][0] == acfg[0] and w_f_bs[i][1] == acfg[1] :
+                        w_f_b[i][2].append(acfg[30])
+                        w_f_b[i][3].append(acfg[31])
+                        w_f_b_new = False
+                        break
+                if w_f_b_new :
+                    w_f_bs.append([acfg[0], acfg[1], acfg[30], acfg[31]])
+
+        for w_f_b in w_f_bs:
+            print (w_f_b[0])
+            print (w_f_b[1])
+            print len(w_f_b[2])
+            print (w_f_b[2])
+
             
-            for i in range(10)
-            self.CLS.CLS_UDP.read_reg_wib (38, 1)
-
-
-
-
-
     def FEMB_CHK_ANA(self, FEMB_infos, qc_data, pwr_i = 0):
         qcs = []
         for femb_info in FEMB_infos:
@@ -275,7 +293,8 @@ class FEMB_QC:
 a = FEMB_QC()
 FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nOFF\nRT\nN\n', 'SLOT3\nOFF\nRT\nN\n']
 #FEMB_infos = a.FEMB_QC_Input()
-a.FEMB_QC_PWR( FEMB_infos)
+#a.FEMB_QC_PWR( FEMB_infos)
+a.FEMB_BL_RB() #default 14mV/fC, 2.0us, 200mV
 
 
 
