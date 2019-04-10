@@ -1,0 +1,98 @@
+Data packaging format (femb_qc.py)
+
+self.raw_data = [a_femb_data, a_femb_data, ...]
+a_femb_data = [qc_list, map_r, sts]
+
+qc_list = ["FAIL", femb_env, femb_id, femb_rerun_f, femb_date, femb_errlog, femb_c_ret, "PWR%d"%pwr_i] 
+            0str     1str      2str     3str(Y/N)       4str      5str         6str        7str
+
+
+map_r = (True, "-PASS", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves])
+         0bool    1str         2list 
+
+                        [ chn_rmss,     chn_peds,      chn_pkps,     chn_pkns, chn_waves]     128 chn
+                         0list[0:128]  1list[0:128]  2list[0:128]  3list[0:128]  4list[0:128]  per chn
+
+                                                                                  chn_waves
+                                                                            List[0:500]--> ADC wavefore per chn
+
+
+sts = [a_femb_all_data[2], a_femb_all_data[2], ... ] 
+             d_sts            d_sts
+
+a_femb_all_data = [cfg, raw_asic, d_sts]
+
+cfg = [ wib_ip, femb_addr, self.act_fembs[wib_ip][femb_addr], self.fecfg_loadflg, \
+         #0        #1            #2                              #3
+
+        pls_cs, dac_sel, fpgadac_en, asicdac_en, fpgadac_v, pls_gap, pls_dly, mon_cs, \
+          #4       #5        #6         #7            #8       #9       #10     #11
+
+        data_cs, sts, snc, sg0, sg1, st0, st1, smn, sdf, \
+          #12    #13  #14  #15  #16  #17  #18  #19  #20
+
+        slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac, bl_mean, bl_rms ] 
+          #21 #22   #23  #24  #25   #26  #27     #28     #29    30      31
+
+
+raw_asic = [asic0_HS_data, asic1_HS_data, ..., asic7_HS_data]
+
+d_sts = [sts1,  sts2, sts3, ...]
+          0dict 1dict
+
+sts1 = status_dict (dict)
+
+status_dict = {"TIME"             
+               "FEMB0_LINK"
+               "FEMB0_EQ"  
+               "FEMB1_LINK"
+               "FEMB1_EQ"  
+               "FEMB2_LINK"
+               "FEMB2_EQ"  
+               "FEMB3_LINK"
+               "FEMB3_EQ"  
+
+"FEMB0_TS_LINK0"           "FEMB1_TS_LINK0"           "FEMB2_TS_LINK0"           "FEMB3_TS_LINK0"          
+"FEMB0_CHK_ERR_LINK0"      "FEMB1_CHK_ERR_LINK0"      "FEMB2_CHK_ERR_LINK0"      "FEMB3_CHK_ERR_LINK0"          
+"FEMB0_FRAME_ERR_LINK0"    "FEMB1_FRAME_ERR_LINK0"    "FEMB2_FRAME_ERR_LINK0"    "FEMB3_FRAME_ERR_LINK0"          
+"FEMB0_TS_LINK1"           "FEMB1_TS_LINK1"           "FEMB2_TS_LINK1"           "FEMB3_TS_LINK1"          
+"FEMB0_CHK_ERR_LINK1"      "FEMB1_CHK_ERR_LINK1"      "FEMB2_CHK_ERR_LINK1"      "FEMB3_CHK_ERR_LINK1"          
+"FEMB0_FRAME_ERR_LINK1"    "FEMB1_FRAME_ERR_LINK1"    "FEMB2_FRAME_ERR_LINK1"    "FEMB3_FRAME_ERR_LINK1"          
+"FEMB0_TS_LINK2"           "FEMB1_TS_LINK2"           "FEMB2_TS_LINK2"           "FEMB3_TS_LINK2"          
+"FEMB0_CHK_ERR_LINK2"      "FEMB1_CHK_ERR_LINK2"      "FEMB2_CHK_ERR_LINK2"      "FEMB3_CHK_ERR_LINK2"          
+"FEMB0_FRAME_ERR_LINK2"    "FEMB1_FRAME_ERR_LINK2"    "FEMB2_FRAME_ERR_LINK2"    "FEMB3_FRAME_ERR_LINK2"          
+"FEMB0_TS_LINK3"           "FEMB1_TS_LINK3"           "FEMB2_TS_LINK3"           "FEMB3_TS_LINK3"          
+"FEMB0_CHK_ERR_LINK3"      "FEMB1_CHK_ERR_LINK3"      "FEMB2_CHK_ERR_LINK3"      "FEMB3_CHK_ERR_LINK3"          
+"FEMB0_FRAME_ERR_LINK3"    "FEMB1_FRAME_ERR_LINK3"    "FEMB2_FRAME_ERR_LINK3"    "FEMB3_FRAME_ERR_LINK3"          
+
+"WIB_2991_VCC"
+"WIB_2991_T" 
+"WIB_BIAS_V" 
+"WIB_BIAS_I" 
+"WIB_V18_V"  
+"WIB_V18_I"  
+"WIB_V36_V"  
+"WIB_V36_I"  
+"WIB_V28_V"  
+"WIB_V28_I"  
+"BIAS_2991_V"
+"BIAS_2991_T"
+"WIB_PC"
+
+"FEMB0_2991_VCC"    "FEMB1_2991_VCC"    "FEMB2_2991_VCC"    "FEMB3_2991_VCC"       
+"FEMB0_2991_T"      "FEMB1_2991_T"      "FEMB2_2991_T"      "FEMB3_2991_T"       
+"FEMB0_FMV39_V"     "FEMB1_FMV39_V"     "FEMB2_FMV39_V"     "FEMB3_FMV39_V"       
+"FEMB0_FMV39_I"     "FEMB1_FMV39_I"     "FEMB2_FMV39_I"     "FEMB3_FMV39_I"       
+"FEMB0_FMV30_V"     "FEMB1_FMV30_V"     "FEMB2_FMV30_V"     "FEMB3_FMV30_V"       
+"FEMB0_FMV30_I"     "FEMB1_FMV30_I"     "FEMB2_FMV30_I"     "FEMB3_FMV30_I"       
+"FEMB0_FMV18_V"     "FEMB1_FMV18_V"     "FEMB2_FMV18_V"     "FEMB3_FMV18_V"       
+"FEMB0_FMV18_I"     "FEMB1_FMV18_I"     "FEMB2_FMV18_I"     "FEMB3_FMV18_I"       
+"FEMB0_AMV33_V"     "FEMB1_AMV33_V"     "FEMB2_AMV33_V"     "FEMB3_AMV33_V"       
+"FEMB0_AMV33_I"     "FEMB1_AMV33_I"     "FEMB2_AMV33_I"     "FEMB3_AMV33_I"       
+"FEMB0_BIAS_V"      "FEMB1_BIAS_V"      "FEMB2_BIAS_V"      "FEMB3_BIAS_V"       
+"FEMB0_BIAS_I"      "FEMB1_BIAS_I"      "FEMB2_BIAS_I"      "FEMB3_BIAS_I"       
+"FEMB0_AMV28_V"     "FEMB1_AMV28_V"     "FEMB2_AMV28_V"     "FEMB3_AMV28_V"       
+"FEMB0_AMV28_I"     "FEMB1_AMV28_I"     "FEMB2_AMV28_I"     "FEMB3_AMV28_I"       
+"FEMB0_AMV33_I"     "FEMB1_AMV33_I"     "FEMB2_AMV33_I"     "FEMB3_AMV33_I"       
+"FEMB0_PC"          "FEMB1_PC"          "FEMB2_PC"          "FEMB3_PC"                
+
