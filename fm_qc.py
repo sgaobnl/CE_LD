@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/4/2019 5:49:12 PM
+Last modified: 4/11/2019 5:31:34 PM
 """
 
 #defaut setting for scientific caculation
@@ -30,9 +30,9 @@ from shutil import copyfile
 class FM_QC:
     def __init__(self):
         self.jumbo_flag = False
-        self.userdir = "D:/SBND_QC/"
+        self.userdir = "I:/SBND_QC/"
         self.user_fm_f = self.userdir + "FM_QCindex.csv"
-        self.databkdir = "D:/SBND_QC/FM_QC/"
+        self.databkdir = "I:/SBND_QC/FM_QC/"
         self.f_fm_qcindex = self.databkdir + "FM_QCindex.csv"
         self.fm_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
@@ -171,12 +171,13 @@ class FM_QC:
             flg = False
             for qct in pwr_qcs:
                 if qct[2] == fm_id :
-                    if qct[1] == "FAIL" :
-                        saves.append(qct)
-                        break
-                    else:
+                    if qct[0] == "PASS" :
                         pass_qct = qct
                         flg = True
+                    else:
+                        saves.append(qct)
+                        flg = False
+                        break
             if (flg):
                 saves.append(pass_qct)
 
