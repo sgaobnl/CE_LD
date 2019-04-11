@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/10/2019 6:22:08 PM
+Last modified: 4/11/2019 5:33:20 PM
 """
 
 #defaut setting for scientific caculation
@@ -266,12 +266,13 @@ class FEMB_QC:
             flg = False
             for qct in pwr_qcs:
                 if qct[2] == femb_id :
-                    if qct[1] == "FAIL" :
-                        saves.append(qct)
-                        break
-                    else:
+                    if qct[0] == "PASS" :
                         pass_qct = qct
                         flg = True
+                    else:
+                        flg = False
+                        saves.append(qct)
+                        break
             if (flg):
                 saves.append(pass_qct)
 
