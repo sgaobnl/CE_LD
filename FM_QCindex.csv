@@ -1,0 +1,11 @@
+#comment,Failure Mode Code,Failure Mode Item,,,,,
+#,P,Pass,,,,,
+#,F0,Power cycle failure,,,,,
+#,F1,Abnormal current faiure,,,,,
+#,F2,Data link failure,,,,,
+#,F3,EQ failure,,,,,
+#,F4,I2C failure,,,,,
+#,F5,Channel mapping error,,,,,
+#,F6,JTAG failure,,,,,
+#,F7,Firmware version is not right ,,,,,
+#Result,ENV,FM_ID,Retun Test,Date,Error_Code,Note,Powr Cycle
