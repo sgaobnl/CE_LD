@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Apr 10 16:41:49 2019
+Last modified: 4/10/2019 6:11:44 PM
 """
 
 #defaut setting for scientific caculation
@@ -575,10 +575,9 @@ class CLS_CONFIG:
                         bl.remove(max(bl))
                         bl.remove(min(bl))
                         bl_mean=int(np.mean(bl))
-                        bl_rms=np.mean(std)
-                    print (bl_mean, bl_rms)
+                        bl_rms=np.std(bl)
 
-                cfglog.append( [ wib_ip, femb_addr,\
+                    cfglog.append( [ wib_ip, femb_addr,\
                            self.act_fembs[wib_ip][femb_addr], self.fecfg_loadflg, \
                            pls_cs, dac_sel, fpgadac_en, asicdac_en, fpgadac_v, \
                            pls_gap, pls_dly, mon_cs, \
@@ -589,17 +588,17 @@ class CLS_CONFIG:
         return cfglog
 
     def FEMB_MON(self,femb_addr=0):
-        self.CLS.CLS_UDP.write_reg_wib (38, 0)
-        self.CLS.CLS_UDP.write_reg_wib (38, 1)
-        self.CLS.CLS_UDP.write_reg_wib (38, 0)
-        self.CLS.CLS_UDP.write_reg_wib (38, 1)
-        self.CLS.CLS_UDP.write_reg_wib (38, 0)
-        self.CLS.CLS_UDP.write_reg_wib (38, 1)
-        self.CLS.CLS_UDP.write_reg_wib (38, 0)
+        self.UDP.write_reg_wib (38, 0)
+        self.UDP.write_reg_wib (38, 1)
+        self.UDP.write_reg_wib (38, 0)
+        self.UDP.write_reg_wib (38, 1)
+        self.UDP.write_reg_wib (38, 0)
+        self.UDP.write_reg_wib (38, 1)
+        self.UDP.write_reg_wib (38, 0)
         rinc = int (femb_addr // 2)
         rloc =  int (femb_addr % 2)
-        tmp = self.CLS.CLS_UDP.read_reg_wib (38+rinc)
-        mondac_v = (tmp&0x0000FFFF) if rloc == 0 else (tmp>>16)&0x0000FFFF)
+        tmp = self.UDP.read_reg_wib (38+rinc)
+        mondac_v = (tmp&0x0000FFFF) if rloc == 1 else ((tmp>>16)&0x0000FFFF)
         return mondac_v
 
  

@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/10/2019 5:25:07 PM
+Last modified: 4/10/2019 6:22:08 PM
 """
 
 #defaut setting for scientific caculation
@@ -121,34 +121,38 @@ class FEMB_QC:
         self.CLS.WIBs_CFG_INIT()
 
         w_f_bs = []
+        self.CLS.FEREG_MAP.set_fe_board(snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=0, sdf=sdf, slk0=slk0, slk1=slk1 )
+        self.CLS.fecfg_loadflg = True
+        self.CLS.fe_monflg = True
+
         for chn in range(128):
             #snc = 1, 200mVBL.  snc=0, 900mVBL
-            #print ("Baseline of %d of WIB IP#%s FEMB#%s is being measured"
-            self.CLS.FEREG_MAP.set_fe_board(snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=0, sdf=sdf, slk0=slk0, slk1=slk1 )
+            print ("Baseline of CHN%d of all available FEMBs are being measured by the monitoring ADC"%chn)
             chipn = int(chn//16)
             chipnchn = int(chn%16)
 
-            self.CLS.fecfg_loadflg = True
             self.CLS.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn, snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=1, sdf=sdf )
             self.CLS.REGS = self.CLS.FEREG_MAP.REGS
-            cfglog = self.CLS.CE_CHK_CFG()
-            self.CLS.fecfg_loadflg = False
+            cfglog = self.CLS.CE_CHK_CFG(mon_cs = 1)
             for acfg in cfglog:
                 w_f_b_new = True
                 for i in range(len(w_f_bs)):
                     if w_f_bs[i][0] == acfg[0] and w_f_bs[i][1] == acfg[1] :
-                        w_f_b[i][2].append(acfg[30])
-                        w_f_b[i][3].append(acfg[31])
+                        w_f_bs[i][2].append(acfg[30])
+                        w_f_bs[i][3].append(acfg[31])
                         w_f_b_new = False
                         break
                 if w_f_b_new :
-                    w_f_bs.append([acfg[0], acfg[1], acfg[30], acfg[31]])
+                    w_f_bs.append([acfg[0], acfg[1], [acfg[30]], [acfg[31]]])
+
+        self.CLS.fecfg_loadflg = False
+        self.CLS.fe_monflg = False
 
         for w_f_b in w_f_bs:
             print (w_f_b[0])
             print (w_f_b[1])
-            print len(w_f_b[2])
             print (w_f_b[2])
+            print (w_f_b[3])
 
             
     def FEMB_CHK_ANA(self, FEMB_infos, qc_data, pwr_i = 0):
