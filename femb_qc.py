@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/11/2019 5:33:20 PM
+Last modified: 4/14/2019 7:27:19 PM
 """
 
 #defaut setting for scientific caculation
@@ -147,13 +147,7 @@ class FEMB_QC:
 
         self.CLS.fecfg_loadflg = False
         self.CLS.fe_monflg = False
-
-        for w_f_b in w_f_bs:
-            print (w_f_b[0])
-            print (w_f_b[1])
-            print (w_f_b[2])
-            print (w_f_b[3])
-
+        return w_f_bs
             
     def FEMB_CHK_ANA(self, FEMB_infos, qc_data, pwr_i = 0):
         qcs = []
@@ -187,6 +181,8 @@ class FEMB_QC:
                         fembdata = fdata[1]
                         map_r = self.FEMB_CHK( femb_addr, fembdata)
                         sts = fdata[2]
+                        r_wib_ip = fdata[0][0]
+                        r_femb_addr = fdata[0][1]
                         if (len(femb_errlog) == 0):
                             if map_r[0] : 
                                 qc_list[0] = "PASS" 
@@ -195,7 +191,7 @@ class FEMB_QC:
                                 qc_list[-3] += map_r[1]
                         break
                 qcs.append(qc_list )
-                self.raw_data.append([qc_list, map_r, sts])
+                self.raw_data.append([qc_list, map_r, sts, r_wip_ip, r_femb_addr])
         return qcs
 
     def FEMB_CHK(self,  femb_addr, fembdata):
@@ -291,9 +287,109 @@ class FEMB_QC:
         print ("Well Done")
 
 
-#    def FEMB_PLOT(self):
-#        if len(self.raw_data) != 0: 
-#            for 
+    def FEMB_SUB_PLOT(self, ax, x, y, title, xlabel, ylabel, color='b', marker='.'):
+        ax.set_title(title)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        ax.grid()
+        ax.plot(x,y, marker=marker, color=color)
+
+    def FEMB_PLOT(self):
+        import matplotlib.pyplot as plt
+        if len(self.raw_data) != 0: 
+            for a_femb_data in self.raw_data:
+                qc_list = a_femb_data[0]
+                qc_pf = qc_list[0]
+                env = qc_list[1]
+                femb_id = qc_list[2]
+                femb_rerun_f = qc_list[3]
+                femb_date = qc_list[4]
+                femb_errlog = qc_list[5]
+                femb_c_ret = qc_list[6]
+                femb_pwr = qc_list[7]
+                map_r = a_femb_data[1]
+                map_pf = map_r[0]
+                map_pf_str = map_r[1]
+                chn_rmss = map_r[2][0] # 128chn list, each element is a integal
+                chn_peds = map_r[2][1] # 128chn list, each element is a float
+                chn_pkps = map_r[2][2] # 128chn list, each element is a integal
+                chn_pkns = -(abs(np.array(map_r[2][3]))) # 128chn list, each element is a integal
+                chn_wfs  = map_r[2][4] # 128chn list, each element is a list
+                d_sts = a_femb_data[2][0]
+                d_sts_keys = list(d_sts.keys())
+                wib_ip = a_femb_data[3]
+                femb_addr = a_femb_data[4]
+                fembsts_keys = []
+                for akey in d_sts_keys:
+                    if (akey == "FEMB%d"%femb_addr):
+                        fembsts_keys.append(akey)
+                
+                fn = env + "_IP" + wib_ip.replace(".", "_") + "FEMB%d"%femb_addr + femb_pwr + ".png"
+
+                fig = plt.figure(figsize=(8.5,11))
+                color = "g" if "PASS" in qc_pf else "r"
+                fig.suptitle("Test Result of Power Cycle #%s (%s)"%(femb_pwr[-1], qc_pf), color=color, weight ="bold", fontsize = 12)
+                fig.text(0.10, 0.94, "Date&Time: %s"%femb_date   )
+                fig.text(0.55, 0.94, "Enviroment: %s "%env  )
+                fig.text(0.10, 0.92, "FEMB ID: %s "%femb_id      )
+                fig.text(0.55, 0.92, "STATUS: %s "%qc_pf, color=color, weight ="bold" )
+                fig.text(0.10,0.90, "Rerun comment: %s "%femb_c_ret     )
+                fig.text(0.10, 0.88, "WIB IP: %s "%wib_ip      )
+                fig.text(0.55, 0.88, "FEMB SLOT: %s "%femb_addr     )
+
+                fig.text(0.35, 0.85, "Link Status and Power consumption" ,weight ="bold"    )
+                fig.text(0.10, 0.83, "LINK: : " + "{0:4b}".format(d_sts["FEMB%d_LINK"%femb_addr])   )
+                fig.text(0.55, 0.83, "EQ: : " + "{0:4b}".format(d_sts["FEMB%d_EQ"%femb_addr])      )
+                fig.text(0.10, 0.81, "Checksum error counter of LINK0 to LINK3 : %04X, %04X, %04X, %04X"%\
+                                      (d_sts["FEMB%d_CHK_ERR_LINK0"%femb_addr], d_sts["FEMB%d_CHK_ERR_LINK1"%femb_addr] ,
+                                       d_sts["FEMB%d_CHK_ERR_LINK2"%femb_addr], d_sts["FEMB%d_CHK_ERR_LINK3"%femb_addr] ) )
+                fig.text(0.10, 0.79, "Frame error counter of LINK0 to LINK3 : %04X, %04X, %04X, %04X"% \
+                                      (d_sts["FEMB%d_FRAME_ERR_LINK0"%femb_addr], d_sts["FEMB%d_FRAME_ERR_LINK1"%femb_addr] ,
+                                       d_sts["FEMB%d_FRAME_ERR_LINK2"%femb_addr], d_sts["FEMB%d_FRAME_ERR_LINK3"%femb_addr] ) )
+                fig.text(0.10, 0.77, "FEMB Power Consumption = " + "{0:.4f}".format(d_sts["FEMB%d_PC"%femb_addr]) + "W" )
+
+                fig.text(0.10, 0.75, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_V"%femb_addr]) + \
+                                     "V, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_V"%femb_addr]) + \
+                                     "V, AM V28 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_V"%femb_addr]) + "V")
+
+                fig.text(0.10, 0.73, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_V"%femb_addr]) + \
+                                     "A, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_I"%femb_addr]) + \
+                                     "A, AM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_I"%femb_addr]) + "A")
+
+                fig.text(0.10, 0.71, "FM V39 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV39_V"%femb_addr]) + \
+                                     "V, FM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV30_V"%femb_addr]) + \
+                                     "V, FM V18 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV18_V"%femb_addr]) + "V" )
+
+                fig.text(0.10, 0.69, "FM V39 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV39_I"%femb_addr]) + \
+                                     "A, FM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV30_I"%femb_addr]) + \
+                                     "A, FM V18 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV18_I"%femb_addr]) + "A" )
+                
+                
+                if ("PASS" in qc_pf):
+                    ax1 = plt.subplot2grid((3, 2), (1, 0), colspan=1, rowspan=1)
+                    ax2 = plt.subplot2grid((3, 2), (2, 0), colspan=1, rowspan=1)
+                    ax3 = plt.subplot2grid((3, 2), (1, 1), colspan=1, rowspan=1)
+                    ax4 = plt.subplot2grid((3, 2), (2, 1), colspan=1, rowspan=1)
+                    chns = range(len(chn_rmss))
+                    self.FEMB_SUB_PLOT(ax1, chns, chn_rmss, title="RMS Noise", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
+                    self.FEMB_SUB_PLOT(ax2, chns, chn_peds, title="Pedestal", xlabel="CH number", ylabel ="ADC / bin", color='b', marker='.')
+                    self.FEMB_SUB_PLOT(ax3, chns, chn_pkps, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
+                    self.FEMB_SUB_PLOT(ax3, chns, chn_pkns, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='g', marker='.')
+                    for chni in chns:
+                        x = (np.arange(len(chn_wfs[chni]))) * 0.5
+                        y = chn_wfs[chni]
+                        self.FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / us", ylabel="ADC /bin", color='C%d'%(chni%9))
+                else4
+                    cperl = 120
+                    lines = int(len(femb_errlog)//cperl) + 1
+                    fig.text(0.05,0.65, "Error log: ")
+                    for i in range(lines):
+                        fig.text(0.10, 0.63-0.02*i, femb_errlog[i*cperl:(i+1)*cperl])
+                
+                plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
+                plt.show()
+                plt.close()
+
 
 a = FEMB_QC()
 FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nOFF\nRT\nN\n', 'SLOT3\nOFF\nRT\nN\n']

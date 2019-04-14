@@ -1,7 +1,7 @@
 Data packaging format (femb_qc.py)
 
 self.raw_data = [a_femb_data, a_femb_data, ...]
-a_femb_data = [qc_list, map_r, sts]
+a_femb_data = [qc_list, map_r, sts, wib_ip, femg_addr]
 
 qc_list = ["FAIL", femb_env, femb_id, femb_rerun_f, femb_date, femb_errlog, femb_c_ret, "PWR%d"%pwr_i] 
             0str     1str      2str     3str(Y/N)       4str      5str         6str        7str
@@ -34,7 +34,10 @@ cfg = [ wib_ip, femb_addr, self.act_fembs[wib_ip][femb_addr], self.fecfg_loadflg
         slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac, bl_mean, bl_rms ] 
           #21 #22   #23  #24  #25   #26  #27     #28     #29    30      31
 
-
+w_f_bs = [w_f_b, w_f_b, ...]
+w_f_b = [acfg[0],   acfg[1],   [bl_means], [bl_rmss]
+         wib_ip     femb_addr  128chns      128 chns
+           0  
 raw_asic = [asic0_HS_data, asic1_HS_data, ..., asic7_HS_data]
 
 d_sts = [sts1,  sts2, sts3, ...]
