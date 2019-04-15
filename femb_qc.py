@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/14/2019 7:27:19 PM
+Last modified: Sun Apr 14 21:55:34 2019
 """
 
 #defaut setting for scientific caculation
@@ -280,7 +280,7 @@ class FEMB_QC:
         copyfile(self.f_qcindex, self.user_f )
 
         if (len(pwr_qcs) > 0 ):
-            fn =self.databkdir  + "FM_QC_" + pwr_qcs[0][1] +"_" + pwr_qcs[0][4] + ".bin" 
+            fn =self.databkdir  + "FEMB_QC_" + pwr_qcs[0][1] +"_" + pwr_qcs[0][4] + ".bin" 
             with open(fn, 'wb') as f:
                 pickle.dump(self.raw_data, f)
         print ("Result is saved in %s"%self.user_f )
@@ -324,7 +324,7 @@ class FEMB_QC:
                     if (akey == "FEMB%d"%femb_addr):
                         fembsts_keys.append(akey)
                 
-                fn = env + "_IP" + wib_ip.replace(".", "_") + "FEMB%d"%femb_addr + femb_pwr + ".png"
+                fn = self.databkdir + "/" + env + "_IP" + wib_ip.replace(".", "_") + "FEMB%d"%femb_addr + femb_pwr + ".png"
 
                 fig = plt.figure(figsize=(8.5,11))
                 color = "g" if "PASS" in qc_pf else "r"
@@ -387,7 +387,7 @@ class FEMB_QC:
                         fig.text(0.10, 0.63-0.02*i, femb_errlog[i*cperl:(i+1)*cperl])
                 
                 plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
-                plt.show()
+                plt.savefig(fn)
                 plt.close()
 
 
@@ -395,7 +395,12 @@ a = FEMB_QC()
 FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nOFF\nRT\nN\n', 'SLOT3\nOFF\nRT\nN\n']
 #FEMB_infos = a.FEMB_QC_Input()
 #a.FEMB_QC_PWR( FEMB_infos)
-a.FEMB_BL_RB() #default 14mV/fC, 2.0us, 200mV
+#a.FEMB_BL_RB() #default 14mV/fC, 2.0us, 200mV
+fn =self.databkdir  + "\FM_QC_RT_2019_04_09_18_26_28.bin"
+with open(fn, 'bb') as f:
+     self.raw_data = pickle.load(f)
+ 
+a.FEMB_PLOT():
 
 
 
