@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sun Apr 14 21:57:01 2019
+Last modified: 4/14/2019 10:30:19 PM
 """
 
 #defaut setting for scientific caculation
@@ -104,7 +104,7 @@ class FEMB_QC:
             #14mV/fC, 2.0us, 200mV, ASIC_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=0, swdac2=1, dac= 0x0A, data_cs=0)
         else:
-            #14mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x08
+            #14mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x06
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=1, swdac2=0, data_cs=0)
 
         qc_data = self.CLS.TPC_UDPACQ(cfglog)
@@ -149,7 +149,7 @@ class FEMB_QC:
         self.CLS.fe_monflg = False
         return w_f_bs
             
-    def FEMB_CHK_ANA(self, FEMB_infos, qc_data, pwr_i = 0):
+    def FEMB_CHK_ANA(self, FEMB_infos, qc_data, pwr_i = 1):
         qcs = []
         for femb_info in FEMB_infos:
             fembs = femb_info.split("\n")
@@ -181,8 +181,6 @@ class FEMB_QC:
                         fembdata = fdata[1]
                         map_r = self.FEMB_CHK( femb_addr, fembdata)
                         sts = fdata[2]
-                        r_wib_ip = fdata[0][0]
-                        r_femb_addr = fdata[0][1]
                         if (len(femb_errlog) == 0):
                             if map_r[0] : 
                                 qc_list[0] = "PASS" 
@@ -191,7 +189,7 @@ class FEMB_QC:
                                 qc_list[-3] += map_r[1]
                         break
                 qcs.append(qc_list )
-                self.raw_data.append([qc_list, map_r, sts, r_wip_ip, r_femb_addr])
+                self.raw_data.append([qc_list, map_r, sts, fdata[0]])
         return qcs
 
     def FEMB_CHK(self,  femb_addr, fembdata):
@@ -247,7 +245,7 @@ class FEMB_QC:
 
     def FEMB_QC_PWR(self, FEMB_infos):
         pwr_qcs = []
-        for pwr_i in range(self.pwr_n ):
+        for pwr_i in range(1, self.pwr_n+1 ):
             print ("Power Cycle %d of %d starts..."%(pwr_i, self.pwr_n))
             qc_data = self.FEMB_CHK_ACQ(testcode = pwr_i)
             qcs = self.FEMB_CHK_ANA(FEMB_infos, qc_data, pwr_i)
@@ -317,8 +315,45 @@ class FEMB_QC:
                 chn_wfs  = map_r[2][4] # 128chn list, each element is a list
                 d_sts = a_femb_data[2][0]
                 d_sts_keys = list(d_sts.keys())
-                wib_ip = a_femb_data[3]
-                femb_addr = a_femb_data[4]
+                wib_ip = a_femb_data[3][0]
+                femb_addr = a_femb_data[3][1]
+
+                fpgadac_en = a_femb_data[3][6]
+                asicdac_en = a_femb_data[3][7]
+                fpgadac_v  = a_femb_data[3][8]
+                snc  = a_femb_data[3][14]
+                sg0  = a_femb_data[3][15]
+                sg1  = a_femb_data[3][16]
+                st0  = a_femb_data[3][17]
+                st1  = a_femb_data[3][18]
+                sdf  = a_femb_data[3][20]
+                asicdac_v = a_femb_data[3][29]
+                if fpgadac_en:
+                    cali_str = "FPGA-DAC = %02x in use"%fpgadac_v
+                elif asicdac_en:
+                    cali_str = "ASIC-DAC = %02x in use"%asicdac_v
+                else:
+                    cali_str = "No pulser in use"%asicdac_v
+                snc_str = "FE Baseline = 200mV" if snc==1 else "FE Baseline = 200mV"
+                sdf_str = "FE Buffer ON" if sdf==1 else "FE Buffer OFF"
+                if sg0 == 0 and sg1 == 0:
+                    sg_str = "FE Gain = 4.7mV/fc"
+                elif sg0 == 1 and sg1 == 0:
+                    sg_str = "FE Gain = 7.8mV/fc"
+                elif sg0 == 0 and sg1 == 1:
+                    sg_str = "FE Gain = 14mV/fc"
+                else:
+                    sg_str = "FE Gain = 25mV/fc"
+
+                if sg0 == 0 and sg1 == 0:
+                    sg_str = "FE Gain = 4.7mV/fc"
+                elif sg0 == 1 and sg1 == 0:
+                    sg_str = "FE Gain = 7.8mV/fc"
+                elif sg0 == 0 and sg1 == 1:
+                    sg_str = "FE Gain = 14mV/fc"
+                else:
+                    sg_str = "FE Gain = 25mV/fc"
+               
                 fembsts_keys = []
                 for akey in d_sts_keys:
                     if (akey == "FEMB%d"%femb_addr):
@@ -376,8 +411,9 @@ class FEMB_QC:
                     self.FEMB_SUB_PLOT(ax3, chns, chn_pkps, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
                     self.FEMB_SUB_PLOT(ax3, chns, chn_pkns, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='g', marker='.')
                     for chni in chns:
-                        x = (np.arange(len(chn_wfs[chni]))) * 0.5
-                        y = chn_wfs[chni]
+                        ts = 100 if (len(chn_wfs[chni]) > 100) else len(chn_wfs[chni])
+                        x = (np.arange(ts)) * 0.5
+                        y = chn_wfs[chni][0:ts]
                         self.FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / us", ylabel="ADC /bin", color='C%d'%(chni%9))
                 else:
                     cperl = 120
@@ -394,11 +430,11 @@ class FEMB_QC:
 a = FEMB_QC()
 FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nOFF\nRT\nN\n', 'SLOT3\nOFF\nRT\nN\n']
 #FEMB_infos = a.FEMB_QC_Input()
-#a.FEMB_QC_PWR( FEMB_infos)
+a.FEMB_QC_PWR( FEMB_infos)
 #a.FEMB_BL_RB() #default 14mV/fC, 2.0us, 200mV
-fn =self.databkdir  + "\FM_QC_RT_2019_04_09_18_26_28.bin"
-with open(fn, 'bb') as f:
-     self.raw_data = pickle.load(f)
+#fn =a.databkdir  + "\FM_QC_RT_2019_04_09_18_26_28.bin"
+#with open(fn, 'rb') as f:
+#     a.raw_data = pickle.load(f)
  
 a.FEMB_PLOT()
 
