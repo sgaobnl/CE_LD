@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sun Apr 14 21:55:34 2019
+Last modified: Sun Apr 14 21:56:15 2019
 """
 
 #defaut setting for scientific caculation
@@ -379,7 +379,7 @@ class FEMB_QC:
                         x = (np.arange(len(chn_wfs[chni]))) * 0.5
                         y = chn_wfs[chni]
                         self.FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / us", ylabel="ADC /bin", color='C%d'%(chni%9))
-                else4
+                else:
                     cperl = 120
                     lines = int(len(femb_errlog)//cperl) + 1
                     fig.text(0.05,0.65, "Error log: ")
