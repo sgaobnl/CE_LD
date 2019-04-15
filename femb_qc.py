@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/14/2019 10:30:19 PM
+Last modified: Sun Apr 14 22:42:35 2019
 """
 
 #defaut setting for scientific caculation
@@ -37,7 +37,7 @@ class FEMB_QC:
         self.f_qcindex = self.databkdir + "FEMB_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
-        self.pwr_n = 5
+        self.pwr_n = 1
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
         self.CLS.FEMB_ver = 0x501
@@ -329,30 +329,30 @@ class FEMB_QC:
                 sdf  = a_femb_data[3][20]
                 asicdac_v = a_femb_data[3][29]
                 if fpgadac_en:
-                    cali_str = "FPGA-DAC = %02x in use"%fpgadac_v
+                    cali_str = "FPGA-DAC(%02x)"%fpgadac_v
                 elif asicdac_en:
-                    cali_str = "ASIC-DAC = %02x in use"%asicdac_v
+                    cali_str = "ASIC-DAC(%02x)"%asicdac_v
                 else:
-                    cali_str = "No pulser in use"%asicdac_v
-                snc_str = "FE Baseline = 200mV" if snc==1 else "FE Baseline = 200mV"
+                    cali_str = "No pulser"%asicdac_v
+                snc_str = "FE Baseline 200mV" if snc==1 else "FE Baseline 900mV"
                 sdf_str = "FE Buffer ON" if sdf==1 else "FE Buffer OFF"
                 if sg0 == 0 and sg1 == 0:
-                    sg_str = "FE Gain = 4.7mV/fc"
+                    sg_str = "4.7mV/fc"
                 elif sg0 == 1 and sg1 == 0:
-                    sg_str = "FE Gain = 7.8mV/fc"
+                    sg_str = "7.8mV/fc"
                 elif sg0 == 0 and sg1 == 1:
-                    sg_str = "FE Gain = 14mV/fc"
+                    sg_str = "14mV/fc"
                 else:
-                    sg_str = "FE Gain = 25mV/fc"
+                    sg_str = "25mV/fc"
 
-                if sg0 == 0 and sg1 == 0:
-                    sg_str = "FE Gain = 4.7mV/fc"
-                elif sg0 == 1 and sg1 == 0:
-                    sg_str = "FE Gain = 7.8mV/fc"
-                elif sg0 == 0 and sg1 == 1:
-                    sg_str = "FE Gain = 14mV/fc"
+                if st0 == 0 and st1 == 0:
+                    st_str = "1.0us"
+                elif st0 == 1 and st1 == 0:
+                    st_str = "0.5us"
+                elif st0 == 0 and st1 == 1:
+                    st_str = "3.0us"
                 else:
-                    sg_str = "FE Gain = 25mV/fc"
+                    st_str = "2.0us"
                
                 fembsts_keys = []
                 for akey in d_sts_keys:
@@ -365,37 +365,38 @@ class FEMB_QC:
                 color = "g" if "PASS" in qc_pf else "r"
                 fig.suptitle("Test Result of Power Cycle #%s (%s)"%(femb_pwr[-1], qc_pf), color=color, weight ="bold", fontsize = 12)
                 fig.text(0.10, 0.94, "Date&Time: %s"%femb_date   )
-                fig.text(0.55, 0.94, "Enviroment: %s "%env  )
+                fig.text(0.55, 0.94, "Temperature: %s "%env  )
                 fig.text(0.10, 0.92, "FEMB ID: %s "%femb_id      )
                 fig.text(0.55, 0.92, "STATUS: %s "%qc_pf, color=color, weight ="bold" )
                 fig.text(0.10,0.90, "Rerun comment: %s "%femb_c_ret     )
                 fig.text(0.10, 0.88, "WIB IP: %s "%wib_ip      )
                 fig.text(0.55, 0.88, "FEMB SLOT: %s "%femb_addr     )
+                fig.text(0.10, 0.86, "FE Configuration: " + sg_str + ", " + st_str + ", " + snc_str + ", " + sdf_str + ", " + cali_str  )
 
-                fig.text(0.35, 0.85, "Link Status and Power consumption" ,weight ="bold"    )
-                fig.text(0.10, 0.83, "LINK: : " + "{0:4b}".format(d_sts["FEMB%d_LINK"%femb_addr])   )
-                fig.text(0.55, 0.83, "EQ: : " + "{0:4b}".format(d_sts["FEMB%d_EQ"%femb_addr])      )
-                fig.text(0.10, 0.81, "Checksum error counter of LINK0 to LINK3 : %04X, %04X, %04X, %04X"%\
+                fig.text(0.35, 0.83, "Link Status and Power consumption" ,weight ="bold"    )
+                fig.text(0.10, 0.81, "LINK: : " + "{0:4b}".format(d_sts["FEMB%d_LINK"%femb_addr])   )
+                fig.text(0.55, 0.81, "EQ: : " + "{0:4b}".format(d_sts["FEMB%d_EQ"%femb_addr])      )
+                fig.text(0.10, 0.79, "Checksum error counter of LINK0 to LINK3 : %04X, %04X, %04X, %04X"%\
                                       (d_sts["FEMB%d_CHK_ERR_LINK0"%femb_addr], d_sts["FEMB%d_CHK_ERR_LINK1"%femb_addr] ,
                                        d_sts["FEMB%d_CHK_ERR_LINK2"%femb_addr], d_sts["FEMB%d_CHK_ERR_LINK3"%femb_addr] ) )
-                fig.text(0.10, 0.79, "Frame error counter of LINK0 to LINK3 : %04X, %04X, %04X, %04X"% \
+                fig.text(0.10, 0.77, "Frame error counter of LINK0 to LINK3 : %04X, %04X, %04X, %04X"% \
                                       (d_sts["FEMB%d_FRAME_ERR_LINK0"%femb_addr], d_sts["FEMB%d_FRAME_ERR_LINK1"%femb_addr] ,
                                        d_sts["FEMB%d_FRAME_ERR_LINK2"%femb_addr], d_sts["FEMB%d_FRAME_ERR_LINK3"%femb_addr] ) )
-                fig.text(0.10, 0.77, "FEMB Power Consumption = " + "{0:.4f}".format(d_sts["FEMB%d_PC"%femb_addr]) + "W" )
+                fig.text(0.10, 0.75, "FEMB Power Consumption = " + "{0:.4f}".format(d_sts["FEMB%d_PC"%femb_addr]) + "W" )
 
-                fig.text(0.10, 0.75, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_V"%femb_addr]) + \
+                fig.text(0.10, 0.73, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_V"%femb_addr]) + \
                                      "V, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_V"%femb_addr]) + \
                                      "V, AM V28 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_V"%femb_addr]) + "V")
 
-                fig.text(0.10, 0.73, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_V"%femb_addr]) + \
+                fig.text(0.10, 0.71, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_V"%femb_addr]) + \
                                      "A, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_I"%femb_addr]) + \
                                      "A, AM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_I"%femb_addr]) + "A")
 
-                fig.text(0.10, 0.71, "FM V39 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV39_V"%femb_addr]) + \
+                fig.text(0.10, 0.69, "FM V39 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV39_V"%femb_addr]) + \
                                      "V, FM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV30_V"%femb_addr]) + \
                                      "V, FM V18 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV18_V"%femb_addr]) + "V" )
 
-                fig.text(0.10, 0.69, "FM V39 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV39_I"%femb_addr]) + \
+                fig.text(0.10, 0.67, "FM V39 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV39_I"%femb_addr]) + \
                                      "A, FM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV30_I"%femb_addr]) + \
                                      "A, FM V18 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV18_I"%femb_addr]) + "A" )
                 
