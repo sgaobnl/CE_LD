@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sun Apr 14 22:42:35 2019
+Last modified: 4/14/2019 11:23:01 PM
 """
 
 #defaut setting for scientific caculation
@@ -37,7 +37,7 @@ class FEMB_QC:
         self.f_qcindex = self.databkdir + "FEMB_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
-        self.pwr_n = 1
+        self.pwr_n = 5
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
         self.CLS.FEMB_ver = 0x501
@@ -102,9 +102,9 @@ class FEMB_QC:
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=1, sg1=0, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
         elif testcode == 4:
             #14mV/fC, 2.0us, 200mV, ASIC_DAC enable = 0x08
-            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=0, swdac2=1, dac= 0x0A, data_cs=0)
+            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=0, swdac2=1, dac= 0x08, data_cs=0)
         else:
-            #14mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x06
+            #14mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=1, swdac2=0, data_cs=0)
 
         qc_data = self.CLS.TPC_UDPACQ(cfglog)
@@ -236,7 +236,7 @@ class FEMB_QC:
                     ana_err_code += "-F9_PED_CHN%d"%(chn)
                 if abs(1- chn_pkps[chn]/pkp_mean) > 0.2:
                     ana_err_code += "-F9_PEAKP_CHN%d"%(chn)
-                if abs(1- chn_pkns[chn]/pkp_mean) > 0.2:
+                if abs(1- chn_pkns[chn]/pkn_mean) > 0.2:
                     ana_err_code += "-F9_PEAKN_CHN%d"%(chn)
         if len(ana_err_code) > 0:
             return (False, ana_err_code, [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves])
@@ -289,7 +289,7 @@ class FEMB_QC:
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
-        ax.grid()
+        ax.grid(True)
         ax.plot(x,y, marker=marker, color=color)
 
     def FEMB_PLOT(self):
@@ -337,29 +337,29 @@ class FEMB_QC:
                 snc_str = "FE Baseline 200mV" if snc==1 else "FE Baseline 900mV"
                 sdf_str = "FE Buffer ON" if sdf==1 else "FE Buffer OFF"
                 if sg0 == 0 and sg1 == 0:
-                    sg_str = "4.7mV/fc"
+                    sg_str = "4.7mV/fC"
                 elif sg0 == 1 and sg1 == 0:
-                    sg_str = "7.8mV/fc"
+                    sg_str = "7.8mV/fC"
                 elif sg0 == 0 and sg1 == 1:
-                    sg_str = "14mV/fc"
+                    sg_str = "14mV/fC"
                 else:
-                    sg_str = "25mV/fc"
+                    sg_str = "25mV/fC"
 
                 if st0 == 0 and st1 == 0:
-                    st_str = "1.0us"
+                    st_str = "1.0$\mu$s"
                 elif st0 == 1 and st1 == 0:
-                    st_str = "0.5us"
+                    st_str = "0.5$\mu$s"
                 elif st0 == 0 and st1 == 1:
-                    st_str = "3.0us"
+                    st_str = "3.0$\mu$s"
                 else:
-                    st_str = "2.0us"
+                    st_str = "2.0$\mu$s"
                
                 fembsts_keys = []
                 for akey in d_sts_keys:
                     if (akey == "FEMB%d"%femb_addr):
                         fembsts_keys.append(akey)
                 
-                fn = self.databkdir + "/" + env + "_IP" + wib_ip.replace(".", "_") + "FEMB%d"%femb_addr + femb_pwr + ".png"
+                fn = self.databkdir + "/" + env + "_" + femb_id + "_" + femb_date + "_" + femb_pwr + ".png"
 
                 fig = plt.figure(figsize=(8.5,11))
                 color = "g" if "PASS" in qc_pf else "r"
@@ -415,9 +415,9 @@ class FEMB_QC:
                         ts = 100 if (len(chn_wfs[chni]) > 100) else len(chn_wfs[chni])
                         x = (np.arange(ts)) * 0.5
                         y = chn_wfs[chni][0:ts]
-                        self.FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / us", ylabel="ADC /bin", color='C%d'%(chni%9))
+                        self.FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
                 else:
-                    cperl = 120
+                    cperl = 80
                     lines = int(len(femb_errlog)//cperl) + 1
                     fig.text(0.05,0.65, "Error log: ")
                     for i in range(lines):
@@ -429,7 +429,7 @@ class FEMB_QC:
 
 
 a = FEMB_QC()
-FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nOFF\nRT\nN\n', 'SLOT3\nOFF\nRT\nN\n']
+FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
 #FEMB_infos = a.FEMB_QC_Input()
 a.FEMB_QC_PWR( FEMB_infos)
 #a.FEMB_BL_RB() #default 14mV/fC, 2.0us, 200mV
