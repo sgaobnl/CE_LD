@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sun Apr 14 21:56:15 2019
+Last modified: Sun Apr 14 21:57:01 2019
 """
 
 #defaut setting for scientific caculation
@@ -400,7 +400,7 @@ fn =self.databkdir  + "\FM_QC_RT_2019_04_09_18_26_28.bin"
 with open(fn, 'bb') as f:
      self.raw_data = pickle.load(f)
  
-a.FEMB_PLOT():
+a.FEMB_PLOT()
 
 
 
