@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/16/2019 10:32:19 AM
+Last modified: 4/16/2019 12:06:13 PM
 """
 
 #defaut setting for scientific caculation
@@ -158,7 +158,7 @@ class FEMB_QC:
         self.CLS.FEMBs_SCAN()
         self.CLS.WIBs_CFG_INIT()
 
-        w_f_bs = []
+        w_f_ts = []
         self.CLS.FEREG_MAP.set_fe_board(smn=0 )
         self.CLS.fecfg_loadflg = True
         self.CLS.fe_monflg = True
@@ -173,21 +173,20 @@ class FEMB_QC:
             self.CLS.REGS = self.CLS.FEREG_MAP.REGS
             cfglog = self.CLS.CE_CHK_CFG(mon_cs = 1)
             for acfg in cfglog:
-                w_f_b_new = True
-                for i in range(len(w_f_bs)):
-                    if w_f_bs[i][0] == acfg[0] and w_f_bs[i][1] == acfg[1] :
-                        w_f_bs[i][2].append(acfg[30])
-                        w_f_bs[i][3].append(acfg[31])
-                        w_f_b_new = False
+                w_f_t_new = True
+                for i in range(len(w_f_ts)):
+                    if w_f_ts[i][0] == acfg[0] and w_f_ts[i][1] == acfg[1] :
+                        w_f_ts[i][2].append(acfg[30])
+                        w_f_ts[i][3].append(acfg[31])
+                        w_f_t_new = False
                         break
-                if w_f_b_new :
-                    w_f_bs.append([acfg[0], acfg[1], [acfg[30]], [acfg[31]]])
+                if w_f_t_new :
+                    w_f_ts.append([acfg[0], acfg[1], [acfg[30]], [acfg[31]]])
 
-        print (w_f_bs)
         self.CLS.fecfg_loadflg = False
         self.CLS.fe_monflg = False
         self.CLS.CE_CHK_CFG(mon_cs = 0) #disable monitoring and return to default setting
-        return w_f_bs
+        return w_f_ts
            
     def FEMB_CHK_ANA(self, FEMB_infos, qc_data, pwr_i = 1):
         qcs = []
@@ -467,6 +466,67 @@ class FEMB_QC:
                 plt.savefig(fn)
                 plt.close()
 
+    def QC_FEMB_BL_T_PLOT(self, FEMB_infos):
+        w_f_bs_200mV = self.FEMB_BL_RB(snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1) # 14mV/fC, 2.0us, 200mV
+        w_f_bs_900mV = self.FEMB_BL_RB(snc=0, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1) # 14mV/fC, 2.0us, 900mV
+        w_f_ts = self.FEMB_Temp_RB()
+        for femb_info in FEMB_infos:
+            fembs = femb_info.split("\n")
+            femb_addr = int(fembs[0][4])
+            femb_id = fembs[1]
+            femb_env = fembs[2]
+            femb_rerun_f = fembs[3]
+            femb_c_ret = fembs[4]
+            femb_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
+            errs = self.CLS.err_code.split("SLOT")
+            wib_ip = self.CLS.err_code[self.CLS.err_code.index("#IP") +3: self.CLS.err_code.index("-SLOT")] 
+            for er in errs[1:]:
+                if( int(er[0]) == femb_addr ):
+                    if (len(er) <2 ):
+                        femb_errlog = ""
+                    else:
+                        femb_errlog = er[2: er.index("#IP")] if "#IP" in er else er[2: ]
+                    break
+
+            if  "OFF" in femb_id:
+                pass
+            else :
+                ys = []
+                for w_fs in [w_f_bs200mV, w_f_bs900mV, w_f_ts]:
+                    for f_bt in w_fs:
+                        if f_bt[0] == wib_ip and f_bt[1] == femb_addr
+                            ys.append(f_bt[2])
+                            break
+
+                fn = self.databkdir + "/BL_T_" + env + "_" + femb_id + "_" + femb_date +  ".png"
+                import matplotlib.pyplot as plt
+                fig = plt.figure(figsize=(8.5,11))
+                fig.suptitle("BASELINE and Temperature Measurement of FEMB#%s"%(femb_id), weight ="bold", fontsize = 12)
+                fig.text(0.10, 0.94, "Date&Time: %s"%femb_date   )
+                fig.text(0.55, 0.94, "Temperature: %s "%env  )
+                fig.text(0.10, 0.92, "FEMB ID: %s "%femb_id      )
+                fig.text(0.10,0.90, "Rerun comment: %s "%femb_c_ret     )
+                fig.text(0.10, 0.88, "WIB IP: %s "%wib_ip      )
+                fig.text(0.55, 0.88, "FEMB SLOT: %s "%femb_addr     )
+                if len(femb_errlog) == 0:
+                    ax1 = plt.subplot2grid((4, 1), (1, 0), colspan=1, rowspan=1)
+                    ax2 = plt.subplot2grid((4, 1), (2, 0), colspan=1, rowspan=1)
+                    ax3 = plt.subplot2grid((4, 1), (3, 0), colspan=1, rowspan=1)
+                    self.FEMB_SUB_PLOT(ax1, range(len(ys[0])), ys[0], title="FE 200mV Baseline Measurement", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
+                    self.FEMB_SUB_PLOT(ax2, range(len(ys[1])), ys[1], title="FE 900mV Baseline Measurement", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
+                    self.FEMB_SUB_PLOT(ax3, range(len(ys[2])), ys[2], title="Temperature Readout From FE", \
+                                       xlabel="FE number (CHN0 of a FE ASIC)", ylabel ="ADC / bin", color='r', marker='.')
+                else:
+                    cperl = 80
+                    lines = int(len(femb_errlog)//cperl) + 1
+                    fig.text(0.05,0.65, "Error log: ")
+                    for i in range(lines):
+                        fig.text(0.10, 0.63-0.02*i, femb_errlog[i*cperl:(i+1)*cperl])
+                
+                plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
+                plt.savefig(fn)
+                plt.close()
+
 
 a = FEMB_QC()
 FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
@@ -474,7 +534,8 @@ FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC
 #a.FEMB_QC_PWR( FEMB_infos)
 #a.FEMB_PLOT()
 #a.FEMB_BL_RB(snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1) #default 14mV/fC, 2.0us, 200mV
-a.FEMB_Temp_RB()
+#1a.FEMB_Temp_RB()
+a.QC_FEMB_BL_T_PLOT(FEMB_infos):
 #a.FEMB_BL_RB() #default 14mV/fC, 2.0us, 200mV
 #fn =a.databkdir  + "\FM_QC_RT_2019_04_09_18_26_28.bin"
 #with open(fn, 'rb') as f:
