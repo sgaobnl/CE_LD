@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/16/2019 3:29:43 PM
+Last modified: 4/16/2019 5:37:55 PM
 """
 
 #defaut setting for scientific caculation
@@ -59,7 +59,7 @@ class FEMB_QC:
                     self.femb_qclist.append(x[1:])
         femb_ids = []
         for femb in self.femb_qclist:
-            femb_ids.append(fm[1])
+            femb_ids.append(femb[1])
         return femb_ids
 
     def FEMB_QC_Input(self):
@@ -77,7 +77,7 @@ class FEMB_QC:
             c_ret +="ToyTPC14_" + input("Toy TPC NO. for ASIC1-4 : ")
             c_ret +="-ToyTPC58_" +input("Toy TPC NO. for ASIC5-8 : ") + "-"
             if FEMB_id in FEMBlist:
-                print ("FEMB \"%s\" has been tested before, please input a short note for this retest\n"%FEMB_id)
+                print ("FEMB \"%s\" has been tested before, please input a short note for this retest"%FEMB_id)
                 c_ret += input("Reason for retest: ")
                 rerun_f = "Y"
             else:
@@ -149,6 +149,7 @@ class FEMB_QC:
         self.CLS.fecfg_loadflg = False
         self.CLS.fe_monflg = False
         self.CLS.CE_CHK_CFG(mon_cs = 0) #disable monitoring and return to default setting
+        self.CLS.FEMBs_CE_OFF()
         return w_f_bs
 
     def FEMB_Temp_RB(self ):
@@ -188,6 +189,7 @@ class FEMB_QC:
         self.CLS.fecfg_loadflg = False
         self.CLS.fe_monflg = False
         self.CLS.CE_CHK_CFG(mon_cs = 0) #disable monitoring and return to default setting
+        self.CLS.FEMBs_CE_OFF()
         return w_f_ts
            
     def FEMB_CHK_ANA(self, FEMB_infos, qc_data, pwr_i = 1):
@@ -256,7 +258,7 @@ class FEMB_QC:
                 chn_waves.append( chn_data[achn][feed_loc[0]: feed_loc[1]] )
         ana_err_code = ""
         rms_mean = np.mean(chn_rmss)
-        rms_thr = 5*np.std(chn_rmss) if 5*(np.std(chn_rmss) < 0.5*rms_mean) else 0.5*rms_mean
+        rms_thr = 10*np.std(chn_rmss) if 10*(np.std(chn_rmss) < rms_mean) else rms_mean
         for chn in range(128):
             if abs(chn_rmss[chn] - rms_mean) < rms_thr :
                 pass
@@ -277,7 +279,7 @@ class FEMB_QC:
                     ana_err_code += "-F9_PED_CHN%d"%(chn)
                 if abs(1- chn_pkps[chn]/pkp_mean) > 0.2:
                     ana_err_code += "-F9_PEAKP_CHN%d"%(chn)
-                if abs(1- chn_pkns[chn]/pkn_mean) > 0.2:
+                if abs(1- chn_pkns[chn]/pkn_mean) > 0.5:
                     ana_err_code += "-F9_PEAKN_CHN%d"%(chn)
         if len(ana_err_code) > 0:
             return (False, ana_err_code, [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves])
@@ -325,17 +327,19 @@ class FEMB_QC:
         print ("Result is saved in %s"%self.user_f )
 
 
-    def FEMB_SUB_PLOT(self, ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx=False, ylabel_twx = ""):
+    def FEMB_SUB_PLOT(self, ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx=False, ylabel_twx = "", e=None):
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         ax.grid(True)
-        ax.plot(x,y, marker=marker, color=color)
         if (atwinx):
+            ax.errorbar(x,y,e marker=marker, color=color)
             ax.set_ylim([0, 0x4000])
             ax2 = ax.twinx()
             ax2.set_ylabel(ylabel_twx)
             ax2.set_ylim([0, 2048])
+        else:
+            ax.plot(x,y, marker=marker, color=color)
 
     def FEMB_PLOT(self):
         import matplotlib.pyplot as plt
@@ -500,10 +504,12 @@ class FEMB_QC:
                 pass
             else :
                 ys = []
+                ys_std = []
                 for w_fs in [w_f_bs_200mV, w_f_bs_900mV, w_f_ts]:
                     for f_bt in w_fs:
                         if f_bt[0] == wib_ip and f_bt[1] == femb_addr:
                             ys.append(f_bt[2])
+                            ys_std.append(f_bt[3])
                             break
                 BL_T_data.append([femb_id, ys, wib_ip, femb_addr, femb_env, femb_rerun_f, femb_c_ret, femb_date, femb_errlog]) 
                 import matplotlib.pyplot as plt
@@ -522,13 +528,13 @@ class FEMB_QC:
                     ax3 = plt.subplot2grid((4, 1), (3, 0), colspan=1, rowspan=1)
                     self.FEMB_SUB_PLOT(ax1, range(len(ys[0])), ys[0], title="FE 200mV Baseline Measurement", \
                                        xlabel="CH number", ylabel ="MON ADC / bin", color='r', marker='.', \
-                                       atwinx=True, ylabel_twx = "Amplitude / mV")
+                                       atwinx=True, ylabel_twx = "Amplitude / mV", e=ys_std[0] )
                     self.FEMB_SUB_PLOT(ax2, range(len(ys[1])), ys[1], title="FE 900mV Baseline Measurement", \
                                        xlabel="CH number", ylabel ="MON ADC / bin", color='r', marker='.', \
-                                       atwinx=True, ylabel_twx = "Amplitude / mV")
+                                       atwinx=True, ylabel_twx = "Amplitude / mV", e=ys_std[0])
                     self.FEMB_SUB_PLOT(ax3, range(len(ys[2])), ys[2], title="Temperature Readout From FE", \
                                        xlabel="FE number (CHN0 of a FE ASIC)", ylabel ="MON ADC / bin", color='r', marker='.',\
-                                       atwinx=True, ylabel_twx = "Amplitude / mV")
+                                       atwinx=True, ylabel_twx = "Amplitude / mV", e=ys_std[0])
                 else:
                     cperl = 80
                     lines = int(len(femb_errlog)//cperl) + 1
