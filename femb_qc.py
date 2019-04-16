@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/15/2019 11:45:20 AM
+Last modified: 4/16/2019 10:19:13 AM
 """
 
 #defaut setting for scientific caculation
@@ -126,7 +126,6 @@ class FEMB_QC:
         self.CLS.fe_monflg = True
 
         for chn in range(128):
-            #snc = 1, 200mVBL.  snc=0, 900mVBL
             print ("Baseline of CHN%d of all available FEMBs are being measured by the monitoring ADC"%chn)
             chipn = int(chn//16)
             chipnchn = int(chn%16)
@@ -147,8 +146,48 @@ class FEMB_QC:
 
         self.CLS.fecfg_loadflg = False
         self.CLS.fe_monflg = False
+        self.CLS.CE_CHK_CFG(mon_cs = 0) #disable monitoring and return to default setting
         return w_f_bs
-            
+
+     def FEMB_Temp_RB(self ):
+        self.CLS.val = 10 
+        self.CLS.sts_num = 1
+        self.CLS.f_save = False
+        self.CLS.FM_only_f = False
+        self.CLS.WIBs_SCAN()
+        self.CLS.FEMBs_SCAN()
+        self.CLS.WIBs_CFG_INIT()
+
+        w_f_bs = []
+        self.CLS.FEREG_MAP.set_fe_board(smn=0 )
+        self.CLS.fecfg_loadflg = True
+        self.CLS.fe_monflg = True
+
+        for chip in range(8):
+            print ("Baseline of CHN%d of all available FEMBs are being measured by the monitoring ADC"%chn)
+            chipn = chip
+            chipnchn = 0
+
+            self.CLS.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn, stb=1, stb1=0, smn=1 )
+            self.CLS.REGS = self.CLS.FEREG_MAP.REGS
+            cfglog = self.CLS.CE_CHK_CFG(mon_cs = 1)
+            for acfg in cfglog:
+                w_f_b_new = True
+                for i in range(len(w_f_bs)):
+                    if w_f_bs[i][0] == acfg[0] and w_f_bs[i][1] == acfg[1] :
+                        w_f_bs[i][2].append(acfg[30])
+                        w_f_bs[i][3].append(acfg[31])
+                        w_f_b_new = False
+                        break
+                if w_f_b_new :
+                    w_f_bs.append([acfg[0], acfg[1], [acfg[30]], [acfg[31]]])
+
+        print w_f_bs
+        self.CLS.fecfg_loadflg = False
+        self.CLS.fe_monflg = False
+        self.CLS.CE_CHK_CFG(mon_cs = 0) #disable monitoring and return to default setting
+        return w_f_bs
+           
     def FEMB_CHK_ANA(self, FEMB_infos, qc_data, pwr_i = 1):
         qcs = []
         for femb_info in FEMB_infos:
@@ -430,9 +469,11 @@ class FEMB_QC:
 
 a = FEMB_QC()
 FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
-a.FEMB_QC_PWR( FEMB_infos)
-a.FEMB_PLOT()
 #FEMB_infos = a.FEMB_QC_Input()
+#a.FEMB_QC_PWR( FEMB_infos)
+#a.FEMB_PLOT()
+#a.FEMB_BL_RB(snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1) #default 14mV/fC, 2.0us, 200mV
+a.FEMB_Temp_RB()
 #a.FEMB_BL_RB() #default 14mV/fC, 2.0us, 200mV
 #fn =a.databkdir  + "\FM_QC_RT_2019_04_09_18_26_28.bin"
 #with open(fn, 'rb') as f:
