@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/16/2019 2:06:45 PM
+Last modified: Tue Apr 16 14:28:06 2019
 """
 
 #defaut setting for scientific caculation
@@ -324,12 +324,17 @@ class FEMB_QC:
         print ("Well Done")
 
 
-    def FEMB_SUB_PLOT(self, ax, x, y, title, xlabel, ylabel, color='b', marker='.'):
+    def FEMB_SUB_PLOT(self, ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx=False, ylabel_twx = ""):
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         ax.grid(True)
         ax.plot(x,y, marker=marker, color=color)
+        if (atwinx):
+            ax.set_ylim([0, 0x4000])
+            ax2 = ax.twinx()
+            ax2.set_ylabel(ylabel_twx)
+            ax2.set_ylabel([0, 2048])
 
     def FEMB_PLOT(self):
         import matplotlib.pyplot as plt
@@ -499,7 +504,7 @@ class FEMB_QC:
                         if f_bt[0] == wib_ip and f_bt[1] == femb_addr:
                             ys.append(f_bt[2])
                             break
-                BL_T_data.append([femb_id, ys, wib_ip, femb_addr, femb_env, femb_return_f, femb_c_ret, femb_date, femb_errlog]) 
+                BL_T_data.append([femb_id, ys, wib_ip, femb_addr, femb_env, femb_rerun_f, femb_c_ret, femb_date, femb_errlog]) 
                 import matplotlib.pyplot as plt
                 fn_fig = self.databkdir + "/BL_T_" + femb_env + "_" + femb_id + "_" + femb_date +  ".png"
                 fig = plt.figure(figsize=(8.5,11))
@@ -515,11 +520,11 @@ class FEMB_QC:
                     ax2 = plt.subplot2grid((4, 1), (2, 0), colspan=1, rowspan=1)
                     ax3 = plt.subplot2grid((4, 1), (3, 0), colspan=1, rowspan=1)
                     self.FEMB_SUB_PLOT(ax1, range(len(ys[0])), ys[0], title="FE 200mV Baseline Measurement", \
-                                       xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
+                                       xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.', atwinx=True, ylabel_twx = "Amplitude / mV")
                     self.FEMB_SUB_PLOT(ax2, range(len(ys[1])), ys[1], title="FE 900mV Baseline Measurement", \
-                                       xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
+                                       xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.', atwinx=True, ylabel_twx = "Amplitude / mV")
                     self.FEMB_SUB_PLOT(ax3, range(len(ys[2])), ys[2], title="Temperature Readout From FE", \
-                                       xlabel="FE number (CHN0 of a FE ASIC)", ylabel ="ADC / bin", color='r', marker='.')
+                                       xlabel="FE number (CHN0 of a FE ASIC)", ylabel ="ADC / bin", color='r', marker='.', atwinx=True, ylabel_twx = "Amplitude / mV")
                 else:
                     cperl = 80
                     lines = int(len(femb_errlog)//cperl) + 1
@@ -528,8 +533,8 @@ class FEMB_QC:
                         fig.text(0.10, 0.63-0.02*i, femb_errlog[i*cperl:(i+1)*cperl])
                 
                 plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
-                plt.savefig(fn)
-                print (fn)
+                plt.savefig(fn_fig)
+                print (fn_fig)
                 plt.close()
 
         femb_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
