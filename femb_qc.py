@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/16/2019 2:38:53 PM
+Last modified: 4/16/2019 3:14:03 PM
 """
 
 #defaut setting for scientific caculation
@@ -31,9 +31,9 @@ from shutil import copyfile
 class FEMB_QC:
     def __init__(self):
         self.jumbo_flag = False
-        self.userdir = "D:/SBND_QC/"
+        self.userdir = "I:/SBND_QC/"
         self.user_f = self.userdir + "FEMB_QCindex.csv"
-        self.databkdir = "D:/SBND_QC/FEMB_QC/"
+        self.databkdir = "I:/SBND_QC/FEMB_QC/"
         self.f_qcindex = self.databkdir + "FEMB_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
@@ -73,12 +73,14 @@ class FEMB_QC:
                 cf = input("WIB slot%d with FEMB ID is \"#%s\", Y or N? "%(i, FEMB_id) )
                 if (cf == "Y"):
                     break
+            c_ret = ""
+            c_ret += input("Toy TPC NO. for ASIC1-4 : ")
+            c_ret += input("Toy TPC NO. for ASIC5-8 : ")
             if FEMB_id in FEMBlist:
                 print ("FEMB \"%s\" has been tested before, please input a short note for this retest\n"%FEMB_id)
-                c_ret = input("Reason for retest: ")
+                c_ret += input("Reason for retest: ")
                 rerun_f = "Y"
             else:
-                c_ret = ""
                 rerun_f = "N"
             FEMB_infos.append("SLOT%d"%i + "\n" + FEMB_id + "\n" + env + "\n" + rerun_f + "\n" + c_ret )
         return FEMB_infos
@@ -547,13 +549,18 @@ class FEMB_QC:
 
 
 a = FEMB_QC()
-FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
-#FEMB_infos = a.FEMB_QC_Input()
+#FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
+FEMB_infos = a.FEMB_QC_Input()
+a.FEMB_QC_PWR( FEMB_infos)
+a.FEMB_PLOT()
+a.QC_FEMB_BL_T_PLOT(FEMB_infos)
+
+#FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
 #a.FEMB_QC_PWR( FEMB_infos)
 #a.FEMB_PLOT()
+#a.QC_FEMB_BL_T_PLOT(FEMB_infos)
 #a.FEMB_BL_RB(snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1) #default 14mV/fC, 2.0us, 200mV
 #1a.FEMB_Temp_RB()
-a.QC_FEMB_BL_T_PLOT(FEMB_infos)
 #a.FEMB_BL_RB() #default 14mV/fC, 2.0us, 200mV
 #fn =a.databkdir  + "\FM_QC_RT_2019_04_09_18_26_28.bin"
 #with open(fn, 'rb') as f:
