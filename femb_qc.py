@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/16/2019 10:19:13 AM
+Last modified: 4/16/2019 10:31:09 AM
 """
 
 #defaut setting for scientific caculation
@@ -149,7 +149,7 @@ class FEMB_QC:
         self.CLS.CE_CHK_CFG(mon_cs = 0) #disable monitoring and return to default setting
         return w_f_bs
 
-     def FEMB_Temp_RB(self ):
+    def FEMB_Temp_RB(self ):
         self.CLS.val = 10 
         self.CLS.sts_num = 1
         self.CLS.f_save = False
@@ -164,11 +164,12 @@ class FEMB_QC:
         self.CLS.fe_monflg = True
 
         for chip in range(8):
-            print ("Baseline of CHN%d of all available FEMBs are being measured by the monitoring ADC"%chn)
+            print ("FE ASIC%d of all available FEMBs are being measured by the monitoring ADC"%chip)
             chipn = chip
             chipnchn = 0
 
-            self.CLS.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn, stb=1, stb1=0, smn=1 )
+            self.CLS.FEREG_MAP.set_fechip_global(chip=chipn, stb=0, stb1=0 )
+            self.CLS.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn,  smn=1 )
             self.CLS.REGS = self.CLS.FEREG_MAP.REGS
             cfglog = self.CLS.CE_CHK_CFG(mon_cs = 1)
             for acfg in cfglog:
@@ -182,7 +183,7 @@ class FEMB_QC:
                 if w_f_b_new :
                     w_f_bs.append([acfg[0], acfg[1], [acfg[30]], [acfg[31]]])
 
-        print w_f_bs
+        print (w_f_bs)
         self.CLS.fecfg_loadflg = False
         self.CLS.fe_monflg = False
         self.CLS.CE_CHK_CFG(mon_cs = 0) #disable monitoring and return to default setting
