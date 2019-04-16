@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/16/2019 10:31:09 AM
+Last modified: 4/16/2019 10:32:19 AM
 """
 
 #defaut setting for scientific caculation
@@ -168,7 +168,7 @@ class FEMB_QC:
             chipn = chip
             chipnchn = 0
 
-            self.CLS.FEREG_MAP.set_fechip_global(chip=chipn, stb=0, stb1=0 )
+            self.CLS.FEREG_MAP.set_fechip_global(chip=chipn, stb=1, stb1=0 )
             self.CLS.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn,  smn=1 )
             self.CLS.REGS = self.CLS.FEREG_MAP.REGS
             cfglog = self.CLS.CE_CHK_CFG(mon_cs = 1)
