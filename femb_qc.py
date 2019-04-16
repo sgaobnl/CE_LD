@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/16/2019 3:21:10 PM
+Last modified: 4/16/2019 3:28:52 PM
 """
 
 #defaut setting for scientific caculation
@@ -244,7 +244,7 @@ class FEMB_QC:
             for achn in range(len(chn_data)):
                 achn_ped = []
                 for af in range(len(feed_loc[0:-2])):
-                    achn_ped += chn_data[achn][feed_loc[af]+100: feed_loc[af+1] ] 
+                    achn_ped += chn_data[achn][feed_loc[af]+100: feed_loc[af+1]-100 ] 
                 arms = np.std(achn_ped)
                 aped = int(np.mean(achn_ped))
                 apeakp = int(np.mean(chn_peakp[achn]))
