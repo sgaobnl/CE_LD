@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/16/2019 3:28:52 PM
+Last modified: 4/16/2019 3:29:43 PM
 """
 
 #defaut setting for scientific caculation
@@ -323,7 +323,6 @@ class FEMB_QC:
             with open(fn, 'wb') as f:
                 pickle.dump(self.raw_data, f)
         print ("Result is saved in %s"%self.user_f )
-        print ("Well Done")
 
 
     def FEMB_SUB_PLOT(self, ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx=False, ylabel_twx = ""):
@@ -554,6 +553,7 @@ FEMB_infos = a.FEMB_QC_Input()
 a.FEMB_QC_PWR( FEMB_infos)
 a.FEMB_PLOT()
 a.QC_FEMB_BL_T_PLOT(FEMB_infos)
+print ("Well Done")
 
 #FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
 #a.FEMB_QC_PWR( FEMB_infos)
