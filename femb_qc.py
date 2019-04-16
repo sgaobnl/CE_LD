@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/16/2019 3:14:03 PM
+Last modified: 4/16/2019 3:21:10 PM
 """
 
 #defaut setting for scientific caculation
@@ -74,8 +74,8 @@ class FEMB_QC:
                 if (cf == "Y"):
                     break
             c_ret = ""
-            c_ret += input("Toy TPC NO. for ASIC1-4 : ")
-            c_ret += input("Toy TPC NO. for ASIC5-8 : ")
+            c_ret +="ToyTPC14_" + input("Toy TPC NO. for ASIC1-4 : ")
+            c_ret +="-ToyTPC58_" +input("Toy TPC NO. for ASIC5-8 : ") + "-"
             if FEMB_id in FEMBlist:
                 print ("FEMB \"%s\" has been tested before, please input a short note for this retest\n"%FEMB_id)
                 c_ret += input("Reason for retest: ")
