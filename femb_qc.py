@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue Apr 16 14:28:06 2019
+Last modified: 4/16/2019 2:38:53 PM
 """
 
 #defaut setting for scientific caculation
@@ -334,7 +334,7 @@ class FEMB_QC:
             ax.set_ylim([0, 0x4000])
             ax2 = ax.twinx()
             ax2.set_ylabel(ylabel_twx)
-            ax2.set_ylabel([0, 2048])
+            ax2.set_ylim([0, 2048])
 
     def FEMB_PLOT(self):
         import matplotlib.pyplot as plt
@@ -520,11 +520,14 @@ class FEMB_QC:
                     ax2 = plt.subplot2grid((4, 1), (2, 0), colspan=1, rowspan=1)
                     ax3 = plt.subplot2grid((4, 1), (3, 0), colspan=1, rowspan=1)
                     self.FEMB_SUB_PLOT(ax1, range(len(ys[0])), ys[0], title="FE 200mV Baseline Measurement", \
-                                       xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.', atwinx=True, ylabel_twx = "Amplitude / mV")
+                                       xlabel="CH number", ylabel ="MON ADC / bin", color='r', marker='.', \
+                                       atwinx=True, ylabel_twx = "Amplitude / mV")
                     self.FEMB_SUB_PLOT(ax2, range(len(ys[1])), ys[1], title="FE 900mV Baseline Measurement", \
-                                       xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.', atwinx=True, ylabel_twx = "Amplitude / mV")
+                                       xlabel="CH number", ylabel ="MON ADC / bin", color='r', marker='.', \
+                                       atwinx=True, ylabel_twx = "Amplitude / mV")
                     self.FEMB_SUB_PLOT(ax3, range(len(ys[2])), ys[2], title="Temperature Readout From FE", \
-                                       xlabel="FE number (CHN0 of a FE ASIC)", ylabel ="ADC / bin", color='r', marker='.', atwinx=True, ylabel_twx = "Amplitude / mV")
+                                       xlabel="FE number (CHN0 of a FE ASIC)", ylabel ="MON ADC / bin", color='r', marker='.',\
+                                       atwinx=True, ylabel_twx = "Amplitude / mV")
                 else:
                     cperl = 80
                     lines = int(len(femb_errlog)//cperl) + 1
