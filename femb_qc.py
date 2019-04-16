@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/14/2019 11:23:01 PM
+Last modified: 4/15/2019 11:45:20 AM
 """
 
 #defaut setting for scientific caculation
@@ -430,14 +430,14 @@ class FEMB_QC:
 
 a = FEMB_QC()
 FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
-#FEMB_infos = a.FEMB_QC_Input()
 a.FEMB_QC_PWR( FEMB_infos)
+a.FEMB_PLOT()
+#FEMB_infos = a.FEMB_QC_Input()
 #a.FEMB_BL_RB() #default 14mV/fC, 2.0us, 200mV
 #fn =a.databkdir  + "\FM_QC_RT_2019_04_09_18_26_28.bin"
 #with open(fn, 'rb') as f:
 #     a.raw_data = pickle.load(f)
  
-a.FEMB_PLOT()
 
 
 
