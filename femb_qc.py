@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/16/2019 5:37:55 PM
+Last modified: 4/17/2019 11:29:06 AM
 """
 
 #defaut setting for scientific caculation
@@ -333,7 +333,7 @@ class FEMB_QC:
         ax.set_ylabel(ylabel)
         ax.grid(True)
         if (atwinx):
-            ax.errorbar(x,y,e marker=marker, color=color)
+            ax.errorbar(x,y,e, marker=marker, color=color)
             ax.set_ylim([0, 0x4000])
             ax2 = ax.twinx()
             ax2.set_ylabel(ylabel_twx)
