@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/17/2019 11:29:06 AM
+Last modified: 4/17/2019 7:13:14 PM
 """
 
 #defaut setting for scientific caculation
@@ -37,7 +37,7 @@ class FEMB_QC:
         self.f_qcindex = self.databkdir + "FEMB_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
-        self.pwr_n = 5
+        self.pwr_n = 50 
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
         self.CLS.FEMB_ver = 0x501
@@ -93,22 +93,38 @@ class FEMB_QC:
         self.CLS.WIBs_SCAN()
         self.CLS.FEMBs_SCAN()
         self.CLS.WIBs_CFG_INIT()
-        if testcode == 1:
+        testn = testcode % 10
+        if testn == 1:
             #14mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
-        elif testcode == 2:
+        elif testn == 2:
             #7.8mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=1, sg1=0, st0 =1, st1=1, swdac1=1, swdac2=0, data_cs=0)
-        elif testcode == 3:
+        elif testn == 3:
             #7.8mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=1, sg1=0, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
-        elif testcode == 4:
+        elif testn == 4:
             #14mV/fC, 2.0us, 200mV, ASIC_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=0, swdac2=1, dac= 0x08, data_cs=0)
+        elif testn == 5:
+            #14mV/fC, 2.0us, 200mV, RMS 
+            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1)
+        elif testn == 6:
+            #14mV/fC, 2.0us, 900mV, RMS 
+            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=0)
+        elif testn == 7:
+            #7.8mV/fC, 2.0us, 200mV, RMS 
+            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=1, sg1=0, st0 =1, st1=1, snc=1)
+        elif testn == 8:
+            #14mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08
+            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+        elif testn == 9:
+            #7.8mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08
+            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=1, sg1=0, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
         else:
             #14mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=1, swdac2=0, data_cs=0)
-
+        time.sleep(2)
         qc_data = self.CLS.TPC_UDPACQ(cfglog)
         self.CLS.FEMBs_CE_OFF()
         return qc_data
@@ -123,7 +139,6 @@ class FEMB_QC:
         self.CLS.WIBs_CFG_INIT()
 
         w_f_bs = []
-        self.CLS.FEREG_MAP.set_fe_board(snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=0, sdf=sdf, slk0=slk0, slk1=slk1 )
         self.CLS.fecfg_loadflg = True
         self.CLS.fe_monflg = True
 
@@ -131,7 +146,7 @@ class FEMB_QC:
             print ("Baseline of CHN%d of all available FEMBs are being measured by the monitoring ADC"%chn)
             chipn = int(chn//16)
             chipnchn = int(chn%16)
-
+            self.CLS.FEREG_MAP.set_fe_board(snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=0, sdf=sdf, slk0=slk0, slk1=slk1 )
             self.CLS.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn, snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=1, sdf=sdf )
             self.CLS.REGS = self.CLS.FEREG_MAP.REGS
             cfglog = self.CLS.CE_CHK_CFG(mon_cs = 1)
@@ -162,7 +177,6 @@ class FEMB_QC:
         self.CLS.WIBs_CFG_INIT()
 
         w_f_ts = []
-        self.CLS.FEREG_MAP.set_fe_board(smn=0 )
         self.CLS.fecfg_loadflg = True
         self.CLS.fe_monflg = True
 
@@ -171,6 +185,7 @@ class FEMB_QC:
             chipn = chip
             chipnchn = 0
 
+            self.CLS.FEREG_MAP.set_fe_board(smn=0 )
             self.CLS.FEREG_MAP.set_fechip_global(chip=chipn, stb=1, stb1=0 )
             self.CLS.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn,  smn=1 )
             self.CLS.REGS = self.CLS.FEREG_MAP.REGS
@@ -288,6 +303,7 @@ class FEMB_QC:
 
     def FEMB_QC_PWR(self, FEMB_infos):
         pwr_qcs = []
+        self.CLS.FEMB_QC_f = True
         for pwr_i in range(1, self.pwr_n+1 ):
             print ("Power Cycle %d of %d starts..."%(pwr_i, self.pwr_n))
             qc_data = self.FEMB_CHK_ACQ(testcode = pwr_i)
@@ -325,7 +341,7 @@ class FEMB_QC:
             with open(fn, 'wb') as f:
                 pickle.dump(self.raw_data, f)
         print ("Result is saved in %s"%self.user_f )
-
+        self.CLS.FEMB_QC_f = False
 
     def FEMB_SUB_PLOT(self, ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx=False, ylabel_twx = "", e=None):
         ax.set_title(title)
@@ -450,7 +466,8 @@ class FEMB_QC:
                                      "A, FM V18 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV18_I"%femb_addr]) + "A" )
                 
                 
-                if ("PASS" in qc_pf):
+                #if ("PASS" in qc_pf):
+                if (True):
                     ax1 = plt.subplot2grid((3, 2), (1, 0), colspan=1, rowspan=1)
                     ax2 = plt.subplot2grid((3, 2), (2, 0), colspan=1, rowspan=1)
                     ax3 = plt.subplot2grid((3, 2), (1, 1), colspan=1, rowspan=1)
@@ -477,9 +494,11 @@ class FEMB_QC:
                 plt.close()
 
     def QC_FEMB_BL_T_PLOT(self, FEMB_infos):
+        self.CLS.FEMB_QC_f = True
         w_f_bs_200mV = self.FEMB_BL_RB(snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1) # 14mV/fC, 2.0us, 200mV
         w_f_bs_900mV = self.FEMB_BL_RB(snc=0, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1) # 14mV/fC, 2.0us, 900mV
         w_f_ts = self.FEMB_Temp_RB()
+        self.CLS.FEMB_QC_f = False
         BL_T_data = []
 
         for femb_info in FEMB_infos:
@@ -506,6 +525,7 @@ class FEMB_QC:
                 ys = []
                 ys_std = []
                 for w_fs in [w_f_bs_200mV, w_f_bs_900mV, w_f_ts]:
+                #for w_fs in [w_f_ts, w_f_ts, w_f_ts]:
                     for f_bt in w_fs:
                         if f_bt[0] == wib_ip and f_bt[1] == femb_addr:
                             ys.append(f_bt[2])
@@ -531,10 +551,10 @@ class FEMB_QC:
                                        atwinx=True, ylabel_twx = "Amplitude / mV", e=ys_std[0] )
                     self.FEMB_SUB_PLOT(ax2, range(len(ys[1])), ys[1], title="FE 900mV Baseline Measurement", \
                                        xlabel="CH number", ylabel ="MON ADC / bin", color='r', marker='.', \
-                                       atwinx=True, ylabel_twx = "Amplitude / mV", e=ys_std[0])
+                                       atwinx=True, ylabel_twx = "Amplitude / mV", e=ys_std[1])
                     self.FEMB_SUB_PLOT(ax3, range(len(ys[2])), ys[2], title="Temperature Readout From FE", \
                                        xlabel="FE number (CHN0 of a FE ASIC)", ylabel ="MON ADC / bin", color='r', marker='.',\
-                                       atwinx=True, ylabel_twx = "Amplitude / mV", e=ys_std[0])
+                                       atwinx=True, ylabel_twx = "Amplitude / mV", e=ys_std[2])
                 else:
                     cperl = 80
                     lines = int(len(femb_errlog)//cperl) + 1
@@ -555,7 +575,9 @@ class FEMB_QC:
 
 a = FEMB_QC()
 #FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
-FEMB_infos = a.FEMB_QC_Input()
+#FEMB_infos = ['SLOT0\nFC022-TAC01\nRT\nN\n', 'SLOT1\nFC026-TAC02\nRT\nN\n', 'SLOT2\nFC037-TAC03\nRT\nN\n', 'SLOT3\nFC024-TAC04\nRT\nN\n']
+FEMB_infos = ['SLOT0\nFC022-TAC01\nLN\nN\n', 'SLOT1\nFC026-TAC02\nLN\nN\n', 'SLOT2\nFC037-TAC03\nLN\nN\n', 'SLOT3\nFC024-TAC04\nLN\nN\n']
+#FEMB_infos = a.FEMB_QC_Input()
 a.FEMB_QC_PWR( FEMB_infos)
 a.FEMB_PLOT()
 a.QC_FEMB_BL_T_PLOT(FEMB_infos)

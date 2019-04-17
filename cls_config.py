@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/16/2019 5:17:16 PM
+Last modified: 4/17/2019 6:58:50 PM
 """
 
 #defaut setting for scientific caculation
@@ -41,7 +41,7 @@ class CLS_CONFIG:
         self.fecfg_f ="./fecfg.csv" 
         self.FEREG_MAP = FE_REG_MAPPING()
         self.DAQstream_en =  True
-        self.pwr_dly = 20 #delay(s) after power operation
+        self.pwr_dly = 10 #delay(s) after power operation
         self.sts_num = 1 #how many times statitics data are collected
         self.val = 100 #how many UDP HS package are collected per time
         self.f_save = False #if False, no raw data is saved, if True, no further data analysis 
@@ -51,6 +51,7 @@ class CLS_CONFIG:
         self.fecfg_loadflg = False
         self.fe_monflg = False
         self.REGS = []
+        self.FEMB_QC_f = False #only set to "True" for FEMB screening test
 
     def WIB_UDP_CTL(self, wib_ip, WIB_UDP_EN = False):
         self.UDP.UDP_IP = wib_ip
@@ -91,20 +92,33 @@ class CLS_CONFIG:
     def WIB_PWR_FEMB(self, wib_ip, femb_sws=[1,1,1,1]):
         print ("FEMBs power operation on the WIB with IP = %s, wait a moment"%wib_ip)
         self.UDP.UDP_IP = wib_ip
-        pwr_status = self.UDP.read_reg_wib (0x8)
-        pwr_ctl = [0x31000F, 0x5200F0, 0x940F00, 0x118F000]
-        for i in range(len(femb_sws)):
-            if ( femb_sws[i] == 1):
-                pwr_status |= np.uint32(pwr_ctl[i])
-                self.UDP.write_reg_wib_checked (0x8, pwr_status )
-                time.sleep(1)
-            else:
-                if (i == 3) and (femb_sws == [0, 0, 0, 0]):
-                    pwr_status = 0x00000000
+        if (self.FEMB_QC_f):
+            pwr_ctl = [0x31000F, 0x5200F0, 0x940F00, 0x118F000]
+            pwr_wr = 0
+            for pwr in pwr_ctl:
+                pwr_wr |= np.uint32(pwr)
+            self.UDP.write_reg_wib_checked (0x8, 0) #All off
+            time.sleep(5)
+            self.UDP.write_reg_wib_checked (0x8, pwr_wr) 
+            time.sleep(5)
+            self.UDP.write_reg_wib_checked (0x8, 0) #All off
+            time.sleep(0.1)
+            self.UDP.write_reg_wib_checked (0x8, pwr_wr)
+        else:
+            pwr_status = self.UDP.read_reg_wib (0x8)
+            pwr_ctl = [0x31000F, 0x5200F0, 0x940F00, 0x118F000]
+            for i in range(len(femb_sws)):
+                if ( femb_sws[i] == 1):
+                    pwr_status |= np.uint32(pwr_ctl[i])
+                    self.UDP.write_reg_wib_checked (0x8, pwr_status )
+                    time.sleep(1)
                 else:
-                    pwr_status &= (~np.uint32(pwr_ctl[i]) | 0x00100000)
-                self.UDP.write_reg_wib_checked (0x8, pwr_status )
-                time.sleep(1)
+                    if (i == 3) and (femb_sws == [0, 0, 0, 0]):
+                        pwr_status = 0x00000000
+                    else:
+                        pwr_status &= (~np.uint32(pwr_ctl[i]) | 0x00100000)
+                    self.UDP.write_reg_wib_checked (0x8, pwr_status )
+                    time.sleep(1)
         time.sleep(self.pwr_dly)
 
     def FEMB_DECTECT(self, wib_ip):
@@ -665,3 +679,6 @@ class CLS_CONFIG:
 ##a.FEMB_UDPACQ("192.168.121.1", 0, cfglog, val=100)
 #a.TPC_UDPACQ(cfglog)
 #a.FEMBs_CE_OFF()
+
+#a.FEMB_QC_f = True
+#a.WIB_PWR_FEMB( wib_ip="192.168.121.1", femb_sws=[1,1,1,1])
