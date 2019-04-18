@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/17/2019 11:09:59 PM
+Last modified: 4/18/2019 6:35:52 PM
 """
 
 #defaut setting for scientific caculation
@@ -51,7 +51,7 @@ class CLS_CONFIG:
         self.fecfg_loadflg = False
         self.fe_monflg = False
         self.REGS = []
-        self.FEMB_QC_f = False #only set to "True" for FEMB screening test
+        self.pwr_int_f = False #only set to "True" for FEMB screening test
 
     def WIB_UDP_CTL(self, wib_ip, WIB_UDP_EN = False):
         self.UDP.UDP_IP = wib_ip
@@ -92,11 +92,14 @@ class CLS_CONFIG:
     def WIB_PWR_FEMB(self, wib_ip, femb_sws=[1,1,1,1]):
         print ("FEMBs power operation on the WIB with IP = %s, wait a moment"%wib_ip)
         self.UDP.UDP_IP = wib_ip
-        if (self.FEMB_QC_f):
+        if (self.pwr_int_f):
             pwr_ctl = [0x31000F, 0x5200F0, 0x940F00, 0x118F000]
             pwr_wr = 0
-            for pwr in pwr_ctl:
-                pwr_wr |= np.uint32(pwr)
+            for i in range(len(femb_sws)):
+                if ( femb_sws[i] == 1):
+                    pwr_wr |= np.uint32(pwr_ctl[i])
+                else:
+                    pwr_wr |= 0
             self.UDP.write_reg_wib_checked (0x8, 0) #All off
             time.sleep(5)
             self.UDP.write_reg_wib_checked (0x8, pwr_wr) 
@@ -666,6 +669,8 @@ class CLS_CONFIG:
                             pickle.dump(tmp, fp)
                         tmp = None
                     break
+        else:
+            tmp = None
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
         return tmp
 

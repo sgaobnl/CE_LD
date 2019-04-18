@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/17/2019 11:43:36 PM
+Last modified: 4/18/2019 6:35:46 PM
 """
 
 #defaut setting for scientific caculation
@@ -17,6 +17,7 @@ import numpy as np
 #import pylab as pl
 
 import sys 
+import os
 import string
 import time
 from datetime import datetime
@@ -37,7 +38,7 @@ class FEMB_QC:
         self.f_qcindex = self.databkdir + "FEMB_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
-        self.pwr_n = 10 
+        self.pwr_n = 1 
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
         self.CLS.FEMB_ver = 0x501
@@ -229,16 +230,20 @@ class FEMB_QC:
             if  "OFF" in femb_id:
                 pass
             else :
+                if self.pwr_int_f:
+                    note = "PWR_Interrupt_Enable(0.1s), " + femb_c_ret
+                else:
+                    note =  femb_c_ret
                 qc_list = ["FAIL", femb_env, femb_id, femb_rerun_f, femb_date, femb_errlog, femb_c_ret, "PWR%d"%pwr_i] 
                 map_r = None
-                sts = None
                 for femb_data in qc_data:
                     if (femb_data[0][1] == femb_addr): 
                         fdata =  femb_data
                         sts_r = fdata[2][0]
                         fembdata = fdata[1]
-                        map_r = self.FEMB_CHK( femb_addr, fembdata)
+                        cfg = fdata[0]
                         sts = fdata[2]
+                        map_r = self.FEMB_CHK( femb_addr, cfg, fembdata)
                         if (len(femb_errlog) == 0):
                             if map_r[0] : 
                                 qc_list[0] = "PASS" 
@@ -247,21 +252,32 @@ class FEMB_QC:
                                 qc_list[-3] += map_r[1]
                         break
                 qcs.append(qc_list )
-                self.raw_data.append([qc_list, map_r, sts, fdata[0]])
+                if (map_r != None):
+                    self.raw_data.append([qc_list, map_r, sts, cfg])
+                else:
+                    self.raw_data.append([qc_list, None, None, None])
         return qcs
 
-    def FEMB_CHK(self,  femb_addr, fembdata):
+    def FEMB_CHK(self,  femb_addr, cfg, fembdata):
         chn_rmss = []
         chn_peds = []
         chn_pkps = []
         chn_pkns = []
         chn_waves = []
+        fpgadac_en = cfg[6]
+        asicdac_en = cfg[7]
+        fe_sts = cfg[13]
+        rms_f = True if ((fpgadac_en==0) and (asicdac_en==0)) or (fe_sts==0) else False
+
         for adata in fembdata:
             chn_data, feed_loc, chn_peakp, chn_peakn = self.RAW_C.raw_conv_peak(adata)
             for achn in range(len(chn_data)):
                 achn_ped = []
-                for af in range(len(feed_loc[0:-2])):
-                    achn_ped += chn_data[achn][feed_loc[af]+100: feed_loc[af+1]-100 ] 
+                if (rms_f):
+                    achn_ped += chn_data[achn] 
+                else:
+                    for af in range(len(feed_loc[0:-2])):
+                        achn_ped += chn_data[achn][feed_loc[af]+100: feed_loc[af+1]-100 ] 
                 arms = np.std(achn_ped)
                 aped = int(np.mean(achn_ped))
                 apeakp = int(np.mean(chn_peakp[achn]))
@@ -273,12 +289,13 @@ class FEMB_QC:
                 chn_waves.append( chn_data[achn][feed_loc[0]: feed_loc[1]] )
         ana_err_code = ""
         rms_mean = np.mean(chn_rmss)
-        rms_thr = 10*np.std(chn_rmss) if 10*(np.std(chn_rmss) < rms_mean) else rms_mean
-        for chn in range(128):
-            if abs(chn_rmss[chn] - rms_mean) < rms_thr :
-                pass
-            else:
-                ana_err_code += "-F9_RMS_CHN%d"%(chn)
+        if (rms_f):
+            rms_thr = 5*np.std(chn_rmss) if 5*(np.std(chn_rmss) < rms_mean) else rms_mean
+            for chn in range(128):
+                if abs(chn_rmss[chn] - rms_mean) < rms_thr :
+                    pass
+                else:
+                    ana_err_code += "-F9_RMS_CHN%d"%(chn)
 
         for gi in range(4): 
             ped_mean = np.mean(chn_peds[gi*32 : (gi+1)*32])
@@ -286,24 +303,25 @@ class FEMB_QC:
             pkn_mean = np.mean(chn_pkns[gi*32 : (gi+1)*32])
             ped_thr= 30 
             for chn in range(gi*32, (gi+1)*32, 1):
-                if chn_pkps[chn] < 200:
-                    ana_err_code += "-F9_NORESP_CHN%d"%(chn)
-                if chn_pkns[chn] < 200:
-                    ana_err_code += "-F9_NORESN_CHN%d"%(chn)
                 if abs(chn_peds[chn] - ped_mean) > ped_thr :
                     ana_err_code += "-F9_PED_CHN%d"%(chn)
-                if abs(1- chn_pkps[chn]/pkp_mean) > 0.2:
-                    ana_err_code += "-F9_PEAKP_CHN%d"%(chn)
-                if abs(1- chn_pkns[chn]/pkn_mean) > 0.5:
-                    ana_err_code += "-F9_PEAKN_CHN%d"%(chn)
+                if (not rms_f):
+                    if chn_pkps[chn] < 200:
+                        ana_err_code += "-F9_NORESP_CHN%d"%(chn)
+                    if chn_pkns[chn] < 200:
+                        ana_err_code += "-F9_NORESN_CHN%d"%(chn)
+                    if abs(1- chn_pkps[chn]/pkp_mean) > 0.2:
+                        ana_err_code += "-F9_PEAKP_CHN%d"%(chn)
+                    if abs(1- chn_pkns[chn]/pkn_mean) > 0.5:
+                        ana_err_code += "-F9_PEAKN_CHN%d"%(chn)
         if len(ana_err_code) > 0:
             return (False, ana_err_code, [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves])
         else:
             return (True, "-PASS", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves])
 
-    def FEMB_QC_PWR(self, FEMB_infos):
+    def FEMB_QC_PWR(self, FEMB_infos, pwr_int_f = False):
         pwr_qcs = []
-        self.CLS.FEMB_QC_f = True
+        self.CLS.pwr_int_f = pwr_int_f
         for pwr_i in range(1, self.pwr_n+1 ):
             print ("Power Cycle %d of %d starts..."%(pwr_i, self.pwr_n))
             qc_data = self.FEMB_CHK_ACQ(testcode = pwr_i)
@@ -311,6 +329,7 @@ class FEMB_QC:
             pwr_qcs += qcs
             print ("Power Cycle %d of %d is done, wait 30 seconds"%(pwr_i, self.pwr_n))
             time.sleep(30)
+        self.CLS.pwr_int_f = False
 
         saves = []
         for femb_info in FEMB_infos:
@@ -340,8 +359,9 @@ class FEMB_QC:
             fn =self.databkdir  + "FEMB_QC_" + pwr_qcs[0][1] +"_" + pwr_qcs[0][4] + ".bin" 
             with open(fn, 'wb') as f:
                 pickle.dump(self.raw_data, f)
+        self.FEMB_PLOT()
+        self.raw_data = []
         print ("Result is saved in %s"%self.user_f )
-        self.CLS.FEMB_QC_f = False
 
     def FEMB_SUB_PLOT(self, ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx=False, ylabel_twx = "", e=None):
         ax.set_title(title)
@@ -350,10 +370,12 @@ class FEMB_QC:
         ax.grid(True)
         if (atwinx):
             ax.errorbar(x,y,e, marker=marker, color=color)
-            ax.set_ylim([0, 0x4000])
+            y_min = int(np.min(y))-1000
+            y_max = int(np.max(y))+1000
+            ax.set_ylim([y_min, y_max])
             ax2 = ax.twinx()
             ax2.set_ylabel(ylabel_twx)
-            ax2.set_ylim([0, 2048])
+            ax2.set_ylim([int((y_min/16384.0)*2048), int((y_max/16384.0)*2048)])
         else:
             ax.plot(x,y, marker=marker, color=color)
 
@@ -370,61 +392,17 @@ class FEMB_QC:
                 femb_errlog = qc_list[5]
                 femb_c_ret = qc_list[6]
                 femb_pwr = qc_list[7]
-                map_r = a_femb_data[1]
-                map_pf = map_r[0]
-                map_pf_str = map_r[1]
-                chn_rmss = map_r[2][0] # 128chn list, each element is a integal
-                chn_peds = map_r[2][1] # 128chn list, each element is a float
-                chn_pkps = map_r[2][2] # 128chn list, each element is a integal
-                chn_pkns = -(abs(np.array(map_r[2][3]))) # 128chn list, each element is a integal
-                chn_wfs  = map_r[2][4] # 128chn list, each element is a list
-                d_sts = a_femb_data[2][0]
-                d_sts_keys = list(d_sts.keys())
-                wib_ip = a_femb_data[3][0]
-                femb_addr = a_femb_data[3][1]
 
-                fpgadac_en = a_femb_data[3][6]
-                asicdac_en = a_femb_data[3][7]
-                fpgadac_v  = a_femb_data[3][8]
-                snc  = a_femb_data[3][14]
-                sg0  = a_femb_data[3][15]
-                sg1  = a_femb_data[3][16]
-                st0  = a_femb_data[3][17]
-                st1  = a_femb_data[3][18]
-                sdf  = a_femb_data[3][20]
-                asicdac_v = a_femb_data[3][29]
-                if fpgadac_en:
-                    cali_str = "FPGA-DAC(%02x)"%fpgadac_v
-                elif asicdac_en:
-                    cali_str = "ASIC-DAC(%02x)"%asicdac_v
+                png_dir = self.databkdir + "/" + femb_id + "/"
+                if (os.path.exists(png_dir)):
+                    pass
                 else:
-                    cali_str = "No pulser"
-                snc_str = "FE Baseline 200mV" if snc==1 else "FE Baseline 900mV"
-                sdf_str = "FE Buffer ON" if sdf==1 else "FE Buffer OFF"
-                if sg0 == 0 and sg1 == 0:
-                    sg_str = "4.7mV/fC"
-                elif sg0 == 1 and sg1 == 0:
-                    sg_str = "7.8mV/fC"
-                elif sg0 == 0 and sg1 == 1:
-                    sg_str = "14mV/fC"
-                else:
-                    sg_str = "25mV/fC"
-
-                if st0 == 0 and st1 == 0:
-                    st_str = "1.0$\mu$s"
-                elif st0 == 1 and st1 == 0:
-                    st_str = "0.5$\mu$s"
-                elif st0 == 0 and st1 == 1:
-                    st_str = "3.0$\mu$s"
-                else:
-                    st_str = "2.0$\mu$s"
-               
-                fembsts_keys = []
-                for akey in d_sts_keys:
-                    if (akey == "FEMB%d"%femb_addr):
-                        fembsts_keys.append(akey)
-                
-                fn = self.databkdir + "/" + env + "_" + femb_id + "_" + femb_date + "_" + femb_pwr + ".png"
+                    try:
+                        os.makedirs(png_dir)
+                    except OSError:
+                        print ("Error to create folder %s"%png_dir)
+                        sys.exit()
+                fn = png_dir + "/" + env + "_" + femb_id + "_" + femb_date + "_" + femb_pwr + ".png"
 
                 fig = plt.figure(figsize=(8.5,11))
                 color = "g" if "PASS" in qc_pf else "r"
@@ -434,44 +412,98 @@ class FEMB_QC:
                 fig.text(0.10, 0.92, "FEMB ID: %s "%femb_id      )
                 fig.text(0.55, 0.92, "STATUS: %s "%qc_pf, color=color, weight ="bold" )
                 fig.text(0.10,0.90, "Rerun comment: %s "%femb_c_ret     )
-                fig.text(0.10, 0.88, "WIB IP: %s "%wib_ip      )
-                fig.text(0.55, 0.88, "FEMB SLOT: %s "%femb_addr     )
-                fig.text(0.10, 0.86, "FE Configuration: " + sg_str + ", " + st_str + ", " + snc_str + ", " + sdf_str + ", " + cali_str  )
 
-                fig.text(0.35, 0.83, "Link Status and Power consumption" ,weight ="bold"    )
-                fig.text(0.10, 0.81, "LINK: : " + "{0:4b}".format(d_sts["FEMB%d_LINK"%femb_addr])   )
-                fig.text(0.55, 0.81, "EQ: : " + "{0:4b}".format(d_sts["FEMB%d_EQ"%femb_addr])      )
-                fig.text(0.10, 0.79, "Checksum error counter of LINK0 to LINK3 : %04X, %04X, %04X, %04X"%\
-                                      (d_sts["FEMB%d_CHK_ERR_LINK0"%femb_addr], d_sts["FEMB%d_CHK_ERR_LINK1"%femb_addr] ,
-                                       d_sts["FEMB%d_CHK_ERR_LINK2"%femb_addr], d_sts["FEMB%d_CHK_ERR_LINK3"%femb_addr] ) )
-                fig.text(0.10, 0.77, "Frame error counter of LINK0 to LINK3 : %04X, %04X, %04X, %04X"% \
-                                      (d_sts["FEMB%d_FRAME_ERR_LINK0"%femb_addr], d_sts["FEMB%d_FRAME_ERR_LINK1"%femb_addr] ,
-                                       d_sts["FEMB%d_FRAME_ERR_LINK2"%femb_addr], d_sts["FEMB%d_FRAME_ERR_LINK3"%femb_addr] ) )
-                fig.text(0.10, 0.75, "FEMB Power Consumption = " + "{0:.4f}".format(d_sts["FEMB%d_PC"%femb_addr]) + "W" )
+                map_r = a_femb_data[1]
+                if (map_r != None):
+                    map_pf = map_r[0]
+                    map_pf_str = map_r[1]
+                    chn_rmss = map_r[2][0] # 128chn list, each element is a integal
+                    chn_peds = map_r[2][1] # 128chn list, each element is a float
+                    chn_pkps = map_r[2][2] # 128chn list, each element is a integal
+                    chn_pkns = -(abs(np.array(map_r[2][3]))) # 128chn list, each element is a integal
+                    chn_wfs  = map_r[2][4] # 128chn list, each element is a list
+                    d_sts = a_femb_data[2][0]
+                    d_sts_keys = list(d_sts.keys())
+                    wib_ip = a_femb_data[3][0]
+                    femb_addr = a_femb_data[3][1]
 
-                fig.text(0.10, 0.73, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_V"%femb_addr]) + \
-                                     "V, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_V"%femb_addr]) + \
-                                     "V, AM V28 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_V"%femb_addr]) + "V")
+                    fpgadac_en = a_femb_data[3][6]
+                    asicdac_en = a_femb_data[3][7]
+                    fpgadac_v  = a_femb_data[3][8]
+                    snc  = a_femb_data[3][14]
+                    sg0  = a_femb_data[3][15]
+                    sg1  = a_femb_data[3][16]
+                    st0  = a_femb_data[3][17]
+                    st1  = a_femb_data[3][18]
+                    sdf  = a_femb_data[3][20]
+                    asicdac_v = a_femb_data[3][29]
+                    if fpgadac_en:
+                        cali_str = "FPGA-DAC(%02x)"%fpgadac_v
+                    elif asicdac_en:
+                        cali_str = "ASIC-DAC(%02x)"%asicdac_v
+                    else:
+                        cali_str = "No pulser"
+                    snc_str = "FE Baseline 200mV" if snc==1 else "FE Baseline 900mV"
+                    sdf_str = "FE Buffer ON" if sdf==1 else "FE Buffer OFF"
+                    if sg0 == 0 and sg1 == 0:
+                        sg_str = "4.7mV/fC"
+                    elif sg0 == 1 and sg1 == 0:
+                        sg_str = "7.8mV/fC"
+                    elif sg0 == 0 and sg1 == 1:
+                        sg_str = "14mV/fC"
+                    else:
+                        sg_str = "25mV/fC"
 
-                fig.text(0.10, 0.71, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_I"%femb_addr]) + \
-                                     "A, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_I"%femb_addr]) + \
-                                     "A, AM V28 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_I"%femb_addr]) + "A")
+                    if st0 == 0 and st1 == 0:
+                        st_str = "1.0$\mu$s"
+                    elif st0 == 1 and st1 == 0:
+                        st_str = "0.5$\mu$s"
+                    elif st0 == 0 and st1 == 1:
+                        st_str = "3.0$\mu$s"
+                    else:
+                        st_str = "2.0$\mu$s"
+               
+                    fembsts_keys = []
+                    for akey in d_sts_keys:
+                        if (akey == "FEMB%d"%femb_addr):
+                            fembsts_keys.append(akey)
+                
+                    fig.text(0.10, 0.88, "WIB IP: %s "%wib_ip      )
+                    fig.text(0.55, 0.88, "FEMB SLOT: %s "%femb_addr     )
+                    fig.text(0.10, 0.86, "FE Configuration: " + sg_str + ", " + st_str + ", " + snc_str + ", " + sdf_str + ", " + cali_str  )
 
-                fig.text(0.10, 0.69, "FM V39 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV39_V"%femb_addr]) + \
-                                     "V, FM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV30_V"%femb_addr]) + \
-                                     "V, FM V18 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV18_V"%femb_addr]) + "V" )
+                    fig.text(0.35, 0.83, "Link Status and Power consumption" ,weight ="bold"    )
+                    fig.text(0.10, 0.81, "LINK: : " + "{0:4b}".format(d_sts["FEMB%d_LINK"%femb_addr])   )
+                    fig.text(0.55, 0.81, "EQ: : " + "{0:4b}".format(d_sts["FEMB%d_EQ"%femb_addr])      )
+                    fig.text(0.10, 0.79, "Checksum error counter of LINK0 to LINK3 : %04X, %04X, %04X, %04X"%\
+                                          (d_sts["FEMB%d_CHK_ERR_LINK0"%femb_addr], d_sts["FEMB%d_CHK_ERR_LINK1"%femb_addr] ,
+                                           d_sts["FEMB%d_CHK_ERR_LINK2"%femb_addr], d_sts["FEMB%d_CHK_ERR_LINK3"%femb_addr] ) )
+                    fig.text(0.10, 0.77, "Frame error counter of LINK0 to LINK3 : %04X, %04X, %04X, %04X"% \
+                                          (d_sts["FEMB%d_FRAME_ERR_LINK0"%femb_addr], d_sts["FEMB%d_FRAME_ERR_LINK1"%femb_addr] ,
+                                           d_sts["FEMB%d_FRAME_ERR_LINK2"%femb_addr], d_sts["FEMB%d_FRAME_ERR_LINK3"%femb_addr] ) )
+                    fig.text(0.10, 0.75, "FEMB Power Consumption = " + "{0:.4f}".format(d_sts["FEMB%d_PC"%femb_addr]) + "W" )
 
-                fig.text(0.10, 0.67, "FM V39 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV39_I"%femb_addr]) + \
-                                     "A, FM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV30_I"%femb_addr]) + \
-                                     "A, FM V18 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV18_I"%femb_addr]) + "A" )
+                    fig.text(0.10, 0.73, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_V"%femb_addr]) + \
+                                         "V, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_V"%femb_addr]) + \
+                                         "V, AM V28 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_V"%femb_addr]) + "V")
+
+                    fig.text(0.10, 0.71, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_I"%femb_addr]) + \
+                                         "A, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_I"%femb_addr]) + \
+                                         "A, AM V28 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_I"%femb_addr]) + "A")
+
+                    fig.text(0.10, 0.69, "FM V39 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV39_V"%femb_addr]) + \
+                                         "V, FM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV30_V"%femb_addr]) + \
+                                         "V, FM V18 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV18_V"%femb_addr]) + "V" )
+
+                    fig.text(0.10, 0.67, "FM V39 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV39_I"%femb_addr]) + \
+                                         "A, FM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV30_I"%femb_addr]) + \
+                                         "A, FM V18 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV18_I"%femb_addr]) + "A" )
                 
                 
-                #if ("PASS" in qc_pf):
-                if (True):
-                    ax1 = plt.subplot2grid((3, 2), (1, 0), colspan=1, rowspan=1)
-                    ax2 = plt.subplot2grid((3, 2), (2, 0), colspan=1, rowspan=1)
-                    ax3 = plt.subplot2grid((3, 2), (1, 1), colspan=1, rowspan=1)
-                    ax4 = plt.subplot2grid((3, 2), (2, 1), colspan=1, rowspan=1)
+                    ax1 = plt.subplot2grid((4, 2), (2, 0), colspan=1, rowspan=1)
+                    ax2 = plt.subplot2grid((4, 2), (3, 0), colspan=1, rowspan=1)
+                    ax3 = plt.subplot2grid((4, 2), (2, 1), colspan=1, rowspan=1)
+                    ax4 = plt.subplot2grid((4, 2), (3, 1), colspan=1, rowspan=1)
                     chns = range(len(chn_rmss))
                     self.FEMB_SUB_PLOT(ax1, chns, chn_rmss, title="RMS Noise", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
                     self.FEMB_SUB_PLOT(ax2, chns, chn_peds, title="Pedestal", xlabel="CH number", ylabel ="ADC / bin", color='b', marker='.')
@@ -482,23 +514,27 @@ class FEMB_QC:
                         x = (np.arange(ts)) * 0.5
                         y = chn_wfs[chni][0:ts]
                         self.FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
-                else:
+
+                if ("PASS" not in qc_pf):
                     cperl = 80
                     lines = int(len(femb_errlog)//cperl) + 1
                     fig.text(0.05,0.65, "Error log: ")
-                    for i in range(lines):
+                    printlines =  lines if lines<=5 else 5
+                    for i in range(printlines):
                         fig.text(0.10, 0.63-0.02*i, femb_errlog[i*cperl:(i+1)*cperl])
+                    if (lines>5):
+                        fig.text(0.10, 0.63-0.02*5, " ... ... ... (%d more lines are not shown!)"%(lines-5) )
                 
                 plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
                 plt.savefig(fn)
                 plt.close()
 
-    def QC_FEMB_BL_T_PLOT(self, FEMB_infos):
-        self.CLS.FEMB_QC_f = True
+    def QC_FEMB_BL_T_PLOT(self, FEMB_infos, pwr_int_f = False):
+        self.CLS.pwr_int_f = pwr_int_f
         w_f_bs_200mV = self.FEMB_BL_RB(snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1) # 14mV/fC, 2.0us, 200mV
         w_f_bs_900mV = self.FEMB_BL_RB(snc=0, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1) # 14mV/fC, 2.0us, 900mV
         w_f_ts = self.FEMB_Temp_RB()
-        self.CLS.FEMB_QC_f = False
+        self.CLS.pwr_int_f = False
         BL_T_data = []
 
         for femb_info in FEMB_infos:
@@ -533,7 +569,16 @@ class FEMB_QC:
                             break
                 BL_T_data.append([femb_id, ys, wib_ip, femb_addr, femb_env, femb_rerun_f, femb_c_ret, femb_date, femb_errlog]) 
                 import matplotlib.pyplot as plt
-                fn_fig = self.databkdir + "/BL_T_" + femb_env + "_" + femb_id + "_" + femb_date +  ".png"
+                png_dir = self.databkdir + "/" + femb_id + "/"
+                if (os.path.exists(png_dir)):
+                    pass
+                else:
+                    try:
+                        os.makedirs(png_dir)
+                    except OSError:
+                        print ("Error to create folder %s"%png_dir)
+                        sys.exit()
+                fn_fig = png_dir + "BL_T_" + femb_env + "_" + femb_id + "_" + femb_date +  ".png"
                 fig = plt.figure(figsize=(8.5,11))
                 fig.suptitle("BASELINE and Temperature Measurement of FEMB#%s"%(femb_id), weight ="bold", fontsize = 12)
                 fig.text(0.10, 0.94, "Date&Time: %s"%femb_date   )
@@ -579,8 +624,8 @@ a = FEMB_QC()
 FEMB_infos = ['SLOT0\nFC022-TAC01\nLN\nN\n', 'SLOT1\nFC026-TAC02\nLN\nN\n', 'SLOT2\nFC037-TAC03\nLN\nN\n', 'SLOT3\nFC024-TAC04\nLN\nN\n']
 #FEMB_infos = a.FEMB_QC_Input()
 a.FEMB_QC_PWR( FEMB_infos)
-a.FEMB_PLOT()
-a.QC_FEMB_BL_T_PLOT(FEMB_infos)
+a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = True)
+#a.QC_FEMB_BL_T_PLOT(FEMB_infos)
 print ("Well Done")
 
 #FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
