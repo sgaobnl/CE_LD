@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/18/2019 6:35:46 PM
+Last modified: 4/18/2019 7:05:17 PM
 """
 
 #defaut setting for scientific caculation
@@ -38,7 +38,7 @@ class FEMB_QC:
         self.f_qcindex = self.databkdir + "FEMB_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
-        self.pwr_n = 1 
+        self.pwr_n = 10
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
         self.CLS.FEMB_ver = 0x501
@@ -230,11 +230,11 @@ class FEMB_QC:
             if  "OFF" in femb_id:
                 pass
             else :
-                if self.pwr_int_f:
-                    note = "PWR_Interrupt_Enable(0.1s), " + femb_c_ret
+                if self.CLS.pwr_int_f:
+                    note = "PWR Interruption Enable(0.1s), " + femb_c_ret
                 else:
                     note =  femb_c_ret
-                qc_list = ["FAIL", femb_env, femb_id, femb_rerun_f, femb_date, femb_errlog, femb_c_ret, "PWR%d"%pwr_i] 
+                qc_list = ["FAIL", femb_env, femb_id, femb_rerun_f, femb_date, femb_errlog, note, "PWR%d"%pwr_i] 
                 map_r = None
                 for femb_data in qc_data:
                     if (femb_data[0][1] == femb_addr): 
@@ -297,12 +297,12 @@ class FEMB_QC:
                 else:
                     ana_err_code += "-F9_RMS_CHN%d"%(chn)
 
-        for gi in range(4): 
-            ped_mean = np.mean(chn_peds[gi*32 : (gi+1)*32])
-            pkp_mean = np.mean(chn_pkps[gi*32 : (gi+1)*32])
-            pkn_mean = np.mean(chn_pkns[gi*32 : (gi+1)*32])
+        for gi in range(8): 
+            ped_mean = np.mean(chn_peds[gi*16 : (gi+1)*16])
+            pkp_mean = np.mean(chn_pkps[gi*16 : (gi+1)*16])
+            pkn_mean = np.mean(chn_pkns[gi*16 : (gi+1)*16])
             ped_thr= 30 
-            for chn in range(gi*32, (gi+1)*32, 1):
+            for chn in range(gi*16, (gi+1)*16, 1):
                 if abs(chn_peds[chn] - ped_mean) > ped_thr :
                     ana_err_code += "-F9_PED_CHN%d"%(chn)
                 if (not rms_f):
@@ -359,7 +359,7 @@ class FEMB_QC:
             fn =self.databkdir  + "FEMB_QC_" + pwr_qcs[0][1] +"_" + pwr_qcs[0][4] + ".bin" 
             with open(fn, 'wb') as f:
                 pickle.dump(self.raw_data, f)
-        self.FEMB_PLOT()
+        self.FEMB_PLOT(pwr_int_f = pwr_int_f)
         self.raw_data = []
         print ("Result is saved in %s"%self.user_f )
 
@@ -379,7 +379,7 @@ class FEMB_QC:
         else:
             ax.plot(x,y, marker=marker, color=color)
 
-    def FEMB_PLOT(self):
+    def FEMB_PLOT(self, pwr_int_f = False):
         import matplotlib.pyplot as plt
         if len(self.raw_data) != 0: 
             for a_femb_data in self.raw_data:
@@ -482,6 +482,8 @@ class FEMB_QC:
                                           (d_sts["FEMB%d_FRAME_ERR_LINK0"%femb_addr], d_sts["FEMB%d_FRAME_ERR_LINK1"%femb_addr] ,
                                            d_sts["FEMB%d_FRAME_ERR_LINK2"%femb_addr], d_sts["FEMB%d_FRAME_ERR_LINK3"%femb_addr] ) )
                     fig.text(0.10, 0.75, "FEMB Power Consumption = " + "{0:.4f}".format(d_sts["FEMB%d_PC"%femb_addr]) + "W" )
+                    if (pwr_int_f):
+                        fig.text(0.55, 0.75, "Power 0.1s Interruption Enabled", color ='r' )
 
                     fig.text(0.10, 0.73, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_V"%femb_addr]) + \
                                          "V, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_V"%femb_addr]) + \
@@ -587,6 +589,8 @@ class FEMB_QC:
                 fig.text(0.10,0.90, "Rerun comment: %s "%femb_c_ret     )
                 fig.text(0.10, 0.88, "WIB IP: %s "%wib_ip      )
                 fig.text(0.55, 0.88, "FEMB SLOT: %s "%femb_addr     )
+                if (pwr_int_f):
+                    fig.text(0.10, 0.86, "Power 0.1s Interruption Enabled", color ='r' )
                 if len(femb_errlog) == 0:
                     ax1 = plt.subplot2grid((4, 1), (1, 0), colspan=1, rowspan=1)
                     ax2 = plt.subplot2grid((4, 1), (2, 0), colspan=1, rowspan=1)
@@ -625,7 +629,8 @@ FEMB_infos = ['SLOT0\nFC022-TAC01\nLN\nN\n', 'SLOT1\nFC026-TAC02\nLN\nN\n', 'SLO
 #FEMB_infos = a.FEMB_QC_Input()
 a.FEMB_QC_PWR( FEMB_infos)
 a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = True)
-#a.QC_FEMB_BL_T_PLOT(FEMB_infos)
+a.QC_FEMB_BL_T_PLOT(FEMB_infos)
+a.QC_FEMB_BL_T_PLOT(FEMB_infos, pwr_int_f = True)
 print ("Well Done")
 
 #FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
