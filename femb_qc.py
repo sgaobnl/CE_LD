@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/17/2019 7:13:14 PM
+Last modified: 4/17/2019 11:43:36 PM
 """
 
 #defaut setting for scientific caculation
@@ -37,7 +37,7 @@ class FEMB_QC:
         self.f_qcindex = self.databkdir + "FEMB_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
-        self.pwr_n = 50 
+        self.pwr_n = 10 
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
         self.CLS.FEMB_ver = 0x501
@@ -398,7 +398,7 @@ class FEMB_QC:
                 elif asicdac_en:
                     cali_str = "ASIC-DAC(%02x)"%asicdac_v
                 else:
-                    cali_str = "No pulser"%asicdac_v
+                    cali_str = "No pulser"
                 snc_str = "FE Baseline 200mV" if snc==1 else "FE Baseline 900mV"
                 sdf_str = "FE Buffer ON" if sdf==1 else "FE Buffer OFF"
                 if sg0 == 0 and sg1 == 0:
@@ -453,9 +453,9 @@ class FEMB_QC:
                                      "V, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_V"%femb_addr]) + \
                                      "V, AM V28 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_V"%femb_addr]) + "V")
 
-                fig.text(0.10, 0.71, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_V"%femb_addr]) + \
+                fig.text(0.10, 0.71, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_I"%femb_addr]) + \
                                      "A, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_I"%femb_addr]) + \
-                                     "A, AM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_I"%femb_addr]) + "A")
+                                     "A, AM V28 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_I"%femb_addr]) + "A")
 
                 fig.text(0.10, 0.69, "FM V39 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV39_V"%femb_addr]) + \
                                      "V, FM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV30_V"%femb_addr]) + \

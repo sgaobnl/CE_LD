@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/17/2019 6:58:50 PM
+Last modified: 4/17/2019 11:09:59 PM
 """
 
 #defaut setting for scientific caculation
@@ -147,7 +147,7 @@ class CLS_CONFIG:
                         fembs_found[i] = False
                         self.err_code +="-F1_BIAS_L"
                     elif (stats[key] > 0.1 ):
-                        print ("FEMB%d BIAS current (%fA) is higer than expected"%(i, stats[key]) )
+                        print ("FEMB%d BIAS current (%fA) is higher than expected"%(i, stats[key]) )
                         fembs_found[i] = False
                         self.err_code += "-F1_BIAS_H"
                 elif key in "FEMB%d_FMV39_I"%i:
@@ -156,7 +156,7 @@ class CLS_CONFIG:
                         fembs_found[i] = False
                         self.err_code += "-F1_FMV39_L"
                     elif (stats[key] > 0.2 ):
-                        print ("FEMB%d FM_V39 current (%fA) is higer than expected"%(i, stats[key] ))
+                        print ("FEMB%d FM_V39 current (%fA) is higher than expected"%(i, stats[key] ))
                         fembs_found[i] = False
                         self.err_code += "-F1_FMV39_H"
                 elif key in "FEMB%d_FMV30_I"%i:
@@ -165,7 +165,7 @@ class CLS_CONFIG:
                         fembs_found[i] = False
                         self.err_code += "-F1_FMV30_L"
                     elif (stats[key] > 0.5 ):
-                        print ("FEMB%d FM_V30 current (%fA) is higer than expected"%(i, stats[key] ))
+                        print ("FEMB%d FM_V30 current (%fA) is higher than expected"%(i, stats[key] ))
                         fembs_found[i] = False
                         self.err_code += "-F1_FMV30_H"
                 elif key in "FEMB%d_FMV18_I"%i:
@@ -174,7 +174,7 @@ class CLS_CONFIG:
                         fembs_found[i] = False
                         self.err_code += "-F1_FMV18_L"
                     elif (stats[key] > 1.0 ):
-                        print ("FEMB%d FM_V18 current (%fA) is higer than expected"%(i, stats[key] ))
+                        print ("FEMB%d FM_V18 current (%fA) is higher than expected"%(i, stats[key] ))
                         fembs_found[i] = False
                         self.err_code += "-F1_FMV18_H"
                 elif key in "FEMB%d_AMV33_I"%i:
@@ -183,7 +183,7 @@ class CLS_CONFIG:
                         fembs_found[i] = False if not self.FM_only_f else True
                         self.err_code +="-F1_AMV33_L"if not self.FM_only_f else ""
                     elif (stats[key] > 1.0 ):
-                        print ("FEMB%d AM_V33 current (%fA) is higer than expected"%(i, stats[key] ))
+                        print ("FEMB%d AM_V33 current (%fA) is higher than expected"%(i, stats[key] ))
                         fembs_found[i] = False if not self.FM_only_f else True
                         self.err_code +="-F1_AMV33_H"if not self.FM_only_f else ""
                 elif key in "FEMB%d_AMV28_I"%i:
@@ -191,8 +191,8 @@ class CLS_CONFIG:
                         print ("FEMB%d AM_V28 current (%fA) is lower than expected"%(i, stats[key] ))
                         fembs_found[i] = False if not self.FM_only_f else True
                         self.err_code +="-F1_AMV28_L"if not self.FM_only_f else ""
-                    elif (stats[key] > 1.0 ):
-                        print ("FEMB%d AM_V28 current (%fA) is higer than expected"%(i, stats[key] ))
+                    elif (stats[key] > 1.5 ):
+                        print ("FEMB%d AM_V28 current (%fA) is higher than expected"%(i, stats[key] ))
                         fembs_found[i] = False if not self.FM_only_f else True
                         self.err_code +="-F1_AMV28_H"if not self.FM_only_f else ""
             if (fembs_found[i]): #Link and current are good
