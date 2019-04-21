@@ -1,7 +1,7 @@
 Data packaging format (femb_qc.py)
 
 self.raw_data = [a_femb_data, a_femb_data, ...]
-a_femb_data = [qc_list, map_r, sts, wib_ip, femg_addr, cfg]
+a_femb_data = [qc_list, map_r, sts, cfg]
 
 qc_list = ["FAIL", femb_env, femb_id, femb_rerun_f, femb_date, femb_errlog, femb_c_ret, "PWR%d"%pwr_i] 
             0str     1str      2str     3str(Y/N)       4str      5str         6str        7str
