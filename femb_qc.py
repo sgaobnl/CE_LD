@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/18/2019 7:05:17 PM
+Last modified: 4/22/2019 6:35:46 PM
 """
 
 #defaut setting for scientific caculation
@@ -75,8 +75,9 @@ class FEMB_QC:
                 if (cf == "Y"):
                     break
             c_ret = ""
-            c_ret +="ToyTPC14_" + input("Toy TPC NO. for ASIC1-4 : ")
-            c_ret +="-ToyTPC58_" +input("Toy TPC NO. for ASIC5-8 : ") + "-"
+            if ("OFF" not in FEMB_id):
+                c_ret +="ToyTPC14_" + input("Toy TPC NO. for ASIC1-4 : ")
+                c_ret +="-ToyTPC58_" +input("Toy TPC NO. for ASIC5-8 : ") + "-"
             if FEMB_id in FEMBlist:
                 print ("FEMB \"%s\" has been tested before, please input a short note for this retest"%FEMB_id)
                 c_ret += input("Reason for retest: ")
@@ -221,17 +222,17 @@ class FEMB_QC:
             errs = self.CLS.err_code.split("SLOT")
             for er in errs[1:]:
                 if( int(er[0]) == femb_addr ):
-                    if (len(er) <2 ):
-                        femb_errlog = ""
+                    if (len(er) <=2 ):
+                        femb_errlog = "SLOT" + er
                     else:
-                        femb_errlog = er[2: er.index("#IP")] if "#IP" in er else er[2: ]
+                        femb_errlog = ("SLOT" + er[0: er.index("#IP")]) if "#IP" in er else ("SLOT" + er[0: ])
                     break
 
             if  "OFF" in femb_id:
                 pass
             else :
                 if self.CLS.pwr_int_f:
-                    note = "PWR Interruption Enable(0.1s), " + femb_c_ret
+                    note = "PWR Interruption Enable(0.1s)- " + femb_c_ret
                 else:
                     note =  femb_c_ret
                 qc_list = ["FAIL", femb_env, femb_id, femb_rerun_f, femb_date, femb_errlog, note, "PWR%d"%pwr_i] 
@@ -244,12 +245,12 @@ class FEMB_QC:
                         cfg = fdata[0]
                         sts = fdata[2]
                         map_r = self.FEMB_CHK( femb_addr, cfg, fembdata)
-                        if (len(femb_errlog) == 0):
+                        if (len(femb_errlog) < 8):
                             if map_r[0] : 
                                 qc_list[0] = "PASS" 
-                            else:
-                                qc_list[0] = "FAIL" 
-                                qc_list[-3] += map_r[1]
+                        else:
+                            qc_list[0] = "FAIL" 
+                            qc_list[-3] += map_r[1]
                         break
                 qcs.append(qc_list )
                 if (map_r != None):
@@ -317,7 +318,7 @@ class FEMB_QC:
         if len(ana_err_code) > 0:
             return (False, ana_err_code, [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves])
         else:
-            return (True, "-PASS", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves])
+            return (True, "PASS-", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves])
 
     def FEMB_QC_PWR(self, FEMB_infos, pwr_int_f = False):
         pwr_qcs = []
@@ -551,10 +552,10 @@ class FEMB_QC:
             wib_ip = self.CLS.err_code[self.CLS.err_code.index("#IP") +3: self.CLS.err_code.index("-SLOT")] 
             for er in errs[1:]:
                 if( int(er[0]) == femb_addr ):
-                    if (len(er) <2 ):
-                        femb_errlog = ""
+                    if (len(er) <=2 ):
+                        femb_errlog = "SLOT" + er
                     else:
-                        femb_errlog = er[2: er.index("#IP")] if "#IP" in er else er[2: ]
+                        femb_errlog = ("SLOT" + er[0: er.index("#IP")]) if "#IP" in er else ("SLOT" + er[0: ])
                     break
 
             if  "OFF" in femb_id:
@@ -591,7 +592,7 @@ class FEMB_QC:
                 fig.text(0.55, 0.88, "FEMB SLOT: %s "%femb_addr     )
                 if (pwr_int_f):
                     fig.text(0.10, 0.86, "Power 0.1s Interruption Enabled", color ='r' )
-                if len(femb_errlog) == 0:
+                if len(femb_errlog) < 8:
                     ax1 = plt.subplot2grid((4, 1), (1, 0), colspan=1, rowspan=1)
                     ax2 = plt.subplot2grid((4, 1), (2, 0), colspan=1, rowspan=1)
                     ax3 = plt.subplot2grid((4, 1), (3, 0), colspan=1, rowspan=1)
@@ -625,12 +626,15 @@ class FEMB_QC:
 a = FEMB_QC()
 #FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
 #FEMB_infos = ['SLOT0\nFC022-TAC01\nRT\nN\n', 'SLOT1\nFC026-TAC02\nRT\nN\n', 'SLOT2\nFC037-TAC03\nRT\nN\n', 'SLOT3\nFC024-TAC04\nRT\nN\n']
-FEMB_infos = ['SLOT0\nFC022-TAC01\nLN\nN\n', 'SLOT1\nFC026-TAC02\nLN\nN\n', 'SLOT2\nFC037-TAC03\nLN\nN\n', 'SLOT3\nFC024-TAC04\nLN\nN\n']
-#FEMB_infos = a.FEMB_QC_Input()
+#FEMB_infos = ['SLOT0\nFC022-TAC01\nLN\nN\n', 'SLOT1\nFC026-TAC02\nLN\nN\n', 'SLOT2\nFC037-TAC03\nLN\nN\n', 'SLOT3\nFC024-TAC04\nLN\nN\n']
+FEMB_infos = a.FEMB_QC_Input()
+
+#rt_f = sys.argv[1]
+if ("LN" in FEMB_infos[0]):
+    a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = True)
+    a.QC_FEMB_BL_T_PLOT(FEMB_infos, pwr_int_f = True)
 a.FEMB_QC_PWR( FEMB_infos)
-a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = True)
 a.QC_FEMB_BL_T_PLOT(FEMB_infos)
-a.QC_FEMB_BL_T_PLOT(FEMB_infos, pwr_int_f = True)
 print ("Well Done")
 
 #FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']

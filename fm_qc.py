@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/11/2019 5:31:34 PM
+Last modified: 4/20/2019 6:09:38 PM
 """
 
 #defaut setting for scientific caculation
@@ -36,7 +36,7 @@ class FM_QC:
         self.f_fm_qcindex = self.databkdir + "FM_QCindex.csv"
         self.fm_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
-        self.pwr_n = 5
+        self.pwr_n = 1
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs 
         self.CLS.FEMB_ver = 0x501
