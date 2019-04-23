@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/22/2019 6:35:46 PM
+Last modified: 4/22/2019 8:02:52 PM
 """
 
 #defaut setting for scientific caculation
@@ -245,9 +245,8 @@ class FEMB_QC:
                         cfg = fdata[0]
                         sts = fdata[2]
                         map_r = self.FEMB_CHK( femb_addr, cfg, fembdata)
-                        if (len(femb_errlog) < 8):
-                            if map_r[0] : 
-                                qc_list[0] = "PASS" 
+                        if (len(femb_errlog) < 8) and map_r[0]:
+                            qc_list[0] = "PASS" 
                         else:
                             qc_list[0] = "FAIL" 
                             qc_list[-3] += map_r[1]
