@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/22/2019 8:08:31 PM
+Last modified: 4/23/2019 7:54:51 PM
 """
 
 #defaut setting for scientific caculation
@@ -680,11 +680,11 @@ class CLS_CONFIG:
             pass
         else:
             if (id_type == 0):
-                fm_id_adr = 0x20000
+                fm_id_oft = 0x20000
             elif (id_type == 1):
-                am_id_adr = 0x20010
+                am_id_oft = 0x20010
             elif (id_type == 2):
-                apa_loc_id_adr = 0x20020
+                apa_loc_id_oft = 0x20020
 
             self.UDP.UDP_IP = wib_ip
             self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Enable HS data from the WIB to PC through UDP
@@ -692,6 +692,51 @@ class CLS_CONFIG:
                 #print ("WIB%s FEMB%d"%(wib_ip, femb_addr))
                 #read flash
                 self.UDP.write_reg_femb_checked (femb_addr, 13, 1)
+                for i in range(0x10)
+                    self.UDP.write_reg_femb_checked (femb_addr, 11, fm_id_oft*256)
+                    self.UDP.write_reg_femb_checked (femb_addr, 10, 3)
+                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x103)
+                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x0)
+                    time.sleep(0.01)
+                    id_flg = False 
+                    for i in range(64):
+                        if self.UDP.read_reg_femb (femb_addr, 0x240+i) != 0xFFFFFFFF :
+                            fm_id_oft +=1
+                            id_flg = True
+                            break
+                    if (not id_flg):
+                        break
+
+                for i in range(0x10)
+                    self.UDP.write_reg_femb_checked (femb_addr, 11, am_id_oft*256)
+                    self.UDP.write_reg_femb_checked (femb_addr, 10, 3)
+                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x103)
+                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x0)
+                    time.sleep(0.01)
+                    id_flg = False 
+                    for i in range(64):
+                        if self.UDP.read_reg_femb (femb_addr, 0x240+i) != 0xFFFFFFFF :
+                            am_id_oft +=1
+                            id_flg = True
+                            break
+                    if (not id_flg):
+                        break
+
+                for i in range(0x10)
+                    self.UDP.write_reg_femb_checked (femb_addr, 11, apa_loc_id_oft*256)
+                    self.UDP.write_reg_femb_checked (femb_addr, 10, 3)
+                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x103)
+                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x0)
+                    time.sleep(0.01)
+                    id_flg = False 
+                    for i in range(64):
+                        if self.UDP.read_reg_femb (femb_addr, 0x240+i) != 0xFFFFFFFF :
+                            apa_loc_id_oft +=1
+                            id_flg = True
+                            break
+                    if (not id_flg):
+                        break
+
 
                 #step1
                 self.UDP.write_reg_femb_checked (femb_addr, 9, 1)
