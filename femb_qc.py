@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/22/2019 8:02:52 PM
+Last modified: 4/24/2019 10:15:20 AM
 """
 
 #defaut setting for scientific caculation
@@ -46,6 +46,11 @@ class FEMB_QC:
         self.RAW_C = RAW_CONV()
         self.RAW_C.jumbo_flag = self.jumbo_flag 
         self.raw_data = []
+        self.env = "RT"
+        with open(self.user_f, 'a') as fp:
+            pass
+        with open(self.f_qcindex, 'a') as fp:
+            pass
 
     def FEMB_INDEX_LOAD(self):
         self.femb_qclist = []
@@ -66,7 +71,8 @@ class FEMB_QC:
     def FEMB_QC_Input(self):
         FEMBlist = self.FEMB_INDEX_LOAD()
         FEMB_infos = []
-        env = input("Test is performed at (RT or LN)? :")
+        env = self.env
+        #env = input("Test is performed at (RT or LN)? :")
         for i in range(4):
             while (True):
                 print ("Please enter ID of FEMB in WIB slot%d (input \"OFF\" if no FEMB): "%i)
@@ -145,9 +151,10 @@ class FEMB_QC:
         self.CLS.fe_monflg = True
 
         for chn in range(128):
-            print ("Baseline of CHN%d of all available FEMBs are being measured by the monitoring ADC"%chn)
             chipn = int(chn//16)
             chipnchn = int(chn%16)
+            if (chipnchn == 0):
+                print ("Baseline of ASIC%d of all available FEMBs are being measured, wait a while..."%chipn)
             self.CLS.FEREG_MAP.set_fe_board(snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=0, sdf=sdf, slk0=slk0, slk1=slk1 )
             self.CLS.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn, snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=1, sdf=sdf )
             self.CLS.REGS = self.CLS.FEREG_MAP.REGS
@@ -623,19 +630,39 @@ class FEMB_QC:
 
 
 a = FEMB_QC()
+
+FEMB_infos = a.FEMB_QC_Input()
+
+#warm test
+flg = "N"
+while ( "Y" not in flg):
+    time.sleep(2)
+    flg = input("Is Warm Test Ready(Y)?")
+if "Y" in flg:
+    a.env = "RT"
+    a.FEMB_QC_PWR( FEMB_infos)
+    a.QC_FEMB_BL_T_PLOT(FEMB_infos)
+
+#cold test
+flg = "N"
+while ( "Y" not in flg):
+    time.sleep(2)
+    flg = input("Is Cold Test Ready(Y)?")
+if "Y" in flg:
+    a.env = "LN"
+    if ("LN" in FEMB_infos[0]):
+        a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = True)
+        a.QC_FEMB_BL_T_PLOT(FEMB_infos, pwr_int_f = True)
+    a.FEMB_QC_PWR( FEMB_infos)
+    a.QC_FEMB_BL_T_PLOT(FEMB_infos)
+
+print ("Well Done")
+
+
+
 #FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
 #FEMB_infos = ['SLOT0\nFC022-TAC01\nRT\nN\n', 'SLOT1\nFC026-TAC02\nRT\nN\n', 'SLOT2\nFC037-TAC03\nRT\nN\n', 'SLOT3\nFC024-TAC04\nRT\nN\n']
 #FEMB_infos = ['SLOT0\nFC022-TAC01\nLN\nN\n', 'SLOT1\nFC026-TAC02\nLN\nN\n', 'SLOT2\nFC037-TAC03\nLN\nN\n', 'SLOT3\nFC024-TAC04\nLN\nN\n']
-FEMB_infos = a.FEMB_QC_Input()
-
-#rt_f = sys.argv[1]
-if ("LN" in FEMB_infos[0]):
-    a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = True)
-    a.QC_FEMB_BL_T_PLOT(FEMB_infos, pwr_int_f = True)
-a.FEMB_QC_PWR( FEMB_infos)
-a.QC_FEMB_BL_T_PLOT(FEMB_infos)
-print ("Well Done")
-
 #FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
 #a.FEMB_QC_PWR( FEMB_infos)
 #a.FEMB_PLOT()
@@ -644,6 +671,7 @@ print ("Well Done")
 #1a.FEMB_Temp_RB()
 #a.FEMB_BL_RB() #default 14mV/fC, 2.0us, 200mV
 #fn =a.databkdir  + "\FM_QC_RT_2019_04_09_18_26_28.bin"
+#FEMB_QC_RT_2019_04_23_19_57_46
 #with open(fn, 'rb') as f:
 #     a.raw_data = pickle.load(f)
  
