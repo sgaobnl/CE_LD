@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/24/2019 10:15:20 AM
+Last modified: 5/3/2019 1:30:11 PM
 """
 
 #defaut setting for scientific caculation
@@ -222,7 +222,7 @@ class FEMB_QC:
             fembs = femb_info.split("\n")
             femb_addr = int(fembs[0][4])
             femb_id = fembs[1]
-            femb_env = fembs[2]
+            femb_env = a.env
             femb_rerun_f = fembs[3]
             femb_c_ret = fembs[4]
             femb_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
@@ -550,7 +550,7 @@ class FEMB_QC:
             fembs = femb_info.split("\n")
             femb_addr = int(fembs[0][4])
             femb_id = fembs[1]
-            femb_env = fembs[2]
+            femb_env = a.env
             femb_rerun_f = fembs[3]
             femb_c_ret = fembs[4]
             femb_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
@@ -633,26 +633,25 @@ a = FEMB_QC()
 
 FEMB_infos = a.FEMB_QC_Input()
 
-#warm test
+###warm test
 flg = "N"
 while ( "Y" not in flg):
-    time.sleep(2)
     flg = input("Is Warm Test Ready(Y)?")
+    time.sleep(1)
 if "Y" in flg:
     a.env = "RT"
     a.FEMB_QC_PWR( FEMB_infos)
     a.QC_FEMB_BL_T_PLOT(FEMB_infos)
 
-#cold test
+###cold test
 flg = "N"
 while ( "Y" not in flg):
-    time.sleep(2)
     flg = input("Is Cold Test Ready(Y)?")
+    time.sleep(1)
 if "Y" in flg:
     a.env = "LN"
-    if ("LN" in FEMB_infos[0]):
-        a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = True)
-        a.QC_FEMB_BL_T_PLOT(FEMB_infos, pwr_int_f = True)
+    a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = True)
+    a.QC_FEMB_BL_T_PLOT(FEMB_infos, pwr_int_f = True)
     a.FEMB_QC_PWR( FEMB_infos)
     a.QC_FEMB_BL_T_PLOT(FEMB_infos)
 

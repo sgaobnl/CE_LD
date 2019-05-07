@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/22/2019 8:08:31 PM
+Last modified: 4/24/2019 10:15:58 AM
 """
 
 #defaut setting for scientific caculation
@@ -674,44 +674,44 @@ class CLS_CONFIG:
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
         return tmp
 
-    def FEMB_Flash_id_wr(self, wib_ip, femb_addr, id_type = 3, id_value = 0xFFFFFFFF):
-        if (id_type ==3 ):
-            print "Invalid Flash ID programming"
-            pass
-        else:
-            if (id_type == 0):
-                fm_id_adr = 0x20000
-            elif (id_type == 1):
-                am_id_adr = 0x20010
-            elif (id_type == 2):
-                apa_loc_id_adr = 0x20020
-
-            self.UDP.UDP_IP = wib_ip
-            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Enable HS data from the WIB to PC through UDP
-            if self.act_fembs[wib_ip][femb_addr] == True:
-                #print ("WIB%s FEMB%d"%(wib_ip, femb_addr))
-                #read flash
-                self.UDP.write_reg_femb_checked (femb_addr, 13, 1)
-
-                #step1
-                self.UDP.write_reg_femb_checked (femb_addr, 9, 1)
-                self.UDP.write_reg_femb_checked (femb_addr, 13, 1) #enable flash programmer
-                #step2
-                self.UDP.write_reg_femb_checked (femb_addr, 0x200+i, id_value) 
-                for i in range(63):
-                    self.UDP.write_reg_femb_checked (femb_addr, 0x201+i, 0xFFFFFFFF) 
-                #step3
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 6) #write enable (use before write@bulk erase) 
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x106) #start FPGA FLASH operation
-                time.sleep(0.001)
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 0) 
-                #step4
-                self.UDP.write_reg_femb_checked (femb_addr, 11, 6) #write enable (use before write@bulk erase) 
-
-
-            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
-
-            return [id_flg, id_adr, id_value]
+#    def FEMB_Flash_id_wr(self, wib_ip, femb_addr, id_type = 3, id_value = 0xFFFFFFFF):
+#        if (id_type ==3 ):
+#            print "Invalid Flash ID programming"
+#            pass
+#        else:
+#            if (id_type == 0):
+#                fm_id_adr = 0x20000
+#            elif (id_type == 1):
+#                am_id_adr = 0x20010
+#            elif (id_type == 2):
+#                apa_loc_id_adr = 0x20020
+#
+#            self.UDP.UDP_IP = wib_ip
+#            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Enable HS data from the WIB to PC through UDP
+#            if self.act_fembs[wib_ip][femb_addr] == True:
+#                #print ("WIB%s FEMB%d"%(wib_ip, femb_addr))
+#                #read flash
+#                self.UDP.write_reg_femb_checked (femb_addr, 13, 1)
+#
+#                #step1
+#                self.UDP.write_reg_femb_checked (femb_addr, 9, 1)
+#                self.UDP.write_reg_femb_checked (femb_addr, 13, 1) #enable flash programmer
+#                #step2
+#                self.UDP.write_reg_femb_checked (femb_addr, 0x200+i, id_value) 
+#                for i in range(63):
+#                    self.UDP.write_reg_femb_checked (femb_addr, 0x201+i, 0xFFFFFFFF) 
+#                #step3
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 6) #write enable (use before write@bulk erase) 
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x106) #start FPGA FLASH operation
+#                time.sleep(0.001)
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 0) 
+#                #step4
+#                self.UDP.write_reg_femb_checked (femb_addr, 11, 6) #write enable (use before write@bulk erase) 
+#
+#
+#            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
+#
+#            return [id_flg, id_adr, id_value]
 
 #a = CLS_CONFIG()
 #a.WIB_IPs = ["192.168.121.1", "192.168.121.2"]
