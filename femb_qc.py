@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/24/2019 10:15:20 AM
+Last modified: Mon May  6 23:34:41 2019
 """
 
 #defaut setting for scientific caculation
@@ -47,6 +47,7 @@ class FEMB_QC:
         self.RAW_C.jumbo_flag = self.jumbo_flag 
         self.raw_data = []
         self.env = "RT"
+        self.avg_cnt = 0
         with open(self.user_f, 'a') as fp:
             pass
         with open(self.f_qcindex, 'a') as fp:
@@ -271,6 +272,7 @@ class FEMB_QC:
         chn_pkps = []
         chn_pkns = []
         chn_waves = []
+        chn_avg_waves = []
         fpgadac_en = cfg[6]
         asicdac_en = cfg[7]
         fe_sts = cfg[13]
@@ -294,6 +296,13 @@ class FEMB_QC:
                 chn_pkps.append(abs(apeakp-aped))
                 chn_pkns.append(abs(apeakn-aped))
                 chn_waves.append( chn_data[achn][feed_loc[0]: feed_loc[1]] )
+                if len(feed_loc) < self.avg_cnt+5:
+                    self.avg_cnt = len(feed_loc)-1
+                avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[1]]) 
+                for i in (1, self.avg_cnt,1):
+                    avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
+                avg_wave = avg_wave/self.avg_cnt
+                chn_avg_waves.append(avg_wave)
         ana_err_code = ""
         rms_mean = np.mean(chn_rmss)
         if (rms_f):
@@ -322,9 +331,9 @@ class FEMB_QC:
                     if abs(1- chn_pkns[chn]/pkn_mean) > 0.5:
                         ana_err_code += "-F9_PEAKN_CHN%d"%(chn)
         if len(ana_err_code) > 0:
-            return (False, ana_err_code, [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves])
+            return (False, ana_err_code, [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves,chn_avg_waves])
         else:
-            return (True, "PASS-", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves])
+            return (True, "PASS-", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves,chn_avg_waves])
 
     def FEMB_QC_PWR(self, FEMB_infos, pwr_int_f = False):
         pwr_qcs = []
@@ -514,15 +523,28 @@ class FEMB_QC:
                     ax3 = plt.subplot2grid((4, 2), (2, 1), colspan=1, rowspan=1)
                     ax4 = plt.subplot2grid((4, 2), (3, 1), colspan=1, rowspan=1)
                     chns = range(len(chn_rmss))
-                    self.FEMB_SUB_PLOT(ax1, chns, chn_rmss, title="RMS Noise", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
-                    self.FEMB_SUB_PLOT(ax2, chns, chn_peds, title="Pedestal", xlabel="CH number", ylabel ="ADC / bin", color='b', marker='.')
-                    self.FEMB_SUB_PLOT(ax3, chns, chn_pkps, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
-                    self.FEMB_SUB_PLOT(ax3, chns, chn_pkns, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='g', marker='.')
-                    for chni in chns:
-                        ts = 100 if (len(chn_wfs[chni]) > 100) else len(chn_wfs[chni])
-                        x = (np.arange(ts)) * 0.5
-                        y = chn_wfs[chni][0:ts]
-                        self.FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
+                    if (self.avg_cnt)<=1:
+                        self.FEMB_SUB_PLOT(ax1, chns, chn_rmss, title="RMS Noise", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
+                        self.FEMB_SUB_PLOT(ax2, chns, chn_peds, title="Pedestal", xlabel="CH number", ylabel ="ADC / bin", color='b', marker='.')
+                        self.FEMB_SUB_PLOT(ax3, chns, chn_pkps, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
+                        self.FEMB_SUB_PLOT(ax3, chns, chn_pkns, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='g', marker='.')
+                        for chni in chns:
+                            ts = 100 if (len(chn_wfs[chni]) > 100) else len(chn_wfs[chni])
+                            x = (np.arange(ts)) * 0.5
+                            y = chn_wfs[chni][0:ts]
+                            self.FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
+                    else:
+                        chn_avg_wfs  = map_r[2][5] # 128chn list, each element is a list
+                        self.FEMB_SUB_PLOT(ax1, chns, chn_peds, title="Pedestal", xlabel="CH number", ylabel ="ADC / bin", color='b', marker='.')
+                        self.FEMB_SUB_PLOT(ax2, chns, chn_pkps, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
+                        self.FEMB_SUB_PLOT(ax2, chns, chn_pkns, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='g', marker='.')
+                        for chni in chns:
+                            ts = 100 if (len(chn_wfs[chni]) > 100) else len(chn_wfs[chni])
+                            x = (np.arange(ts)) * 0.5
+                            y1 = chn_wfs[chni][0:ts]
+                            self.FEMB_SUB_PLOT(ax3, x, y1, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
+                            y2 = chn_avg_wfs[chni][0:ts]
+                            self.FEMB_SUB_PLOT(ax4, x, y2, title="Averaging Waveform Overlap ", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
 
                 if ("PASS" not in qc_pf):
                     cperl = 80
@@ -628,35 +650,67 @@ class FEMB_QC:
         with open(fn, 'wb') as f:
             pickle.dump(BL_T_data, f)
 
+    def FEMB_CHKOUT_Input(self):
+        FEMBlist = self.FEMB_INDEX_LOAD()
+        FEMB_infos = []
+        env = self.env
+        for i in range(4):
+            while (True):
+                print ("Please enter ID of FEMB(AM) in WIB slot%d (input \"OFF\" if no FEMB): "%i)
+                FEMB_id = input("(e.g. TAC01) >>")
+                cf = input("WIB slot%d with FEMB ID is \"#%s\", Y or N? "%(i, FEMB_id) )
+                if (cf == "Y"):
+                    break
+            c_ret = ""
+            rerun_f = "N"
+            FEMB_infos.append("SLOT%d"%i + "\n" + FEMB_id + "\n" + env + "\n" + rerun_f + "\n" + c_ret )
+        return FEMB_infos
+
+    def FEMB_CHKOUT(self, FEMB_infos, pwr_int_f = False, testcode = 1):
+        pwr_qcs = []
+        self.CLS.pwr_int_f = pwr_int_f
+        qc_data = self.FEMB_CHK_ACQ(testcode = testcode)
+        qcs = self.FEMB_CHK_ANA(FEMB_infos, qc_data, pwr_i=testcode)
+        pwr_qcs += qcs
+        self.CLS.pwr_int_f = False
+        if (len(pwr_qcs) > 0 ):
+            fn =self.databkdir  + "FEMB_CHKOUT_" + pwr_qcs[0][1] +"_" + pwr_qcs[0][4] + ".bin" 
+            with open(fn, 'wb') as f:
+                pickle.dump(self.raw_data, f)
+        self.FEMB_PLOT(pwr_int_f = pwr_int_f)
+        self.raw_data = []
+        print ("Result is saved in %s"%self.user_f )
+
+
 
 a = FEMB_QC()
-
-FEMB_infos = a.FEMB_QC_Input()
-
-#warm test
-flg = "N"
-while ( "Y" not in flg):
-    time.sleep(2)
-    flg = input("Is Warm Test Ready(Y)?")
-if "Y" in flg:
-    a.env = "RT"
-    a.FEMB_QC_PWR( FEMB_infos)
-    a.QC_FEMB_BL_T_PLOT(FEMB_infos)
-
-#cold test
-flg = "N"
-while ( "Y" not in flg):
-    time.sleep(2)
-    flg = input("Is Cold Test Ready(Y)?")
-if "Y" in flg:
-    a.env = "LN"
-    if ("LN" in FEMB_infos[0]):
-        a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = True)
-        a.QC_FEMB_BL_T_PLOT(FEMB_infos, pwr_int_f = True)
-    a.FEMB_QC_PWR( FEMB_infos)
-    a.QC_FEMB_BL_T_PLOT(FEMB_infos)
-
+a.env = "RT"
+FEMB_infos = a.FEMB_CHKOUT_Input()
+a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
 print ("Well Done")
+
+##warm test
+#flg = "N"
+#while ( "Y" not in flg):
+#    time.sleep(2)
+#    flg = input("Is Warm Test Ready(Y)?")
+#if "Y" in flg:
+#    a.FEMB_QC_PWR( FEMB_infos)
+#    a.QC_FEMB_BL_T_PLOT(FEMB_infos)
+#
+##cold test
+#flg = "N"
+#while ( "Y" not in flg):
+#    time.sleep(2)
+#    flg = input("Is Cold Test Ready(Y)?")
+#if "Y" in flg:
+#    a.env = "LN"
+#    if ("LN" in FEMB_infos[0]):
+#        a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = True)
+#        a.QC_FEMB_BL_T_PLOT(FEMB_infos, pwr_int_f = True)
+#    a.FEMB_QC_PWR( FEMB_infos)
+#    a.QC_FEMB_BL_T_PLOT(FEMB_infos)
+
 
 
 
