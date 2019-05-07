@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/7/2019 11:39:46 AM
+Last modified: 5/7/2019 12:13:59 PM
 """
 
 #defaut setting for scientific caculation
@@ -33,21 +33,24 @@ class FEMB_QC:
     def __init__(self):
         self.jumbo_flag = False
         self.userdir = "D:/SBND_CHKOUT/"
-        self.user_f = self.userdir + "FEMB_CHKOUT_index.csv"
-        self.databkdir = self.userdir + "/BAK/"
-        self.f_qcindex = self.databkdir + "FEMB_CHKOUT_index.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
         self.pwr_n = 10
-        self.CLS = CLS_CONFIG()
-        self.CLS.WIB_IPs = self.WIB_IPs
-        self.CLS.FEMB_ver = 0x501
-        self.CLS.jumbo_flag = self.jumbo_flag 
-        self.RAW_C = RAW_CONV()
-        self.RAW_C.jumbo_flag = self.jumbo_flag 
         self.raw_data = []
         self.env = "RT"
         self.avg_cnt = 0
+        self.CLS = CLS_CONFIG()
+        self.RAW_C = RAW_CONV()
+        self.re_init()
+
+    def re_init(self):
+        self.user_f = self.userdir + "FEMB_CHKOUT_index.csv"
+        self.databkdir = self.userdir + "/BAK/"
+        self.f_qcindex = self.databkdir + "FEMB_CHKOUT_index.csv"
+        self.CLS.WIB_IPs = self.WIB_IPs
+        self.CLS.FEMB_ver = 0x501
+        self.CLS.jumbo_flag = self.jumbo_flag 
+        self.RAW_C.jumbo_flag = self.jumbo_flag 
 
         if (os.path.exists(self.userdir)):
             pass
@@ -397,12 +400,15 @@ class FEMB_QC:
                         self.FEMB_SUB_PLOT(ax2, chns, chn_pkps, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
                         self.FEMB_SUB_PLOT(ax2, chns, chn_pkns, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='g', marker='.')
                         for chni in chns:
-                            ts = 100 if (len(chn_wfs[chni]) > 100) else len(chn_wfs[chni])
-                            x = (np.arange(ts)) * 0.5
-                            y1 = chn_wfs[chni][0:ts]
-                            self.FEMB_SUB_PLOT(ax3, x, y1, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
-                            y2 = chn_avg_wfs[chni][0:ts]
-                            self.FEMB_SUB_PLOT(ax4, x, y2, title="Averaging (%d) Waveform Overlap"%self.avg_cnt, xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
+                            ts1 = 100 if (len(chn_wfs[chni]) > 100) else len(chn_wfs[chni])
+                            x1 = (np.arange(ts1)) * 0.5
+                            y1 = chn_wfs[chni][0:ts1]
+                            self.FEMB_SUB_PLOT(ax3, x1, y1, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
+
+                            ts2 = 100 if (len(chn_wfs[chni]) > 100) else len(chn_wfs[chni])
+                            x2 = (np.arange(ts2)) * 0.5
+                            y2 = chn_avg_wfs[chni][0:ts2]
+                            self.FEMB_SUB_PLOT(ax4, x2, y2, title="Averaging (%d) Waveform Overlap"%self.avg_cnt, xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
 
                 if ("PASS" not in qc_pf):
                     cperl = 80
