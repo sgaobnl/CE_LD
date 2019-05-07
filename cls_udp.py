@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: 5/7/2019 11:19:43 AM
+Last modified: Tue May  7 13:12:07 2019
 """
 
 #defaut setting for scientific caculation
@@ -243,7 +243,7 @@ class CLS_UDP:
             #set up listening socket
             sock_data = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
             sock_data.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock_data.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 81920000)
+            sock_data.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 7000000)
             sock_data.bind(('',self.UDP_PORT_HSDATA))
             sock_data.settimeout(3)
             #write N data packets to file
@@ -262,7 +262,7 @@ class CLS_UDP:
                         timeout_cnt = timeout_cnt + 1
                         self.write_reg_wib_checked (15, 0) 
                         print ("ERROR: UDP timeout,  Please check if there is any conflict, Try again in 3 seconds")
-                        time.sleep(3)
+                        time.sleep(1)
                         continue
                 if data != None :
                     rawdataPackets += data
