@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue May  7 09:41:05 2019
+Last modified: 5/7/2019 11:31:57 AM
 """
 
 #defaut setting for scientific caculation
@@ -17,12 +17,15 @@ Last modified: Tue May  7 09:41:05 2019
 #import pylab as pl
 
 from femb_qc import FEMB_QC
-
 a = FEMB_QC()
+###########Change to your local path##########
+self.userdir = "D:/SBND_CHKOUT/"
+##############################################
 a.env = "RT"
 a.avg_cnt = 100
+a.CLS.val = 2000
 FEMB_infos = a.FEMB_CHKOUT_Input()
-a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
+a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 3 )
 print ("Well Done")
 
 

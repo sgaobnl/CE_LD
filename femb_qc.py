@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue May  7 10:22:58 2019
+Last modified: 5/7/2019 11:32:57 AM
 """
 
 #defaut setting for scientific caculation
@@ -34,7 +34,7 @@ class FEMB_QC:
         self.jumbo_flag = False
         self.userdir = "D:/SBND_CHKOUT/"
         self.user_f = self.userdir + "FEMB_CHKOUT_index.csv"
-        self.databkdir = "D:/SBND_CHKOUT/FEMB_CHKOUT/"
+        self.databkdir = self.userdir + "/BAK/"
         self.f_qcindex = self.databkdir + "FEMB_CHKOUT_index.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
@@ -67,7 +67,7 @@ class FEMB_QC:
                 print ("Error to create folder %s"%png_dir)
                 sys.exit()
 
-        if (os.file.exists(self.f_qcindex)):
+        if (os.path.isfile(self.f_qcindex)):
            with open(self.f_qcindex, 'a') as fp:
                 pass
            with open(self.user_f, 'a') as fp:
@@ -77,7 +77,6 @@ class FEMB_QC:
             copyfile(self.f_qcindex, self.user_f )
 
     def FEMB_CHK_ACQ(self, testcode = 0):
-        self.CLS.val = 200 
         self.CLS.sts_num = 1
         self.CLS.f_save = False
         self.CLS.FM_only_f = False
@@ -213,26 +212,26 @@ class FEMB_QC:
             for chn in range(128):
                 if abs(chn_rmss[chn] - rms_mean) < rms_thr :
                     pass
-                else:
-                    ana_err_code += "-F9_RMS_CHN%d"%(chn)
+#                else:
+#                    ana_err_code += "-F9_RMS_CHN%d"%(chn)
 
         for gi in range(8): 
             ped_mean = np.mean(chn_peds[gi*16 : (gi+1)*16])
             pkp_mean = np.mean(chn_pkps[gi*16 : (gi+1)*16])
             pkn_mean = np.mean(chn_pkns[gi*16 : (gi+1)*16])
-            ped_thr= 30 
+            ped_thr= 100 
             for chn in range(gi*16, (gi+1)*16, 1):
                 if abs(chn_peds[chn] - ped_mean) > ped_thr :
                     ana_err_code += "-F9_PED_CHN%d"%(chn)
                 if (not rms_f):
                     if chn_pkps[chn] < 200:
                         ana_err_code += "-F9_NORESP_CHN%d"%(chn)
-                    if chn_pkns[chn] < 200:
-                        ana_err_code += "-F9_NORESN_CHN%d"%(chn)
+#                    if chn_pkns[chn] < 200:
+#                        ana_err_code += "-F9_NORESN_CHN%d"%(chn)
                     if abs(1- chn_pkps[chn]/pkp_mean) > 0.2:
                         ana_err_code += "-F9_PEAKP_CHN%d"%(chn)
-                    if abs(1- chn_pkns[chn]/pkn_mean) > 0.5:
-                        ana_err_code += "-F9_PEAKN_CHN%d"%(chn)
+#                    if abs(1- chn_pkns[chn]/pkn_mean) > 0.5:
+#                        ana_err_code += "-F9_PEAKN_CHN%d"%(chn)
         if len(ana_err_code) > 0:
             return (False, ana_err_code, [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves,chn_avg_waves])
         else:
@@ -403,7 +402,7 @@ class FEMB_QC:
                             y1 = chn_wfs[chni][0:ts]
                             self.FEMB_SUB_PLOT(ax3, x, y1, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
                             y2 = chn_avg_wfs[chni][0:ts]
-                            self.FEMB_SUB_PLOT(ax4, x, y2, title="Averaging Waveform Overlap ", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
+                            self.FEMB_SUB_PLOT(ax4, x, y2, title="Averaging (%d) Waveform Overlap"%self.avg_cnt, xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
 
                 if ("PASS" not in qc_pf):
                     cperl = 80

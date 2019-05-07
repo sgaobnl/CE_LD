@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: 4/1/2019 5:20:51 PM
+Last modified: 5/7/2019 11:19:43 AM
 """
 
 #defaut setting for scientific caculation
@@ -243,7 +243,7 @@ class CLS_UDP:
             #set up listening socket
             sock_data = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
             sock_data.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-#            sock_data.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 81920000)
+            sock_data.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 81920000)
             sock_data.bind(('',self.UDP_PORT_HSDATA))
             sock_data.settimeout(3)
             #write N data packets to file
