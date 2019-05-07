@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/7/2019 12:18:01 AM
+Last modified: Tue May  7 10:22:58 2019
 """
 
 #defaut setting for scientific caculation
@@ -33,9 +33,9 @@ class FEMB_QC:
     def __init__(self):
         self.jumbo_flag = False
         self.userdir = "D:/SBND_CHKOUT/"
-        self.user_f = self.userdir + "FEMB_QCindex.csv"
+        self.user_f = self.userdir + "FEMB_CHKOUT_index.csv"
         self.databkdir = "D:/SBND_CHKOUT/FEMB_CHKOUT/"
-        self.f_qcindex = self.databkdir + "FEMB_QCindex.csv"
+        self.f_qcindex = self.databkdir + "FEMB_CHKOUT_index.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
         self.pwr_n = 10
@@ -48,6 +48,7 @@ class FEMB_QC:
         self.raw_data = []
         self.env = "RT"
         self.avg_cnt = 0
+
         if (os.path.exists(self.userdir)):
             pass
         else:
@@ -66,54 +67,17 @@ class FEMB_QC:
                 print ("Error to create folder %s"%png_dir)
                 sys.exit()
 
-#        with open(self.user_f, 'a') as fp:
-#            pass
-#        with open(self.f_qcindex, 'a') as fp:
-#            pass
-
-    def FEMB_INDEX_LOAD(self):
-        self.femb_qclist = []
-        with open(self.f_qcindex, 'r') as fp:
-            for cl in fp:
-                tmp = cl.split(',')
-                x = []
-                for i in tmp:
-                    x.append(i.replace(" ", ""))
-                x = x[:-1]
-                if (x[0][0] != "#"):
-                    self.femb_qclist.append(x[1:])
-        femb_ids = []
-        for femb in self.femb_qclist:
-            femb_ids.append(femb[1])
-        return femb_ids
-
-    def FEMB_QC_Input(self):
-        FEMBlist = self.FEMB_INDEX_LOAD()
-        FEMB_infos = []
-        env = self.env
-        #env = input("Test is performed at (RT or LN)? :")
-        for i in range(4):
-            while (True):
-                print ("Please enter ID of FEMB in WIB slot%d (input \"OFF\" if no FEMB): "%i)
-                FEMB_id = input("Format: FM-AM (e.g. FC1-SAC1) >>")
-                cf = input("WIB slot%d with FEMB ID is \"#%s\", Y or N? "%(i, FEMB_id) )
-                if (cf == "Y"):
-                    break
-            c_ret = ""
-            if ("OFF" not in FEMB_id):
-                c_ret +="ToyTPC14_" + input("Toy TPC NO. for ASIC1-4 : ")
-                c_ret +="-ToyTPC58_" +input("Toy TPC NO. for ASIC5-8 : ") + "-"
-            if FEMB_id in FEMBlist:
-                print ("FEMB \"%s\" has been tested before, please input a short note for this retest"%FEMB_id)
-                c_ret += input("Reason for retest: ")
-                rerun_f = "Y"
-            else:
-                rerun_f = "N"
-            FEMB_infos.append("SLOT%d"%i + "\n" + FEMB_id + "\n" + env + "\n" + rerun_f + "\n" + c_ret )
-        return FEMB_infos
+        if (os.file.exists(self.f_qcindex)):
+           with open(self.f_qcindex, 'a') as fp:
+                pass
+           with open(self.user_f, 'a') as fp:
+                pass
+        else:
+            copyfile("./FEMB_CHKOUT_index.csv", self.f_qcindex )
+            copyfile(self.f_qcindex, self.user_f )
 
     def FEMB_CHK_ACQ(self, testcode = 0):
-        self.CLS.val = 100 
+        self.CLS.val = 200 
         self.CLS.sts_num = 1
         self.CLS.f_save = False
         self.CLS.FM_only_f = False
@@ -156,85 +120,6 @@ class FEMB_QC:
         self.CLS.FEMBs_CE_OFF()
         return qc_data
 
-    def FEMB_BL_RB(self,  snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1): #default 14mV/fC, 2.0us, 200mV
-        self.CLS.val = 10 
-        self.CLS.sts_num = 1
-        self.CLS.f_save = False
-        self.CLS.FM_only_f = False
-        self.CLS.WIBs_SCAN()
-        self.CLS.FEMBs_SCAN()
-        self.CLS.WIBs_CFG_INIT()
-
-        w_f_bs = []
-        self.CLS.fecfg_loadflg = True
-        self.CLS.fe_monflg = True
-
-        for chn in range(128):
-            chipn = int(chn//16)
-            chipnchn = int(chn%16)
-            if (chipnchn == 0):
-                print ("Baseline of ASIC%d of all available FEMBs are being measured, wait a while..."%chipn)
-            self.CLS.FEREG_MAP.set_fe_board(snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=0, sdf=sdf, slk0=slk0, slk1=slk1 )
-            self.CLS.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn, snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=1, sdf=sdf )
-            self.CLS.REGS = self.CLS.FEREG_MAP.REGS
-            cfglog = self.CLS.CE_CHK_CFG(mon_cs = 1)
-            for acfg in cfglog:
-                w_f_b_new = True
-                for i in range(len(w_f_bs)):
-                    if w_f_bs[i][0] == acfg[0] and w_f_bs[i][1] == acfg[1] :
-                        w_f_bs[i][2].append(acfg[30])
-                        w_f_bs[i][3].append(acfg[31])
-                        w_f_b_new = False
-                        break
-                if w_f_b_new :
-                    w_f_bs.append([acfg[0], acfg[1], [acfg[30]], [acfg[31]]])
-
-        self.CLS.fecfg_loadflg = False
-        self.CLS.fe_monflg = False
-        self.CLS.CE_CHK_CFG(mon_cs = 0) #disable monitoring and return to default setting
-        self.CLS.FEMBs_CE_OFF()
-        return w_f_bs
-
-    def FEMB_Temp_RB(self ):
-        self.CLS.val = 10 
-        self.CLS.sts_num = 1
-        self.CLS.f_save = False
-        self.CLS.FM_only_f = False
-        self.CLS.WIBs_SCAN()
-        self.CLS.FEMBs_SCAN()
-        self.CLS.WIBs_CFG_INIT()
-
-        w_f_ts = []
-        self.CLS.fecfg_loadflg = True
-        self.CLS.fe_monflg = True
-
-        for chip in range(8):
-            print ("FE ASIC%d of all available FEMBs are being measured by the monitoring ADC"%chip)
-            chipn = chip
-            chipnchn = 0
-
-            self.CLS.FEREG_MAP.set_fe_board(smn=0 )
-            self.CLS.FEREG_MAP.set_fechip_global(chip=chipn, stb=1, stb1=0 )
-            self.CLS.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn,  smn=1 )
-            self.CLS.REGS = self.CLS.FEREG_MAP.REGS
-            cfglog = self.CLS.CE_CHK_CFG(mon_cs = 1)
-            for acfg in cfglog:
-                w_f_t_new = True
-                for i in range(len(w_f_ts)):
-                    if w_f_ts[i][0] == acfg[0] and w_f_ts[i][1] == acfg[1] :
-                        w_f_ts[i][2].append(acfg[30])
-                        w_f_ts[i][3].append(acfg[31])
-                        w_f_t_new = False
-                        break
-                if w_f_t_new :
-                    w_f_ts.append([acfg[0], acfg[1], [acfg[30]], [acfg[31]]])
-
-        self.CLS.fecfg_loadflg = False
-        self.CLS.fe_monflg = False
-        self.CLS.CE_CHK_CFG(mon_cs = 0) #disable monitoring and return to default setting
-        self.CLS.FEMBs_CE_OFF()
-        return w_f_ts
-           
     def FEMB_CHK_ANA(self, FEMB_infos, qc_data, pwr_i = 1):
         qcs = []
         for femb_info in FEMB_infos:
@@ -353,50 +238,6 @@ class FEMB_QC:
         else:
             return (True, "PASS-", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves,chn_avg_waves])
 
-    def FEMB_QC_PWR(self, FEMB_infos, pwr_int_f = False):
-        pwr_qcs = []
-        self.CLS.pwr_int_f = pwr_int_f
-        for pwr_i in range(1, self.pwr_n+1 ):
-            print ("Power Cycle %d of %d starts..."%(pwr_i, self.pwr_n))
-            qc_data = self.FEMB_CHK_ACQ(testcode = pwr_i)
-            qcs = self.FEMB_CHK_ANA(FEMB_infos, qc_data, pwr_i)
-            pwr_qcs += qcs
-            print ("Power Cycle %d of %d is done, wait 30 seconds"%(pwr_i, self.pwr_n))
-            time.sleep(30)
-        self.CLS.pwr_int_f = False
-
-        saves = []
-        for femb_info in FEMB_infos:
-            fembs = femb_info.split("\n")
-            femb_id = fembs[1]
-            flg = False
-            for qct in pwr_qcs:
-                if qct[2] == femb_id :
-                    if qct[0] == "PASS" :
-                        pass_qct = qct
-                        flg = True
-                    else:
-                        flg = False
-                        saves.append(qct)
-                        break
-            if (flg):
-                saves.append(pass_qct)
-
-        with open (self.f_qcindex , 'a') as fp:
-            print ("Result,ENV,FM_ID,Retun Test,Date,Error_Code,Note,Powr Cycle,")
-            for x in saves:
-                fp.write(",".join(str(i) for i in x) +  "," + "\n")
-                print (x)
-        copyfile(self.f_qcindex, self.user_f )
-
-        if (len(pwr_qcs) > 0 ):
-            fn =self.databkdir  + "FEMB_QC_" + pwr_qcs[0][1] +"_" + pwr_qcs[0][4] + ".bin" 
-            with open(fn, 'wb') as f:
-                pickle.dump(self.raw_data, f)
-        self.FEMB_PLOT(pwr_int_f = pwr_int_f)
-        self.raw_data = []
-        print ("Result is saved in %s"%self.user_f )
-
     def FEMB_SUB_PLOT(self, ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx=False, ylabel_twx = "", e=None):
         ax.set_title(title)
         ax.set_xlabel(xlabel)
@@ -427,7 +268,7 @@ class FEMB_QC:
                 femb_c_ret = qc_list[6]
                 femb_pwr = qc_list[7]
 
-                png_dir = self.databkdir + "/" + femb_id + "/"
+                png_dir = self.userdir + "/" + femb_id + "/"
                 if (os.path.exists(png_dir)):
                     pass
                 else:
@@ -436,7 +277,7 @@ class FEMB_QC:
                     except OSError:
                         print ("Error to create folder %s"%png_dir)
                         sys.exit()
-                fn = png_dir + "/" + env + "_" + femb_id + "_" + femb_date + "_" + femb_pwr + ".png"
+                fn = png_dir + "/" +  femb_id + "_" + env +  "_" + femb_date + "_" + ".png"
 
                 fig = plt.figure(figsize=(8.5,11))
                 color = "g" if "PASS" in qc_pf else "r"
@@ -578,96 +419,6 @@ class FEMB_QC:
                 plt.savefig(fn)
                 plt.close()
 
-    def QC_FEMB_BL_T_PLOT(self, FEMB_infos, pwr_int_f = False):
-        self.CLS.pwr_int_f = pwr_int_f
-        w_f_bs_200mV = self.FEMB_BL_RB(snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1) # 14mV/fC, 2.0us, 200mV
-        w_f_bs_900mV = self.FEMB_BL_RB(snc=0, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1) # 14mV/fC, 2.0us, 900mV
-        w_f_ts = self.FEMB_Temp_RB()
-        self.CLS.pwr_int_f = False
-        BL_T_data = []
-
-        for femb_info in FEMB_infos:
-            fembs = femb_info.split("\n")
-            femb_addr = int(fembs[0][4])
-            femb_id = fembs[1]
-            femb_env = fembs[2]
-            femb_rerun_f = fembs[3]
-            femb_c_ret = fembs[4]
-            femb_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
-            errs = self.CLS.err_code.split("SLOT")
-            wib_ip = self.CLS.err_code[self.CLS.err_code.index("#IP") +3: self.CLS.err_code.index("-SLOT")] 
-            for er in errs[1:]:
-                if( int(er[0]) == femb_addr ):
-                    if (len(er) <=2 ):
-                        femb_errlog = "SLOT" + er
-                    else:
-                        femb_errlog = ("SLOT" + er[0: er.index("#IP")]) if "#IP" in er else ("SLOT" + er[0: ])
-                    break
-
-            if  "OFF" in femb_id:
-                pass
-            else :
-                ys = []
-                ys_std = []
-                for w_fs in [w_f_bs_200mV, w_f_bs_900mV, w_f_ts]:
-                #for w_fs in [w_f_ts, w_f_ts, w_f_ts]:
-                    for f_bt in w_fs:
-                        if f_bt[0] == wib_ip and f_bt[1] == femb_addr:
-                            ys.append(f_bt[2])
-                            ys_std.append(f_bt[3])
-                            break
-                BL_T_data.append([femb_id, ys, wib_ip, femb_addr, femb_env, femb_rerun_f, femb_c_ret, femb_date, femb_errlog]) 
-                import matplotlib.pyplot as plt
-                png_dir = self.databkdir + "/" + femb_id + "/"
-                if (os.path.exists(png_dir)):
-                    pass
-                else:
-                    try:
-                        os.makedirs(png_dir)
-                    except OSError:
-                        print ("Error to create folder %s"%png_dir)
-                        sys.exit()
-                fn_fig = png_dir + "BL_T_" + femb_env + "_" + femb_id + "_" + femb_date +  ".png"
-                fig = plt.figure(figsize=(8.5,11))
-                fig.suptitle("BASELINE and Temperature Measurement of FEMB#%s"%(femb_id), weight ="bold", fontsize = 12)
-                fig.text(0.10, 0.94, "Date&Time: %s"%femb_date   )
-                fig.text(0.55, 0.94, "Temperature: %s "%femb_env  )
-                fig.text(0.10, 0.92, "FEMB ID: %s "%femb_id      )
-                fig.text(0.10,0.90, "Rerun comment: %s "%femb_c_ret     )
-                fig.text(0.10, 0.88, "WIB IP: %s "%wib_ip      )
-                fig.text(0.55, 0.88, "FEMB SLOT: %s "%femb_addr     )
-                if (pwr_int_f):
-                    fig.text(0.10, 0.86, "Power 0.1s Interruption Enabled", color ='r' )
-                if len(femb_errlog) < 8:
-                    ax1 = plt.subplot2grid((4, 1), (1, 0), colspan=1, rowspan=1)
-                    ax2 = plt.subplot2grid((4, 1), (2, 0), colspan=1, rowspan=1)
-                    ax3 = plt.subplot2grid((4, 1), (3, 0), colspan=1, rowspan=1)
-                    self.FEMB_SUB_PLOT(ax1, range(len(ys[0])), ys[0], title="FE 200mV Baseline Measurement", \
-                                       xlabel="CH number", ylabel ="MON ADC / bin", color='r', marker='.', \
-                                       atwinx=True, ylabel_twx = "Amplitude / mV", e=ys_std[0] )
-                    self.FEMB_SUB_PLOT(ax2, range(len(ys[1])), ys[1], title="FE 900mV Baseline Measurement", \
-                                       xlabel="CH number", ylabel ="MON ADC / bin", color='r', marker='.', \
-                                       atwinx=True, ylabel_twx = "Amplitude / mV", e=ys_std[1])
-                    self.FEMB_SUB_PLOT(ax3, range(len(ys[2])), ys[2], title="Temperature Readout From FE", \
-                                       xlabel="FE number (CHN0 of a FE ASIC)", ylabel ="MON ADC / bin", color='r', marker='.',\
-                                       atwinx=True, ylabel_twx = "Amplitude / mV", e=ys_std[2])
-                else:
-                    cperl = 80
-                    lines = int(len(femb_errlog)//cperl) + 1
-                    fig.text(0.05,0.65, "Error log: ")
-                    for i in range(lines):
-                        fig.text(0.10, 0.63-0.02*i, femb_errlog[i*cperl:(i+1)*cperl])
-                
-                plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
-                plt.savefig(fn_fig)
-                print (fn_fig)
-                plt.close()
-
-        femb_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
-        fn =self.databkdir  + "FEMB_QC_BL_T_"  + femb_date + ".bin" 
-        with open(fn, 'wb') as f:
-            pickle.dump(BL_T_data, f)
-
     def FEMB_CHKOUT_Input(self):
         FEMB_infos = []
         env = self.env
@@ -690,6 +441,31 @@ class FEMB_QC:
         qcs = self.FEMB_CHK_ANA(FEMB_infos, qc_data, pwr_i=testcode)
         pwr_qcs += qcs
         self.CLS.pwr_int_f = False
+
+        saves = []
+        for femb_info in FEMB_infos:
+            fembs = femb_info.split("\n")
+            femb_id = fembs[1]
+            flg = False
+            for qct in pwr_qcs:
+                if qct[2] == femb_id :
+                    if qct[0] == "PASS" :
+                        pass_qct = qct
+                        flg = True
+                    else:
+                        flg = False
+                        saves.append(qct)
+                        break
+            if (flg):
+                saves.append(pass_qct)
+
+        with open (self.f_qcindex , 'a') as fp:
+            print ("Result,ENV,FM_ID,Retun Test,Date,Error_Code,Note,Test Mode,")
+            for x in saves:
+                fp.write(",".join(str(i) for i in x) +  "," + "\n")
+                print (x)
+        copyfile(self.f_qcindex, self.user_f )
+
         if (len(pwr_qcs) > 0 ):
             fn =self.databkdir  + "FEMB_CHKOUT_" + pwr_qcs[0][1] +"_" + pwr_qcs[0][4] + ".bin" 
             with open(fn, 'wb') as f:
@@ -697,56 +473,4 @@ class FEMB_QC:
         self.FEMB_PLOT(pwr_int_f = pwr_int_f)
         self.raw_data = []
         print ("Result is saved in %s"%self.user_f )
-
-
-
-a = FEMB_QC()
-a.env = "RT"
-a.avg_cnt = 100
-FEMB_infos = a.FEMB_CHKOUT_Input()
-a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
-print ("Well Done")
-
-##warm test
-#flg = "N"
-#while ( "Y" not in flg):
-#    time.sleep(2)
-#    flg = input("Is Warm Test Ready(Y)?")
-#if "Y" in flg:
-#    a.FEMB_QC_PWR( FEMB_infos)
-#    a.QC_FEMB_BL_T_PLOT(FEMB_infos)
-#
-##cold test
-#flg = "N"
-#while ( "Y" not in flg):
-#    time.sleep(2)
-#    flg = input("Is Cold Test Ready(Y)?")
-#if "Y" in flg:
-#    a.env = "LN"
-#    if ("LN" in FEMB_infos[0]):
-#        a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = True)
-#        a.QC_FEMB_BL_T_PLOT(FEMB_infos, pwr_int_f = True)
-#    a.FEMB_QC_PWR( FEMB_infos)
-#    a.QC_FEMB_BL_T_PLOT(FEMB_infos)
-
-
-
-
-#FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
-#FEMB_infos = ['SLOT0\nFC022-TAC01\nRT\nN\n', 'SLOT1\nFC026-TAC02\nRT\nN\n', 'SLOT2\nFC037-TAC03\nRT\nN\n', 'SLOT3\nFC024-TAC04\nRT\nN\n']
-#FEMB_infos = ['SLOT0\nFC022-TAC01\nLN\nN\n', 'SLOT1\nFC026-TAC02\nLN\nN\n', 'SLOT2\nFC037-TAC03\nLN\nN\n', 'SLOT3\nFC024-TAC04\nLN\nN\n']
-#FEMB_infos = ['SLOT0\nFC1-SAC1\nRT\nN\n', 'SLOT1\nFC2-SAC2\nRT\nN\n', 'SLOT2\nFC3-SAC3\nRT\nN\n', 'SLOT3\nFC4-SAC4\nRT\nN\n']
-#a.FEMB_QC_PWR( FEMB_infos)
-#a.FEMB_PLOT()
-#a.QC_FEMB_BL_T_PLOT(FEMB_infos)
-#a.FEMB_BL_RB(snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1) #default 14mV/fC, 2.0us, 200mV
-#1a.FEMB_Temp_RB()
-#a.FEMB_BL_RB() #default 14mV/fC, 2.0us, 200mV
-#fn =a.databkdir  + "\FM_QC_RT_2019_04_09_18_26_28.bin"
-#FEMB_QC_RT_2019_04_23_19_57_46
-#with open(fn, 'rb') as f:
-#     a.raw_data = pickle.load(f)
- 
-
-
 
