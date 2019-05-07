@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/24/2019 12:24:18 PM
+Last modified: 5/6/2019 11:35:28 PM
 """
 
 #defaut setting for scientific caculation
@@ -674,76 +674,76 @@ class CLS_CONFIG:
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
         return tmp
 
-    def FEMB_Flash_id_wr(self, wib_ip, femb_addr, id_oft = 20000, id_value = 0xFFFFFFFF):
-        if (id_oft < 20000 ) or (id_oft > 20048):
-            print "Invalid Flash ID programming"
-            pass
-        else:
-            id_oft_v = id_oft
-            self.UDP.UDP_IP = wib_ip
-            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Enable HS data from the WIB to PC through UDP
-            if self.act_fembs[wib_ip][femb_addr] == True:
-                #print ("WIB%s FEMB%d"%(wib_ip, femb_addr))
-                #read flash
-                self.UDP.write_reg_femb_checked (femb_addr, 13, 1)
-                for i in range(0x10)
-                    self.UDP.write_reg_femb_checked (femb_addr, 11, id_oft_v*256)
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 3)
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x103)
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x0)
-                    time.sleep(0.01)
-                    id_flg = False 
-                    for i in range(64):
-                        if self.UDP.read_reg_femb (femb_addr, 0x240+i) != 0xFFFFFFFF :
-                            id_oft_v +=1
-                            id_flg = True
-                            break
-                    if (not id_flg):
-                        break
-
-                #writ flash
-                #step1
-                self.UDP.write_reg_femb_checked (femb_addr, 9, 1)
-                self.UDP.write_reg_femb_checked (femb_addr, 13, 1) #enable flash programmer
-                #step2
-                self.UDP.write_reg_femb_checked (femb_addr, 0x200+i, id_value) 
-                for i in range(63):
-                    self.UDP.write_reg_femb_checked (femb_addr, 0x201+i, 0xFFFFFFFF) 
-                #step3
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 6) #write enable (use before write@bulk erase) 
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x106) #start FPGA FLASH operation
-                time.sleep(0.001)
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 0) 
-                #step4
-                self.UDP.write_reg_femb_checked (femb_addr, 11, id_oft_v*256) #write enable (use before write@bulk erase) 
-                #step5
-                while (True):
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 2) #write
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 102) 
-                    time.sleep(0.001)
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 5) #read status
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 105) 
-                    time.sleep(0.001)
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 5) 
-                    f_sts = self.UDP.read_reg_femb(femb_addr, 12) 
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 2) 
-                    if (f_sts != 3)
-                        break
-
-                #step6 #read back
-                self.UDP.write_reg_femb_checked (femb_addr, 11, id_oft_v*256)
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 3)
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x103)
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x0)
-                time.sleep(0.01)
-                rd_v = []
-                for i in range(64):
-                    rd_v.append(self.UDP.read_reg_femb (femb_addr, 0x240+i))
-
-
-            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
-
-            return [id_flg, id_adr, id_value]
+#    def FEMB_Flash_id_wr(self, wib_ip, femb_addr, id_oft = 20000, id_value = 0xFFFFFFFF):
+#        if (id_oft < 20000 ) or (id_oft > 20048):
+#            print "Invalid Flash ID programming"
+#            pass
+#        else:
+#            id_oft_v = id_oft
+#            self.UDP.UDP_IP = wib_ip
+#            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Enable HS data from the WIB to PC through UDP
+#            if self.act_fembs[wib_ip][femb_addr] == True:
+#                #print ("WIB%s FEMB%d"%(wib_ip, femb_addr))
+#                #read flash
+#                self.UDP.write_reg_femb_checked (femb_addr, 13, 1)
+#                for i in range(0x10)
+#                    self.UDP.write_reg_femb_checked (femb_addr, 11, id_oft_v*256)
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 3)
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x103)
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x0)
+#                    time.sleep(0.01)
+#                    id_flg = False 
+#                    for i in range(64):
+#                        if self.UDP.read_reg_femb (femb_addr, 0x240+i) != 0xFFFFFFFF :
+#                            id_oft_v +=1
+#                            id_flg = True
+#                            break
+#                    if (not id_flg):
+#                        break
+#
+#                #writ flash
+#                #step1
+#                self.UDP.write_reg_femb_checked (femb_addr, 9, 1)
+#                self.UDP.write_reg_femb_checked (femb_addr, 13, 1) #enable flash programmer
+#                #step2
+#                self.UDP.write_reg_femb_checked (femb_addr, 0x200+i, id_value) 
+#                for i in range(63):
+#                    self.UDP.write_reg_femb_checked (femb_addr, 0x201+i, 0xFFFFFFFF) 
+#                #step3
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 6) #write enable (use before write@bulk erase) 
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x106) #start FPGA FLASH operation
+#                time.sleep(0.001)
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 0) 
+#                #step4
+#                self.UDP.write_reg_femb_checked (femb_addr, 11, id_oft_v*256) #write enable (use before write@bulk erase) 
+#                #step5
+#                while (True):
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 2) #write
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 102) 
+#                    time.sleep(0.001)
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 5) #read status
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 105) 
+#                    time.sleep(0.001)
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 5) 
+#                    f_sts = self.UDP.read_reg_femb(femb_addr, 12) 
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 2) 
+#                    if (f_sts != 3)
+#                        break
+#
+#                #step6 #read back
+#                self.UDP.write_reg_femb_checked (femb_addr, 11, id_oft_v*256)
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 3)
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x103)
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x0)
+#                time.sleep(0.01)
+#                rd_v = []
+#                for i in range(64):
+#                    rd_v.append(self.UDP.read_reg_femb (femb_addr, 0x240+i))
+#
+#
+#            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
+#
+#            return [id_flg, id_adr, id_value]
 
 
 #    def FEMB_Flash_id_wr(self, wib_ip, femb_addr, id_type = 3, id_value = 0xFFFFFFFF):

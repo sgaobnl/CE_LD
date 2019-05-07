@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Mon May  6 23:34:41 2019
+Last modified: 5/7/2019 12:18:01 AM
 """
 
 #defaut setting for scientific caculation
@@ -32,9 +32,9 @@ from shutil import copyfile
 class FEMB_QC:
     def __init__(self):
         self.jumbo_flag = False
-        self.userdir = "I:/SBND_QC/"
+        self.userdir = "D:/SBND_CHKOUT/"
         self.user_f = self.userdir + "FEMB_QCindex.csv"
-        self.databkdir = "I:/SBND_QC/FEMB_QC/"
+        self.databkdir = "D:/SBND_CHKOUT/FEMB_CHKOUT/"
         self.f_qcindex = self.databkdir + "FEMB_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
@@ -48,10 +48,28 @@ class FEMB_QC:
         self.raw_data = []
         self.env = "RT"
         self.avg_cnt = 0
-        with open(self.user_f, 'a') as fp:
+        if (os.path.exists(self.userdir)):
             pass
-        with open(self.f_qcindex, 'a') as fp:
+        else:
+            try:
+                os.makedirs(self.userdir)
+            except OSError:
+                print ("Error to create folder %s"%png_dir)
+                sys.exit()
+
+        if (os.path.exists(self.databkdir)):
             pass
+        else:
+            try:
+                os.makedirs(self.databkdir)
+            except OSError:
+                print ("Error to create folder %s"%png_dir)
+                sys.exit()
+
+#        with open(self.user_f, 'a') as fp:
+#            pass
+#        with open(self.f_qcindex, 'a') as fp:
+#            pass
 
     def FEMB_INDEX_LOAD(self):
         self.femb_qclist = []
@@ -299,8 +317,8 @@ class FEMB_QC:
                 if len(feed_loc) < self.avg_cnt+5:
                     self.avg_cnt = len(feed_loc)-1
                 avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[1]]) 
-                for i in (1, self.avg_cnt,1):
-                    avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
+                for i in range(1, self.avg_cnt,1):
+                    avg_wave =avg_wave + np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
                 avg_wave = avg_wave/self.avg_cnt
                 chn_avg_waves.append(avg_wave)
         ana_err_code = ""
@@ -651,7 +669,6 @@ class FEMB_QC:
             pickle.dump(BL_T_data, f)
 
     def FEMB_CHKOUT_Input(self):
-        FEMBlist = self.FEMB_INDEX_LOAD()
         FEMB_infos = []
         env = self.env
         for i in range(4):
@@ -685,6 +702,7 @@ class FEMB_QC:
 
 a = FEMB_QC()
 a.env = "RT"
+a.avg_cnt = 100
 FEMB_infos = a.FEMB_CHKOUT_Input()
 a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
 print ("Well Done")
