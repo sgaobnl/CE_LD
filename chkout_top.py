@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/7/2019 11:31:57 AM
+Last modified: 5/7/2019 11:36:35 AM
 """
 
 #defaut setting for scientific caculation
@@ -16,11 +16,13 @@ Last modified: 5/7/2019 11:31:57 AM
 #import scipy as sp
 #import pylab as pl
 
+###########Change to your local path##########
+userdir = "D:/SBND_CHKOUT/"
+##############################################
+
 from femb_qc import FEMB_QC
 a = FEMB_QC()
-###########Change to your local path##########
-self.userdir = "D:/SBND_CHKOUT/"
-##############################################
+a.userdir = userdir 
 a.env = "RT"
 a.avg_cnt = 100
 a.CLS.val = 2000

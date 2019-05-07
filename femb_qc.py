@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/7/2019 11:32:57 AM
+Last modified: 5/7/2019 11:39:46 AM
 """
 
 #defaut setting for scientific caculation
@@ -145,7 +145,7 @@ class FEMB_QC:
                     note = "PWR Interruption Enable(0.1s)- " + femb_c_ret
                 else:
                     note =  femb_c_ret
-                qc_list = ["FAIL", femb_env, femb_id, femb_rerun_f, femb_date, femb_errlog, note, "PWR%d"%pwr_i] 
+                qc_list = ["FAIL", femb_env, femb_id, femb_rerun_f, femb_date, femb_errlog, note, "%d"%pwr_i] 
                 map_r = None
                 for femb_data in qc_data:
                     if (femb_data[0][1] == femb_addr): 
@@ -280,7 +280,7 @@ class FEMB_QC:
 
                 fig = plt.figure(figsize=(8.5,11))
                 color = "g" if "PASS" in qc_pf else "r"
-                fig.suptitle("Test Result of Power Cycle #%s (%s)"%(femb_pwr[-1], qc_pf), color=color, weight ="bold", fontsize = 12)
+                fig.suptitle("Test Result of Test Mode #%s (%s)"%(femb_pwr[-1], qc_pf), color=color, weight ="bold", fontsize = 12)
                 fig.text(0.10, 0.94, "Date&Time: %s"%femb_date   )
                 fig.text(0.55, 0.94, "Temperature: %s "%env  )
                 fig.text(0.10, 0.92, "FEMB ID: %s "%femb_id      )
