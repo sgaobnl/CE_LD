@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/7/2019 12:13:59 PM
+Last modified: 5/7/2019 2:23:28 PM
 """
 
 #defaut setting for scientific caculation
@@ -41,9 +41,8 @@ class FEMB_QC:
         self.avg_cnt = 0
         self.CLS = CLS_CONFIG()
         self.RAW_C = RAW_CONV()
-        self.re_init()
 
-    def re_init(self):
+    def init_cfg(self):
         self.user_f = self.userdir + "FEMB_CHKOUT_index.csv"
         self.databkdir = self.userdir + "/BAK/"
         self.f_qcindex = self.databkdir + "FEMB_CHKOUT_index.csv"
