@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/7/2019 2:23:41 PM
+Last modified: 5/20/2019 4:18:59 PM
 """
 
 #defaut setting for scientific caculation
@@ -17,7 +17,7 @@ Last modified: 5/7/2019 2:23:41 PM
 #import pylab as pl
 
 ###########Change to your local path##########
-userdir = "D:/SBND_CHKOUT/"
+userdir = "I:/SBND_QC/Pre_Cleaning/"
 ##############################################
 
 from femb_qc import FEMB_QC
