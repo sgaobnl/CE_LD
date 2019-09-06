@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Thu Sep  5 22:57:39 2019
+Last modified: 9/6/2019 9:23:07 AM
 """
 
 #defaut setting for scientific caculation
@@ -688,8 +688,9 @@ for PTBslotno in range(1,7):
         time.sleep(1)
         flg = input("PTB Slot %d is ready (Y/N)" % PTBslotno)
     #a.WIB_IPs = ["192.168.121." + str( (crateno%4)*6 + PTBslotno) ]
-    a.WIB_IPs = ["10.226.34." + str( (crateno%4)*6 + PTBslotno) ]
-    a.CLS.WIB_IPs = self.WIB_IPs
+    a.WIB_IPs = ["10.226.34." + str( ((crateno-1)%4)*6 + PTBslotno) ]
+    print (a.WIB_IPs)
+    a.CLS.WIB_IPs = a.WIB_IPs
  
     a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
 print ("Well Done")
