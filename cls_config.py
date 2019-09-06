@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/24/2019 10:15:58 AM
+Last modified: 9/6/2019 9:39:44 AM
 """
 
 #defaut setting for scientific caculation
@@ -37,7 +37,7 @@ class CLS_CONFIG:
         self.UDP = CLS_UDP()
         self.UDP.jumbo_flag = self.jumbo_flag
         self.Int_CLK = True
-        self.pllfile ="./Si5344-RevD-SBND_V3.txt" 
+        self.pllfile ="./Si5344-RevD-SBND_V2-100MHz_REVD_PTC.txt" 
         self.fecfg_f ="./fecfg.csv" 
         self.FEREG_MAP = FE_REG_MAPPING()
         self.DAQstream_en =  True
