@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Mon May  6 23:34:41 2019
+Last modified: Thu Sep  5 22:57:39 2019
 """
 
 #defaut setting for scientific caculation
@@ -33,9 +33,9 @@ class FEMB_QC:
     def __init__(self):
         self.jumbo_flag = False
         self.userdir = "I:/SBND_QC/"
-        self.user_f = self.userdir + "FEMB_QCindex.csv"
-        self.databkdir = "I:/SBND_QC/FEMB_QC/"
-        self.f_qcindex = self.databkdir + "FEMB_QCindex.csv"
+        self.user_f = self.userdir + "Crate_QCindex.csv"
+        self.databkdir = "I:/SBND_QC/Crate_QC/"
+        self.f_qcindex = self.databkdir + "Crate_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
         self.pwr_n = 10
@@ -650,17 +650,12 @@ class FEMB_QC:
         with open(fn, 'wb') as f:
             pickle.dump(BL_T_data, f)
 
-    def FEMB_CHKOUT_Input(self):
+    def FEMB_CHKOUT_Input(self, crateno=0, slotno=0):
         FEMBlist = self.FEMB_INDEX_LOAD()
         FEMB_infos = []
         env = self.env
         for i in range(4):
-            while (True):
-                print ("Please enter ID of FEMB(AM) in WIB slot%d (input \"OFF\" if no FEMB): "%i)
-                FEMB_id = input("(e.g. TAC01) >>")
-                cf = input("WIB slot%d with FEMB ID is \"#%s\", Y or N? "%(i, FEMB_id) )
-                if (cf == "Y"):
-                    break
+            FEMB_id = "Crate%d_PTBslot%d_WIBslot%d"%(crateno, slotno, i)
             c_ret = ""
             rerun_f = "N"
             FEMB_infos.append("SLOT%d"%i + "\n" + FEMB_id + "\n" + env + "\n" + rerun_f + "\n" + c_ret )
@@ -682,11 +677,21 @@ class FEMB_QC:
         print ("Result is saved in %s"%self.user_f )
 
 
-
 a = FEMB_QC()
 a.env = "RT"
 FEMB_infos = a.FEMB_CHKOUT_Input()
-a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
+
+crateno = int(input("Crate no(1-6): "))
+for PTBslotno in range(1,7):
+    flg = "N"
+    while ( "Y" not in flg):
+        time.sleep(1)
+        flg = input("PTB Slot %d is ready (Y/N)" % PTBslotno)
+    #a.WIB_IPs = ["192.168.121." + str( (crateno%4)*6 + PTBslotno) ]
+    a.WIB_IPs = ["10.226.34." + str( (crateno%4)*6 + PTBslotno) ]
+    a.CLS.WIB_IPs = self.WIB_IPs
+ 
+    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
 print ("Well Done")
 
 ##warm test

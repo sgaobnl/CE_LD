@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/24/2019 12:24:18 PM
+Last modified: Thu Sep  5 22:57:37 2019
 """
 
 #defaut setting for scientific caculation
@@ -36,12 +36,12 @@ class CLS_CONFIG:
         self.act_fembs = {}
         self.UDP = CLS_UDP()
         self.UDP.jumbo_flag = self.jumbo_flag
-        self.Int_CLK = True
+        self.Int_CLK = False
         self.pllfile ="./Si5344-RevD-SBND_V3.txt" 
         self.fecfg_f ="./fecfg.csv" 
         self.FEREG_MAP = FE_REG_MAPPING()
         self.DAQstream_en =  True
-        self.pwr_dly = 10 #delay(s) after power operation
+        self.pwr_dly = 2 #delay(s) after power operation
         self.sts_num = 1 #how many times statitics data are collected
         self.val = 100 #how many UDP HS package are collected per time
         self.f_save = False #if False, no raw data is saved, if True, no further data analysis 
@@ -114,14 +114,14 @@ class CLS_CONFIG:
                 if ( femb_sws[i] == 1):
                     pwr_status |= np.uint32(pwr_ctl[i])
                     self.UDP.write_reg_wib_checked (0x8, pwr_status )
-                    time.sleep(1)
+                    time.sleep(0.5)
                 else:
                     if (i == 3) and (femb_sws == [0, 0, 0, 0]):
                         pwr_status = 0x00000000
                     else:
                         pwr_status &= (~np.uint32(pwr_ctl[i]) | 0x00100000)
                     self.UDP.write_reg_wib_checked (0x8, pwr_status )
-                    time.sleep(1)
+                    time.sleep(0.5)
         time.sleep(self.pwr_dly)
 
     def FEMB_DECTECT(self, wib_ip):
