@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 9/6/2019 9:20:34 AM
+Last modified: 9/6/2019 11:47:23 AM
 """
 
 #defaut setting for scientific caculation
@@ -37,7 +37,7 @@ class CLS_CONFIG:
         self.UDP = CLS_UDP()
         self.UDP.jumbo_flag = self.jumbo_flag
         self.Int_CLK = False
-        self.pllfile ="./Si5344-RevD-SBND_V3.txt" 
+        self.pllfile ="./Si5344-RevD-SBND_V2-100MHz_REVD_PTC.txt" 
         self.fecfg_f ="./fecfg.csv" 
         self.FEREG_MAP = FE_REG_MAPPING()
         self.DAQstream_en =  True
@@ -374,11 +374,11 @@ class CLS_CONFIG:
         self.UDP.UDP_IP = wib_ip
         value = 0x01 + ((addr&0xFF)<<8) + ((din&0x00FF)<<16)
         self.UDP.write_reg_wib_checked (11,value)
-        time.sleep(0.01)
+        time.sleep(0.001)
         self.UDP.write_reg_wib_checked (10,1)
-        time.sleep(0.01)
+        time.sleep(0.001)
         self.UDP.write_reg_wib_checked (10,0)
-        time.sleep(0.02)
+        time.sleep(0.002)
 
     def WIB_PLL_cfg(self, wib_ip ):
         with open(self.pllfile,"r") as f:
@@ -395,7 +395,7 @@ class CLS_CONFIG:
                     adr = int(line[2:tmp],16)
                     adrs_h.append((adr&0xFF00)>>8)
                     adrs_l.append((adr&0xFF))
-                    datass.append((int(line[tmp+3:-2],16))&0xFF)
+                    datass.append(int((line[tmp+3:tmp+5]), 16)&0xFF)
         self.UDP.UDP_IP = wib_ip
         lol_flg = False
         for i in range(5):
@@ -415,6 +415,11 @@ class CLS_CONFIG:
             self.UDP.write_reg_wib_checked (4, 0x03)
 
         else:
+            self.UDP.write_reg_wib (10,0xFF0)
+            time.sleep(0.01)
+            self.UDP.write_reg_wib (10,0xFF0)
+            time.sleep(0.2)
+            
             print ("configurate PLL of WIB (%s), please wait..."%wib_ip)
             p_addr = 1
             #step1
@@ -431,14 +436,14 @@ class CLS_CONFIG:
             self.WIB_PLL_wr( wib_ip, adrs_l[2], datass[2])
             time.sleep(0.5)
             #step4
-            for cnt in range(len(adrs_h)):
+            for cnt in range(3, len(adrs_h), 1):
                 if (page4 == adrs_h[cnt]):
-                    tmpadr = adrs_l[2]
                     self.WIB_PLL_wr(wib_ip, adrs_l[cnt], datass[cnt])
                 else:
                     page4 = adrs_h[cnt]
                     self.WIB_PLL_wr( wib_ip, p_addr, page4)
                     self.WIB_PLL_wr(wib_ip, adrs_l[cnt], datass[cnt])
+            #    print (cnt, adrs_h[cnt], adrs_l[cnt], datass[cnt])
             for i in range(10):
                 time.sleep(3)
                 print ("check PLL status, please wait...")
