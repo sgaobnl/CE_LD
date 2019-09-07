@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 9/6/2019 9:23:07 AM
+Last modified: 9/6/2019 5:57:11 PM
 """
 
 #defaut setting for scientific caculation
@@ -38,7 +38,7 @@ class FEMB_QC:
         self.f_qcindex = self.databkdir + "Crate_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
-        self.pwr_n = 10
+        self.pwr_n = 1
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
         self.CLS.FEMB_ver = 0x501
@@ -47,7 +47,7 @@ class FEMB_QC:
         self.RAW_C.jumbo_flag = self.jumbo_flag 
         self.raw_data = []
         self.env = "RT"
-        self.avg_cnt = 0
+        self.avg_cnt = 1
         with open(self.user_f, 'a') as fp:
             pass
         with open(self.f_qcindex, 'a') as fp:
@@ -95,7 +95,7 @@ class FEMB_QC:
         return FEMB_infos
 
     def FEMB_CHK_ACQ(self, testcode = 0):
-        self.CLS.val = 100 
+        self.CLS.val = 200 
         self.CLS.sts_num = 1
         self.CLS.f_save = False
         self.CLS.FM_only_f = False
@@ -105,7 +105,8 @@ class FEMB_QC:
         testn = testcode % 10
         if testn == 1:
             #14mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08
-            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+            cfglog = self.CLS.CE_CHK_CFG(pls_cs=2, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+            #cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
         elif testn == 2:
             #7.8mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=1, sg1=0, st0 =1, st1=1, swdac1=1, swdac2=0, data_cs=0)
@@ -298,9 +299,10 @@ class FEMB_QC:
                 chn_waves.append( chn_data[achn][feed_loc[0]: feed_loc[1]] )
                 if len(feed_loc) < self.avg_cnt+5:
                     self.avg_cnt = len(feed_loc)-1
-                avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[1]]) 
+                avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[0] + 100]) 
                 for i in (1, self.avg_cnt,1):
-                    avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
+                    #avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
+                    avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i]+100]) 
                 avg_wave = avg_wave/self.avg_cnt
                 chn_avg_waves.append(avg_wave)
         ana_err_code = ""
@@ -343,8 +345,8 @@ class FEMB_QC:
             qc_data = self.FEMB_CHK_ACQ(testcode = pwr_i)
             qcs = self.FEMB_CHK_ANA(FEMB_infos, qc_data, pwr_i)
             pwr_qcs += qcs
-            print ("Power Cycle %d of %d is done, wait 30 seconds"%(pwr_i, self.pwr_n))
-            time.sleep(30)
+#            print ("Power Cycle %d of %d is done, wait 30 seconds"%(pwr_i, self.pwr_n))
+#            time.sleep(30)
         self.CLS.pwr_int_f = False
 
         saves = []
@@ -677,22 +679,30 @@ class FEMB_QC:
         print ("Result is saved in %s"%self.user_f )
 
 
-a = FEMB_QC()
-a.env = "RT"
-FEMB_infos = a.FEMB_CHKOUT_Input()
 
 crateno = int(input("Crate no(1-6): "))
-for PTBslotno in range(1,7):
+PTBslotno = int(input("PTB slot no(1-6): "))
+
+#for PTBslotno in range(1,7):
+#for PTBslotno in [6]:
+while (PTBslotno < 7) or (PTBslotno > 0):
     flg = "N"
-    while ( "Y" not in flg):
-        time.sleep(1)
-        flg = input("PTB Slot %d is ready (Y/N)" % PTBslotno)
-    #a.WIB_IPs = ["192.168.121." + str( (crateno%4)*6 + PTBslotno) ]
+#    while ( "Y" not in flg):
+#        flg = input("PTB Slot %d is ready (Y/N)" % PTBslotno)
+#        time.sleep(1)
+
+    a = FEMB_QC()
+    a.env = "RT"
+    FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
+
     a.WIB_IPs = ["10.226.34." + str( ((crateno-1)%4)*6 + PTBslotno) ]
     print (a.WIB_IPs)
     a.CLS.WIB_IPs = a.WIB_IPs
  
-    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
+    a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
+#    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
+
+    PTBslotno = int(input("PTB slot no(1-6): "))
 print ("Well Done")
 
 ##warm test

@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 9/6/2019 11:47:23 AM
+Last modified: 9/6/2019 6:09:13 PM
 """
 
 #defaut setting for scientific caculation
@@ -41,7 +41,7 @@ class CLS_CONFIG:
         self.fecfg_f ="./fecfg.csv" 
         self.FEREG_MAP = FE_REG_MAPPING()
         self.DAQstream_en =  True
-        self.pwr_dly = 2 #delay(s) after power operation
+        self.pwr_dly = 3 #delay(s) after power operation
         self.sts_num = 1 #how many times statitics data are collected
         self.val = 100 #how many UDP HS package are collected per time
         self.f_save = False #if False, no raw data is saved, if True, no further data analysis 
@@ -73,6 +73,7 @@ class CLS_CONFIG:
                 if ((wib_ver_rb&0x0F00) == wib_verid&0x0F00) and ( wib_ver_rb >= 0):
                     print ("WIB with IP = %s is found"%wib_ip) 
                     active_wibs.append(wib_ip)
+                    self.WIB_CLKCMD_cs(wib_ip )# choose clock source
                     break
                 elif ( wib_ver_rb == -2):
                     print ("Timeout. WIB with IP = %s isn't mounted, mask this IP"%wib_ip) 
@@ -122,7 +123,10 @@ class CLS_CONFIG:
                         pwr_status &= (~np.uint32(pwr_ctl[i]) | 0x00100000)
                     self.UDP.write_reg_wib_checked (0x8, pwr_status )
                     time.sleep(0.5)
-        time.sleep(self.pwr_dly)
+        if 1 in femb_sws:
+            time.sleep(self.pwr_dly)
+        else:
+            time.sleep(1)
 
     def FEMB_DECTECT(self, wib_ip):
         self.UDP.UDP_IP = wib_ip
@@ -222,7 +226,7 @@ class CLS_CONFIG:
         status_dict = {}
         status_dict["TIME"] = runtime
 
-        self.UDP.write_reg_wib_checked(0x4, 0x8) #Internal clock is selected
+#        self.UDP.write_reg_wib_checked(0x4, 0x8) #Internal clock is selected
         self.UDP.write_reg_wib_checked(0x12, 0x8000)
         self.UDP.write_reg_wib_checked(0x12, 0x100)
         time.sleep(0.02)
@@ -358,7 +362,7 @@ class CLS_CONFIG:
             else:
                 self.UDP.write_reg_wib_checked(0x1F, 0x1FB) #normal operation
             self.UDP.write_reg_wib_checked(0x0F, 0x0) #normal operation
-            self.WIB_CLKCMD_cs(wib_ip )# choose clock source
+#            self.WIB_CLKCMD_cs(wib_ip )# choose clock source
             femb_sws = [0, 0, 0, 0]
             for femb_addr in range(4):
                 if self.act_fembs[wib_ip][femb_addr] == True:
@@ -466,6 +470,7 @@ class CLS_CONFIG:
         self.UDP.UDP_IP = wib_ip
         if (self.Int_CLK ):
             self.UDP.write_reg_wib_checked(0x04, 0x08) #select WIB onboard system clock and CMD
+            print ("ERROR")
         else:
             self.WIB_PLL_cfg(wib_ip ) #select system clock and CMD from MBB
 
@@ -656,6 +661,7 @@ class CLS_CONFIG:
         d_sts = []
         for i in range(self.sts_num):
             d_sts.append( self.WIB_STATUS(wib_ip) )
+
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True) #Enable HS data from the WIB to PC through UDP
         if self.act_fembs[wib_ip][femb_addr] == True:
             print ("Take data from WIB%s FEMB%d"%(wib_ip, femb_addr))
@@ -676,6 +682,7 @@ class CLS_CONFIG:
                     break
         else:
             tmp = None
+
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
         return tmp
 
