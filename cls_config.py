@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 9/6/2019 6:09:13 PM
+Last modified: 9/9/2019 10:41:13 AM
 """
 
 #defaut setting for scientific caculation
@@ -62,7 +62,7 @@ class CLS_CONFIG:
             wib_reg_7_value = wib_reg_7_value | 0x80000000 #bit31 of reg7 for disable wib udp control
         self.UDP.write_reg_wib_checked (7, wib_reg_7_value)
 
-    def WIBs_SCAN(self, wib_verid=0x109):
+    def WIBs_SCAN(self, wib_verid=0x117):
         print ("Finding available WIBs starts...")
         active_wibs = []
         for wib_ip in self.WIB_IPs:
@@ -70,8 +70,9 @@ class CLS_CONFIG:
             for i in range(5):
                 wib_ver_rb = self.UDP.read_reg_wib (0xFF)
                 wib_ver_rb = self.UDP.read_reg_wib (0xFF)
-                if ((wib_ver_rb&0x0F00) == wib_verid&0x0F00) and ( wib_ver_rb >= 0):
-                    print ("WIB with IP = %s is found"%wib_ip) 
+                #if ((wib_ver_rb&0x0F00) == wib_verid&0x0F00) and ( wib_ver_rb >= 0):
+                if ((wib_ver_rb&0x0FFF) == wib_verid&0x0FFF) and ( wib_ver_rb >= 0):
+                    print ("WIB_V%s with IP = %s is found"%(hex(wib_ver_rb&0x0FFF), wib_ip)) 
                     active_wibs.append(wib_ip)
                     self.WIB_CLKCMD_cs(wib_ip )# choose clock source
                     break

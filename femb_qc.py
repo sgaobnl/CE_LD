@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 9/6/2019 5:57:11 PM
+Last modified: 9/9/2019 10:23:20 AM
 """
 
 #defaut setting for scientific caculation
@@ -685,7 +685,7 @@ PTBslotno = int(input("PTB slot no(1-6): "))
 
 #for PTBslotno in range(1,7):
 #for PTBslotno in [6]:
-while (PTBslotno < 7) or (PTBslotno > 0):
+while (PTBslotno < 7) and (PTBslotno > 0):
     flg = "N"
 #    while ( "Y" not in flg):
 #        flg = input("PTB Slot %d is ready (Y/N)" % PTBslotno)
