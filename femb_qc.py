@@ -700,6 +700,7 @@ while (PTBslotno < 7) and (PTBslotno > 0):
     a.CLS.WIB_IPs = a.WIB_IPs
  
 #    a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
+    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
 
 #    PTBslotno = int(input("PTB slot no(1-6): "))
 print ("Well Done")
