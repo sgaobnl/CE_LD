@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/21/2023 9:20:02 AM
+Last modified: 4/23/2023 5:02:05 PM
 """
 
 #defaut setting for scientific caculation
@@ -105,8 +105,8 @@ class FEMB_QC:
         testn = testcode % 10
         if testn == 1:
             #14mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08
-            cfglog = self.CLS.CE_CHK_CFG(pls_cs=2, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
-            #cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+            #cfglog = self.CLS.CE_CHK_CFG(pls_cs=2, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
         elif testn == 2:
             #7.8mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=1, sg1=0, st0 =1, st1=1, swdac1=1, swdac2=0, data_cs=0)
@@ -135,6 +135,7 @@ class FEMB_QC:
             #14mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=1, swdac2=0, data_cs=0)
         time.sleep(2)
+        print ("CFG is done")
         qc_data = self.CLS.TPC_UDPACQ(cfglog)
         self.CLS.FEMBs_CE_OFF()
         return qc_data
