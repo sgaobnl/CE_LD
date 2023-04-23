@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 9/9/2019 10:41:13 AM
+Last modified: 4/21/2023 9:03:57 AM
 """
 
 #defaut setting for scientific caculation
@@ -29,7 +29,7 @@ class CLS_CONFIG:
     def __init__(self):
         self.jumbo_flag = False 
         self.FEMB_ver = 0x501
-        self.WIB_ver = 0x109
+        self.WIB_ver = 0x122
         self.WIB_IPs = ["192.168.121.1", "192.168.121.2", "192.168.121.3", \
                         "192.168.121.4", "192.168.121.5", "192.168.121.6",] #WIB IPs connected to host-PC
         self.MBB_IP  = "192.168.121.10"
@@ -62,7 +62,7 @@ class CLS_CONFIG:
             wib_reg_7_value = wib_reg_7_value | 0x80000000 #bit31 of reg7 for disable wib udp control
         self.UDP.write_reg_wib_checked (7, wib_reg_7_value)
 
-    def WIBs_SCAN(self, wib_verid=0x117):
+    def WIBs_SCAN(self, wib_verid=0x122):
         print ("Finding available WIBs starts...")
         active_wibs = []
         for wib_ip in self.WIB_IPs:

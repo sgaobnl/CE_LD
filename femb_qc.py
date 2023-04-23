@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 9/9/2019 10:23:20 AM
+Last modified: 4/21/2023 9:20:02 AM
 """
 
 #defaut setting for scientific caculation
@@ -32,9 +32,9 @@ from shutil import copyfile
 class FEMB_QC:
     def __init__(self):
         self.jumbo_flag = False
-        self.userdir = "I:/SBND_QC/"
+        self.userdir = "D:/SBND/Rawdata/"
         self.user_f = self.userdir + "Crate_QCindex.csv"
-        self.databkdir = "I:/SBND_QC/Crate_QC/"
+        self.databkdir = "D:/SBND/Rawdata/Crate_QC/"
         self.f_qcindex = self.databkdir + "Crate_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
@@ -695,14 +695,13 @@ while (PTBslotno < 7) and (PTBslotno > 0):
     a.env = "RT"
     FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
 
-    a.WIB_IPs = ["10.226.34." + str( ((crateno-1)%4)*6 + PTBslotno) ]
+    #a.WIB_IPs = ["10.226.34." + str( ((crateno-1)%4)*6 + PTBslotno) ]
     print (a.WIB_IPs)
     a.CLS.WIB_IPs = a.WIB_IPs
  
-    a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
-#    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
+#    a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
 
-    PTBslotno = int(input("PTB slot no(1-6): "))
+#    PTBslotno = int(input("PTB slot no(1-6): "))
 print ("Well Done")
 
 ##warm test
