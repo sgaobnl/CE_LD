@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/23/2023 5:02:05 PM
+Last modified: 4/23/2023 5:23:41 PM
 """
 
 #defaut setting for scientific caculation
@@ -135,9 +135,9 @@ class FEMB_QC:
             #14mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=1, swdac2=0, data_cs=0)
         time.sleep(2)
-        print ("CFG is done")
+        print ("FEMB are configurated") 
         qc_data = self.CLS.TPC_UDPACQ(cfglog)
-        self.CLS.FEMBs_CE_OFF()
+#        self.CLS.FEMBs_CE_OFF()
         return qc_data
 
     def FEMB_BL_RB(self,  snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1): #default 14mV/fC, 2.0us, 200mV
@@ -680,31 +680,6 @@ class FEMB_QC:
         print ("Result is saved in %s"%self.user_f )
 
 
-
-crateno = int(input("Crate no(1-6): "))
-PTBslotno = int(input("PTB slot no(1-6): "))
-
-#for PTBslotno in range(1,7):
-#for PTBslotno in [6]:
-while (PTBslotno < 7) and (PTBslotno > 0):
-    flg = "N"
-#    while ( "Y" not in flg):
-#        flg = input("PTB Slot %d is ready (Y/N)" % PTBslotno)
-#        time.sleep(1)
-
-    a = FEMB_QC()
-    a.env = "RT"
-    FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
-
-    #a.WIB_IPs = ["10.226.34." + str( ((crateno-1)%4)*6 + PTBslotno) ]
-    print (a.WIB_IPs)
-    a.CLS.WIB_IPs = a.WIB_IPs
- 
-#    a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
-    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
-
-#    PTBslotno = int(input("PTB slot no(1-6): "))
-print ("Well Done")
 
 ##warm test
 #flg = "N"

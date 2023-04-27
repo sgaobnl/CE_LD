@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/21/2023 9:03:57 AM
+Last modified: 4/26/2023 11:13:12 AM
 """
 
 #defaut setting for scientific caculation
@@ -29,14 +29,14 @@ class CLS_CONFIG:
     def __init__(self):
         self.jumbo_flag = False 
         self.FEMB_ver = 0x501
-        self.WIB_ver = 0x122
+        self.WIB_ver = 0x117
         self.WIB_IPs = ["192.168.121.1", "192.168.121.2", "192.168.121.3", \
                         "192.168.121.4", "192.168.121.5", "192.168.121.6",] #WIB IPs connected to host-PC
-        self.MBB_IP  = "192.168.121.10"
+        self.MBB_IP  = "192.168.121.11"
         self.act_fembs = {}
         self.UDP = CLS_UDP()
         self.UDP.jumbo_flag = self.jumbo_flag
-        self.Int_CLK = False
+        self.Int_CLK = False 
         self.pllfile ="./Si5344-RevD-SBND_V2-100MHz_REVD_PTC.txt" 
         self.fecfg_f ="./fecfg.csv" 
         self.FEREG_MAP = FE_REG_MAPPING()
@@ -62,7 +62,7 @@ class CLS_CONFIG:
             wib_reg_7_value = wib_reg_7_value | 0x80000000 #bit31 of reg7 for disable wib udp control
         self.UDP.write_reg_wib_checked (7, wib_reg_7_value)
 
-    def WIBs_SCAN(self, wib_verid=0x122):
+    def WIBs_SCAN(self ):
         print ("Finding available WIBs starts...")
         active_wibs = []
         for wib_ip in self.WIB_IPs:
@@ -71,7 +71,7 @@ class CLS_CONFIG:
                 wib_ver_rb = self.UDP.read_reg_wib (0xFF)
                 wib_ver_rb = self.UDP.read_reg_wib (0xFF)
                 #if ((wib_ver_rb&0x0F00) == wib_verid&0x0F00) and ( wib_ver_rb >= 0):
-                if ((wib_ver_rb&0x0FFF) == wib_verid&0x0FFF) and ( wib_ver_rb >= 0):
+                if ((wib_ver_rb&0x0FFF) == self.WIB_ver&0x0FFF) and ( wib_ver_rb >= 0):
                     print ("WIB_V%s with IP = %s is found"%(hex(wib_ver_rb&0x0FFF), wib_ip)) 
                     active_wibs.append(wib_ip)
                     self.WIB_CLKCMD_cs(wib_ip )# choose clock source
@@ -83,6 +83,10 @@ class CLS_CONFIG:
                 if (i == 4):
                     print ("WIB with IP = %s get error (%x readback from CLS_UDP.read_reg()), mask this IP"%(wib_ip, wib_ver_rb)) 
             self.WIB_UDP_CTL( wib_ip, WIB_UDP_EN = False)
+            print ("enable data stream and synchronize to Nevis")
+            self.UDP.write_reg_wib_checked(20, 0x00) #disable data stream and synchronize to Nevis
+            self.UDP.write_reg_wib_checked(20, 0x03) #disable data stream and synchronize to Nevis
+            self.UDP.write_reg_wib_checked(20, 0x00) #disable data stream and synchronize to Nevis
         self.WIB_IPs = active_wibs
 
         if len(active_wibs) == 0:
@@ -356,6 +360,8 @@ class CLS_CONFIG:
 
     def WIBs_CFG_INIT(self):
         for wib_ip in list(self.act_fembs.keys()):
+
+
             self.UDP.UDP_IP = wib_ip
             self.WIB_UDP_CTL( wib_ip, WIB_UDP_EN = False) #disable Highspeed data
             if (self.jumbo_flag):
@@ -425,7 +431,7 @@ class CLS_CONFIG:
             self.UDP.write_reg_wib (10,0xFF0)
             time.sleep(0.2)
             
-            print ("configurate PLL of WIB (%s), please wait..."%wib_ip)
+            print ("configurate PLL of WIB (%s), please wait a few minutes..."%wib_ip)
             p_addr = 1
             #step1
             page4 = adrs_h[0]
@@ -460,7 +466,8 @@ class CLS_CONFIG:
                 INTR = (ver_value & 0x40000)>>18
                 if (lol == 1):
                     print ("PLL of WIB(%s) is locked"%wib_ip)
-                    self.UDP.write_reg_wib_checked (4, 0x03)
+                    #self.UDP.write_reg_wib_checked (4, 0x03)
+                    self.UDP.write_reg_wib_checked (4, 0x01)
                     break
                 if (i ==9):
                     print ("Fail to configurate PLL of WIB(%s), please check if MBB is on or 16MHz from dAQ"%wib_ip)
@@ -471,8 +478,9 @@ class CLS_CONFIG:
         self.UDP.UDP_IP = wib_ip
         if (self.Int_CLK ):
             self.UDP.write_reg_wib_checked(0x04, 0x08) #select WIB onboard system clock and CMD
-            print ("ERROR")
+            print ("select WIB onboard system clock and CMD, plese select system clock and CMD from MBB ")
         else:
+            print ("select system clock and CMD from MBB")
             self.WIB_PLL_cfg(wib_ip ) #select system clock and CMD from MBB
 
 
@@ -651,14 +659,23 @@ class CLS_CONFIG:
                 d_wib.append( self.FEMB_UDPACQ(wib_ip, femb_addr, cfglog) )
         return d_wib
 
+    def WIB_SYNC(self, wib_ip):
+        self.UDP.UDP_IP = wib_ip
+        self.UDP.write_reg_wib_checked(0x14, 0x0) #
+        time.sleep(0.1)
+        self.UDP.write_reg_wib_checked(0x14, 0x2) #
+        time.sleep(0.1)
+        self.UDP.write_reg_wib_checked(0x14, 0x0) #
+        time.sleep(0.1)
+
     def FEMB_UDPACQ(self, wib_ip, femb_addr, cfglog):
         self.UDP.UDP_IP = wib_ip
         self.UDP.write_reg_wib_checked(0x01, 0x2) #Time Stamp Reset command encoded in 2MHz 
         self.UDP.write_reg_wib_checked(0x01, 0x0) 
         self.UDP.write_reg_wib_checked(18, 0x8000) #reset error counters
-        if (self.DAQstream_en):
-            self.UDP.write_reg_wib_checked(20, 0x03) #disable data stream and synchronize to Nevis
-            self.UDP.write_reg_wib_checked(20, 0x00) #enable data stream to Nevis
+        #if (self.DAQstream_en):
+        #    self.UDP.write_reg_wib_checked(20, 0x03) #disable data stream and synchronize to Nevis
+        #    self.UDP.write_reg_wib_checked(20, 0x00) #enable data stream to Nevis
         d_sts = []
         for i in range(self.sts_num):
             d_sts.append( self.WIB_STATUS(wib_ip) )
@@ -669,7 +686,11 @@ class CLS_CONFIG:
             raw_asic = []
             for asic in range(8):
                 self.FEMB_ASIC_CS(wib_ip, femb_addr, asic)
-                raw_asic.append( self.UDP.get_rawdata_packets(self.val) )
+                rawdata = self.UDP.get_rawdata_packets(self.val) 
+                if rawdata != None:
+                    raw_asic.append(rawdata )
+                else:
+                    self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True) #Enable HS data from the WIB to PC through UDP
             for cfg in cfglog:
                 tmp = [cfg]
                 if (cfg[0] == wib_ip) and (cfg[1] == femb_addr):
