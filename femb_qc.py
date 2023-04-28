@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/23/2023 5:23:41 PM
+Last modified: 4/28/2023 4:54:27 PM
 """
 
 #defaut setting for scientific caculation
@@ -48,10 +48,10 @@ class FEMB_QC:
         self.raw_data = []
         self.env = "RT"
         self.avg_cnt = 1
-        with open(self.user_f, 'a') as fp:
-            pass
-        with open(self.f_qcindex, 'a') as fp:
-            pass
+        #with open(self.user_f, 'a') as fp:
+        #    pass
+        #with open(self.f_qcindex, 'a') as fp:
+        #    pass
 
     def FEMB_INDEX_LOAD(self):
         self.femb_qclist = []

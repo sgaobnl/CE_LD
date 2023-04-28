@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/26/2023 5:50:14 PM
+Last modified: 4/28/2023 4:53:22 PM
 """
 
 #defaut setting for scientific caculation
@@ -36,7 +36,7 @@ ce = FEMB_QC()
 #PTBslotno = int(input("PTB slot no(1-6): "))
 #wib_ip = input( "WIB IP address: ")
 ce.env = "RT"
-ce.CLS.WIB_ver = 0x122
+ce.CLS.WIB_ver = 0x117
 crateno = 0
 PTBslotno = 0
 wib_ip = "192.168.121.1"
@@ -46,8 +46,10 @@ ce.CLS.MBB_IP = mbb_ip
 if True:
     ce.WIB_IPs = [wib_ip]
     ce.CLS.WIB_IPs = ce.WIB_IPs
-    FEMB_infos = ce.FEMB_CHKOUT_Input(crateno, PTBslotno)
-    ce.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
+    ce.FEMB_CHK_ACQ(testcode=1)
+
+#    FEMB_infos = ce.FEMB_CHKOUT_Input(crateno, PTBslotno)
+#    ce.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
     for wib_ip in ce.WIB_IPs:
         ce.CLS.WIB_SYNC(wib_ip)
 
