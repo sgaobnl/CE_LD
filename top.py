@@ -36,12 +36,13 @@ ce = FEMB_QC()
 #PTBslotno = int(input("PTB slot no(1-6): "))
 #wib_ip = input( "WIB IP address: ")
 ce.env = "RT"
-ce.CLS.WIB_ver = 0x117
+ce.CLS.WIB_ver = 0x122
 crateno = 0
 PTBslotno = 0
-wib_ip = "192.168.121.1"
-mbb_ip = "192.168.121.11"
-ce.CLS.MBB_IP = mbb_ip
+#wib_ip = "192.168.121.1"
+wib_ip = "192.168.230.50"
+#mbb_ip = "192.168.121.11"
+#ce.CLS.MBB_IP = mbb_ip
 
 if True:
     ce.WIB_IPs = [wib_ip]

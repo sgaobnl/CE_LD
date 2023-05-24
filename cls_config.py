@@ -38,6 +38,7 @@ class CLS_CONFIG:
         self.UDP.jumbo_flag = self.jumbo_flag
         self.Int_CLK = False 
         self.pllfile ="./Si5344-RevD-SBND_V2-100MHz_REVD_PTC.txt" 
+        #self.pllfile ="./
         self.fecfg_f ="./fecfg.csv" 
         self.FEREG_MAP = FE_REG_MAPPING()
         self.DAQstream_en =  True
