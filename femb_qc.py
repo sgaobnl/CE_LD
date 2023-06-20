@@ -32,9 +32,9 @@ from shutil import copyfile
 class FEMB_QC:
     def __init__(self):
         self.jumbo_flag = False
-        self.userdir = "D:/SBND/Rawdata/"
+        self.userdir = "/Users/shanshangao/Documents/SBND/"
         self.user_f = self.userdir + "Crate_QCindex.csv"
-        self.databkdir = "D:/SBND/Rawdata/Crate_QC/"
+        self.databkdir = "/Users/shanshangao/Documents/SBND/Crate_QC/"
         self.f_qcindex = self.databkdir + "Crate_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]

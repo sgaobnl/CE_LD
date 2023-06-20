@@ -37,10 +37,11 @@ ce = FEMB_QC()
 #wib_ip = input( "WIB IP address: ")
 ce.env = "RT"
 ce.CLS.WIB_ver = 0x122
-crateno = 0
-PTBslotno = 0
+crateno = 1
+PTBslotno = 1
 #wib_ip = "192.168.121.1"
-wib_ip = "192.168.230.50"
+#wib_ip = "192.168.230.50"
+wib_ip = "10.226.34.1"
 #mbb_ip = "192.168.121.11"
 #ce.CLS.MBB_IP = mbb_ip
 
@@ -51,17 +52,17 @@ if True:
 
 #    FEMB_infos = ce.FEMB_CHKOUT_Input(crateno, PTBslotno)
 #    ce.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
-    for wib_ip in ce.WIB_IPs:
-        ce.CLS.WIB_SYNC(wib_ip)
-
-    while True:
-        sync = input ("SYNC Nevis DAQ (Y/N)?: ")
-        if "Y" in sync or "y" in sync:
-            for wib_ip in ce.WIB_IPs:
-                ce.CLS.WIB_SYNC(wib_ip)
-        else:
-            qflg = input ("Quit (Y/N)?: ")
-            if "Y" in sync or "y" in qflg:
-                print ("Done, exit")
-                exit()
-
+#    for wib_ip in ce.WIB_IPs:
+#        ce.CLS.WIB_SYNC(wib_ip)
+#
+#    while True:
+#        sync = input ("SYNC Nevis DAQ (Y/N)?: ")
+#        if "Y" in sync or "y" in sync:
+#            for wib_ip in ce.WIB_IPs:
+#                ce.CLS.WIB_SYNC(wib_ip)
+#        else:
+#            qflg = input ("Quit (Y/N)?: ")
+#            if "Y" in sync or "y" in qflg:
+#                print ("Done, exit")
+#                exit()
+#
