@@ -36,7 +36,7 @@ class CLS_CONFIG:
         self.act_fembs = {}
         self.UDP = CLS_UDP()
         self.UDP.jumbo_flag = self.jumbo_flag
-        self.Int_CLK = False 
+        self.Int_CLK =  True
         self.pllfile ="./Si5344-RevD-SBND_V2-100MHz_REVD_PTC.txt" 
         #self.pllfile ="./
         self.fecfg_f ="./fecfg.csv" 

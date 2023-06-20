@@ -678,6 +678,7 @@ class FEMB_QC:
         self.FEMB_PLOT(pwr_int_f = pwr_int_f)
         self.raw_data = []
         print ("Result is saved in %s"%self.user_f )
+        self.CLS.FEMBs_CE_OFF()
 
 
 
