@@ -29,14 +29,14 @@ class CLS_CONFIG:
     def __init__(self):
         self.jumbo_flag = False 
         self.FEMB_ver = 0x501
-        self.WIB_ver = 0x109
+        self.WIB_ver = 0x122
         self.WIB_IPs = ["192.168.121.1", "192.168.121.2", "192.168.121.3", \
                         "192.168.121.4", "192.168.121.5", "192.168.121.6",] #WIB IPs connected to host-PC
         self.MBB_IP  = "192.168.121.10"
         self.act_fembs = {}
         self.UDP = CLS_UDP()
         self.UDP.jumbo_flag = self.jumbo_flag
-        self.Int_CLK = False
+        self.Int_CLK = True
         self.pllfile ="./Si5344-RevD-SBND_V2-100MHz_REVD_PTC.txt" 
         self.fecfg_f ="./fecfg.csv" 
         self.FEREG_MAP = FE_REG_MAPPING()
@@ -62,7 +62,8 @@ class CLS_CONFIG:
             wib_reg_7_value = wib_reg_7_value | 0x80000000 #bit31 of reg7 for disable wib udp control
         self.UDP.write_reg_wib_checked (7, wib_reg_7_value)
 
-    def WIBs_SCAN(self, wib_verid=0x117):
+    def WIBs_SCAN(self ):
+        wib_verid = self.WIB_ver 
         print ("Finding available WIBs starts...")
         active_wibs = []
         for wib_ip in self.WIB_IPs:

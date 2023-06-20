@@ -32,12 +32,12 @@ from shutil import copyfile
 class FEMB_QC:
     def __init__(self):
         self.jumbo_flag = False
-        self.userdir = "I:/SBND_QC/"
+        self.userdir = "/Users/shanshangao/Documents/SBND/"
         self.user_f = self.userdir + "Crate_QCindex.csv"
-        self.databkdir = "I:/SBND_QC/Crate_QC/"
+        self.databkdir = "/Users/shanshangao/Documents/SBND/Crate_QC/"
         self.f_qcindex = self.databkdir + "Crate_QCindex.csv"
         self.femb_qclist = []
-        self.WIB_IPs = ["192.168.121.1"]
+        self.WIB_IPs = ["10.226.34.1"]
         self.pwr_n = 1
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
@@ -700,7 +700,7 @@ while (PTBslotno < 7) and (PTBslotno > 0):
     a.CLS.WIB_IPs = a.WIB_IPs
  
     a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
-#    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
+    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
 
     PTBslotno = int(input("PTB slot no(1-6): "))
 print ("Well Done")
