@@ -30,39 +30,67 @@ from shutil import copyfile
 from femb_qc import FEMB_QC
 
 
-ce = FEMB_QC()
-
-#crateno = int(input("Crate no(1-6): "))
-#PTBslotno = int(input("PTB slot no(1-6): "))
-#wib_ip = input( "WIB IP address: ")
-ce.env = "RT"
-ce.CLS.WIB_ver = 0x122
-crateno = 1
-PTBslotno = 2
-#wib_ip = "192.168.121.1"
-#wib_ip = "192.168.230.50"
-wib_ip = "10.226.34.2"
-#mbb_ip = "192.168.121.11"
-#ce.CLS.MBB_IP = mbb_ip
-
-if True:
-    ce.WIB_IPs = [wib_ip]
-    ce.CLS.WIB_IPs = ce.WIB_IPs
-    #ce.FEMB_CHK_ACQ(testcode=1)
-
-    FEMB_infos = ce.FEMB_CHKOUT_Input(crateno, PTBslotno)
-    ce.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
-#    for wib_ip in ce.WIB_IPs:
-#        ce.CLS.WIB_SYNC(wib_ip)
+#ce = FEMB_QC()
 #
-#    while True:
-#        sync = input ("SYNC Nevis DAQ (Y/N)?: ")
-#        if "Y" in sync or "y" in sync:
-#            for wib_ip in ce.WIB_IPs:
-#                ce.CLS.WIB_SYNC(wib_ip)
-#        else:
-#            qflg = input ("Quit (Y/N)?: ")
-#            if "Y" in sync or "y" in qflg:
-#                print ("Done, exit")
-#                exit()
+##crateno = int(input("Crate no(1-6): "))
+##PTBslotno = int(input("PTB slot no(1-6): "))
+##wib_ip = input( "WIB IP address: ")
+#ce.env = "RT"
+#ce.CLS.WIB_ver = 0x122
+#crateno = 1
+#PTBslotno = 2
+##wib_ip = "192.168.121.1"
+##wib_ip = "192.168.230.50"
+#wib_ip = "10.226.34.2"
+##mbb_ip = "192.168.121.11"
+##ce.CLS.MBB_IP = mbb_ip
 #
+#
+#
+#
+#
+#if True:
+#    ce.WIB_IPs = [wib_ip]
+#    ce.CLS.WIB_IPs = ce.WIB_IPs
+#    #ce.FEMB_CHK_ACQ(testcode=1)
+#
+#    FEMB_infos = ce.FEMB_CHKOUT_Input(crateno, PTBslotno)
+#    ce.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
+##    for wib_ip in ce.WIB_IPs:
+##        ce.CLS.WIB_SYNC(wib_ip)
+##
+##    while True:
+##        sync = input ("SYNC Nevis DAQ (Y/N)?: ")
+##        if "Y" in sync or "y" in sync:
+##            for wib_ip in ce.WIB_IPs:
+##                ce.CLS.WIB_SYNC(wib_ip)
+##        else:
+##            qflg = input ("Quit (Y/N)?: ")
+##            if "Y" in sync or "y" in qflg:
+##                print ("Done, exit")
+##                exit()
+##
+
+crateno = int(input("Crate no(1-6): "))
+PTBslotno = int(input("PTB slot no(1-6): "))
+
+#for PTBslotno in range(1,7):
+#for PTBslotno in [6]:
+while (PTBslotno < 7) and (PTBslotno > 0):
+
+    a = FEMB_QC()
+    a.env = "RT"
+    a.CLS.WIB_ver = 0x122
+    FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
+
+    a.WIB_IPs = ["10.226.34." + str( ((crateno-1)%4)*6 + PTBslotno) ]
+    print (a.WIB_IPs)
+    a.CLS.WIB_IPs = a.WIB_IPs
+ 
+    a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
+    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
+
+    PTBslotno = int(input("PTB slot no(1-6): "))
+print ("Well Done")
+
+
