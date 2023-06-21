@@ -38,7 +38,7 @@ class FEMB_QC:
         self.f_qcindex = self.databkdir + "Crate_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
-        self.pwr_n = 1
+        self.pwr_n = 9
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
         self.CLS.FEMB_ver = 0x501
@@ -96,6 +96,7 @@ class FEMB_QC:
 
     def FEMB_CHK_ACQ(self, testcode = 0):
         self.CLS.val = 200 
+        self.CLS.val = 100 
         self.CLS.sts_num = 1
         self.CLS.f_save = False
         self.CLS.FM_only_f = False
@@ -678,7 +679,7 @@ class FEMB_QC:
         self.FEMB_PLOT(pwr_int_f = pwr_int_f)
         self.raw_data = []
         print ("Result is saved in %s"%self.user_f )
-        self.CLS.FEMBs_CE_OFF()
+#        self.CLS.FEMBs_CE_OFF()
 
 
 

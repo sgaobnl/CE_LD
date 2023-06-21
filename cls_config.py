@@ -36,7 +36,7 @@ class CLS_CONFIG:
         self.act_fembs = {}
         self.UDP = CLS_UDP()
         self.UDP.jumbo_flag = self.jumbo_flag
-        self.Int_CLK =  True
+        self.Int_CLK =  False 
         self.pllfile ="./Si5344-RevD-SBND_V2-100MHz_REVD_PTC.txt" 
         #self.pllfile ="./
         self.fecfg_f ="./fecfg.csv" 
@@ -696,12 +696,12 @@ class CLS_CONFIG:
                 tmp = [cfg]
                 if (cfg[0] == wib_ip) and (cfg[1] == femb_addr):
                     tmp += [raw_asic] + [d_sts]
-                    if self.f_save :
+                    #if self.f_save :
+                    if True :
                         fn = self.savedir + "/" + "WIB" + cfg[0].replace(".", "_") + "_FEMB%d"%cfg[1] + "_%d_%02d"%(cfg[3], cfg[12]) + \
                              "FE_%d%d%d%d%d%d%d%d%02d"%(cfg[13], cfg[14], cfg[15], cfg[16], cfg[17], cfg[18], cfg[27], cfg[28], cfg[29]) + ".bin"
                         with open(fn, "wb") as fp:
                             pickle.dump(tmp, fp)
-                        tmp = None
                     break
         else:
             tmp = None
