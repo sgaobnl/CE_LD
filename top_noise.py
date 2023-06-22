@@ -92,7 +92,7 @@ while (crateno < 5) and (crateno > 0):
         print (a.WIB_IPs)
         a.CLS.WIB_IPs = a.WIB_IPs
 
-        a.CLS.pwr_femb_ignore = False
+        a.CLS.pwr_femb_ignore = True
         if False:
             a.CLS.WIBs_SCAN()
             a.CLS.FEMBs_SCAN()
@@ -100,8 +100,8 @@ while (crateno < 5) and (crateno > 0):
         else:
             #a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
             a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
-#            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 )
-#            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 6 )
+            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 )
+            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 6 )
             #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 )
     
     #    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 7 )

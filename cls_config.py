@@ -28,6 +28,7 @@ import pickle
 class CLS_CONFIG:
     def __init__(self):
         self.jumbo_flag = False 
+        self.pwr_femb_ignore = False
         self.FEMB_ver = 0x501
         self.WIB_ver = 0x117
         self.WIB_IPs = ["192.168.121.1", "192.168.121.2", "192.168.121.3", \
@@ -97,6 +98,8 @@ class CLS_CONFIG:
             print ("WIB scanning is done" )
 
     def WIB_PWR_FEMB(self, wib_ip, femb_sws=[1,1,1,1]):
+        if self.pwr_femb_ignore: 
+            return None
         print ("FEMBs power operation on the WIB with IP = %s, wait a moment"%wib_ip)
         self.UDP.UDP_IP = wib_ip
         if (self.pwr_int_f):
@@ -361,8 +364,6 @@ class CLS_CONFIG:
 
     def WIBs_CFG_INIT(self):
         for wib_ip in list(self.act_fembs.keys()):
-
-
             self.UDP.UDP_IP = wib_ip
             self.WIB_UDP_CTL( wib_ip, WIB_UDP_EN = False) #disable Highspeed data
             if (self.jumbo_flag):
