@@ -96,7 +96,7 @@ class FEMB_QC:
 
     def FEMB_CHK_ACQ(self, testcode = 0):
         if testcode == 5 or testcode == 6 :
-            self.CLS.val = 1000 
+            self.CLS.val = 200 
         else:
             self.CLS.val = 100 
         self.CLS.sts_num = 1
@@ -129,7 +129,9 @@ class FEMB_QC:
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=0, snc=1)
         elif testn == 7:
             #7.8mV/fC, 2.0us, 200mV, RMS 
-            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=1, sg1=0, st0 =1, st1=1, snc=1)
+            #cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=1, sg1=0, st0 =1, st1=1, snc=1)
+            #14mV/fC, 2.0us, 200mV, RMS 
+            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1)
         elif testn == 8:
             #14mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
@@ -142,7 +144,10 @@ class FEMB_QC:
         time.sleep(2)
         print ("FEMB are configurated") 
         self.CLS.savedir = self.databkdir 
-        qc_data = self.CLS.TPC_UDPACQ(cfglog)
+        if testcode == 7:
+            qc_data = None
+        else:
+            qc_data = self.CLS.TPC_UDPACQ(cfglog)
 #        self.CLS.FEMBs_CE_OFF()
         return qc_data
 
@@ -670,18 +675,19 @@ class FEMB_QC:
             FEMB_infos.append("SLOT%d"%i + "\n" + FEMB_id + "\n" + env + "\n" + rerun_f + "\n" + c_ret )
         return FEMB_infos
 
-    def FEMB_CHKOUT(self, FEMB_infos, pwr_int_f = False, testcode = 1):
+    def FEMB_CHKOUT(self, FEMB_infos, pwr_int_f = False, testcode = 1, ana_flg=True):
         pwr_qcs = []
         self.CLS.pwr_int_f = pwr_int_f
         qc_data = self.FEMB_CHK_ACQ(testcode = testcode)
-        qcs = self.FEMB_CHK_ANA(FEMB_infos, qc_data, pwr_i=testcode)
-        pwr_qcs += qcs
-        self.CLS.pwr_int_f = False
-        if (len(pwr_qcs) > 0 ):
-            fn =self.databkdir  + "FEMB_CHKOUT_" + pwr_qcs[0][1] +"_" + pwr_qcs[0][4] + ".bin" 
-            with open(fn, 'wb') as f:
-                pickle.dump(self.raw_data, f)
-        self.FEMB_PLOT(pwr_int_f = pwr_int_f)
+        if ana_flg:
+            qcs = self.FEMB_CHK_ANA(FEMB_infos, qc_data, pwr_i=testcode)
+            pwr_qcs += qcs
+            self.CLS.pwr_int_f = False
+            if (len(pwr_qcs) > 0 ):
+                fn =self.databkdir  + "FEMB_CHKOUT_" + pwr_qcs[0][1] +"_" + pwr_qcs[0][4] + ".bin" 
+                with open(fn, 'wb') as f:
+                    pickle.dump(self.raw_data, f)
+            self.FEMB_PLOT(pwr_int_f = pwr_int_f)
         self.raw_data = []
         #print ("Result is saved in %s"%self.user_f )
 #        self.CLS.FEMBs_CE_OFF()

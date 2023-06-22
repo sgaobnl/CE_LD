@@ -17,6 +17,7 @@ import numpy as np
 #import pylab as pl
 
 import sys 
+import os
 import string
 import time
 from datetime import datetime
@@ -699,8 +700,9 @@ class CLS_CONFIG:
                     tmp += [raw_asic] + [d_sts]
                     #if self.f_save :
                     if True :
+                        runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
                         fn = self.savedir + "/" + "WIB" + cfg[0].replace(".", "_") + "_FEMB%d"%cfg[1] + "_%d_%02d"%(cfg[3], cfg[12]) + \
-                             "FE_%d%d%d%d%d%d%d%d%02d"%(cfg[13], cfg[14], cfg[15], cfg[16], cfg[17], cfg[18], cfg[27], cfg[28], cfg[29]) + ".bin"
+                             "FE_%d%d%d%d%d%d%d%d%02d"%(cfg[13], cfg[14], cfg[15], cfg[16], cfg[17], cfg[18], cfg[27], cfg[28], cfg[29]) + "_Time" + runtime + ".bin"
                         with open(fn, "wb") as fp:
                             pickle.dump(tmp, fp)
                     break

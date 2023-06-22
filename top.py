@@ -79,9 +79,13 @@ PTBslotno = int(input("PTB slot no(1-6): "))
 while (crateno < 5) and (crateno > 0):
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
-        a.userdir = "/home/nfs/sgao/SBND_Installation/data/"
+        #a.userdir = "/home/nfs/sgao/SBND_Installation/data/"
+        #a.user_f = a.userdir + "tmp.csv"
+        #a.databkdir = "/home/nfs/sgao/SBND_Installation/data/0622/chk/"
+        #a.f_qcindex = a.databkdir + "tmp.csv"
+        a.userdir = "/Users/shanshangao/Documents/SBND/0622/"
         a.user_f = a.userdir + "tmp.csv"
-        a.databkdir = "/home/nfs/sgao/SBND_Installation/data/0622/chk/"
+        a.databkdir = "/Users/shanshangao/Documents/SBND/0622/chk_a_short/"
         a.f_qcindex = a.databkdir + "tmp.csv"
      
         a.env = "RT"
@@ -99,7 +103,8 @@ while (crateno < 5) and (crateno > 0):
             a.CLS.FEMBs_CE_OFF()
         else:
             #a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
-            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
+            #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1, ana_flg=True )
+            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 7, ana_flg=False )
 #            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 )
 #            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 6 )
             #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 )
