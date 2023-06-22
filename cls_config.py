@@ -36,7 +36,7 @@ class CLS_CONFIG:
         self.act_fembs = {}
         self.UDP = CLS_UDP()
         self.UDP.jumbo_flag = self.jumbo_flag
-        self.Int_CLK =  False 
+        self.Int_CLK =  True 
         self.pllfile ="./Si5344-RevD-SBND_V2-100MHz_REVD_PTC.txt" 
         #self.pllfile ="./
         self.fecfg_f ="./fecfg.csv" 
@@ -45,7 +45,7 @@ class CLS_CONFIG:
         self.pwr_dly = 3 #delay(s) after power operation
         self.sts_num = 1 #how many times statitics data are collected
         self.val = 100 #how many UDP HS package are collected per time
-        self.f_save = False #if False, no raw data is saved, if True, no further data analysis 
+        self.f_save = True #if False, no raw data is saved, if True, no further data analysis 
         self.savedir = "./" 
         self.FM_only_f = False #Only FM, no AM
         self.err_code = ""

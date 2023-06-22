@@ -76,33 +76,37 @@ PTBslotno = int(input("PTB slot no(1-6): "))
 
 #for PTBslotno in range(1,7):
 #for PTBslotno in [6]:
-while (PTBslotno < 7) and (PTBslotno > 0):
-
-    a = FEMB_QC()
-    a.userdir = "/Users/shanshangao/Documents/SBND/0621/"
-    a.user_f = a.userdir + "crate.csv"
-    a.databkdir = "/Users/shanshangao/Documents/SBND/0621/CHK/"
-    a.f_qcindex = a.databkdir + "crate.csv"
- 
-    a.env = "RT"
-    a.CLS.WIB_ver = 0x122
-    FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
-
-    a.WIB_IPs = ["10.226.34." + str( ((crateno-1)%4)*6 + PTBslotno) ]
-    print (a.WIB_IPs)
-    a.CLS.WIB_IPs = a.WIB_IPs
-    if False:
-        a.CLS.WIBs_SCAN()
-        a.CLS.FEMBs_SCAN()
-        a.CLS.FEMBs_CE_OFF()
-    else:
-        #a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
-        a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
-        #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 )
-
-#    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 7 )
-#    exit()
-
+while (crateno < 5) and (crateno > 0):
+    while (PTBslotno < 7) and (PTBslotno > 0):
+        a = FEMB_QC()
+        a.userdir = "/Users/shanshangao/Documents/SBND/0622/"
+        a.user_f = a.userdir + "tmp.csv"
+        a.databkdir = "/Users/shanshangao/Documents/SBND/0622/chk/"
+        a.f_qcindex = a.databkdir + "tmp.csv"
+     
+        a.env = "RT"
+        a.CLS.WIB_ver = 0x122
+        FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
+    
+        a.WIB_IPs = ["10.226.34." + str( ((crateno-1)%4)*6 + PTBslotno) ]
+        print (a.WIB_IPs)
+        a.CLS.WIB_IPs = a.WIB_IPs
+        if True:
+            a.CLS.WIBs_SCAN()
+            a.CLS.FEMBs_SCAN()
+            a.CLS.FEMBs_CE_OFF()
+        else:
+            #a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
+            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
+#            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 )
+#            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 6 )
+            #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 )
+    
+    #    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 7 )
+    #    exit()
+    
+        PTBslotno = int(input("PTB slot no(1-6): "))
+    crateno = int(input("Crate no(1-6): "))
     PTBslotno = int(input("PTB slot no(1-6): "))
 print ("Well Done")
 
