@@ -32,13 +32,13 @@ from shutil import copyfile
 class FEMB_QC:
     def __init__(self):
         self.jumbo_flag = False
-        self.userdir = "/Users/shanshangao/Documents/SBND/"
-        self.user_f = self.userdir + "Crate_QCindex.csv"
-        self.databkdir = "/Users/shanshangao/Documents/SBND/Crate_QC/"
-        self.f_qcindex = self.databkdir + "Crate_QCindex.csv"
+        self.userdir = "/Users/shanshangao/Documents/SBND/0621/"
+        self.user_f = self.userdir + "tmp.csv"
+        self.databkdir = "/Users/shanshangao/Documents/SBND/0621/PreEast"
+        self.f_qcindex = self.databkdir + "tmp.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
-        self.pwr_n = 9
+        self.pwr_n = 1
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
         self.CLS.FEMB_ver = 0x501
@@ -95,8 +95,10 @@ class FEMB_QC:
         return FEMB_infos
 
     def FEMB_CHK_ACQ(self, testcode = 0):
-        self.CLS.val = 200 
-        self.CLS.val = 100 
+        if testcode == 5 or testcode == 6 :
+            self.CLS.val = 1000 
+        else:
+            self.CLS.val = 100 
         self.CLS.sts_num = 1
         self.CLS.f_save = False
         self.CLS.FM_only_f = False
@@ -122,7 +124,9 @@ class FEMB_QC:
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1)
         elif testn == 6:
             #14mV/fC, 2.0us, 900mV, RMS 
-            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=0)
+            #cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=0)
+            #14mV/fC, 0.5us, 200mV, RMS 
+            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=0, snc=1)
         elif testn == 7:
             #7.8mV/fC, 2.0us, 200mV, RMS 
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=1, sg1=0, st0 =1, st1=1, snc=1)
@@ -137,6 +141,7 @@ class FEMB_QC:
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=1, swdac2=0, data_cs=0)
         time.sleep(2)
         print ("FEMB are configurated") 
+        self.CLS.savedir = self.databkdir 
         qc_data = self.CLS.TPC_UDPACQ(cfglog)
 #        self.CLS.FEMBs_CE_OFF()
         return qc_data
@@ -381,7 +386,7 @@ class FEMB_QC:
                 pickle.dump(self.raw_data, f)
         self.FEMB_PLOT(pwr_int_f = pwr_int_f)
         self.raw_data = []
-        print ("Result is saved in %s"%self.user_f )
+        #print ("Result is saved in %s"%self.user_f )
 
     def FEMB_SUB_PLOT(self, ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx=False, ylabel_twx = "", e=None):
         ax.set_title(title)
@@ -655,7 +660,7 @@ class FEMB_QC:
             pickle.dump(BL_T_data, f)
 
     def FEMB_CHKOUT_Input(self, crateno=0, slotno=0):
-        FEMBlist = self.FEMB_INDEX_LOAD()
+        #FEMBlist = self.FEMB_INDEX_LOAD()
         FEMB_infos = []
         env = self.env
         for i in range(4):
@@ -678,7 +683,7 @@ class FEMB_QC:
                 pickle.dump(self.raw_data, f)
         self.FEMB_PLOT(pwr_int_f = pwr_int_f)
         self.raw_data = []
-        print ("Result is saved in %s"%self.user_f )
+        #print ("Result is saved in %s"%self.user_f )
 #        self.CLS.FEMBs_CE_OFF()
 
 
