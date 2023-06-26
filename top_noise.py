@@ -43,7 +43,7 @@ while (crateno < 5) and (crateno > 0):
 #        a.f_qcindex = a.databkdir + "tmp.csv"
         a.userdir = "/Users/shanshangao/Documents/SBND/0622/"
         a.user_f = a.userdir + "tmp.csv"
-        a.databkdir = "/Users/shanshangao/Documents/SBND/0622/noise_west_apa_SHV5V/"
+        a.databkdir = "/Users/shanshangao/Documents/SBND/0622/chk_post_bolt/"
         a.f_qcindex = a.databkdir + "tmp.csv"
      
         a.env = "RT"
@@ -62,8 +62,8 @@ while (crateno < 5) and (crateno > 0):
         else:
             #a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
             a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 , ana_flg=True )
-            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 6 , ana_flg=True)
-            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 , ana_flg=True )
+            #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 6 , ana_flg=True)
+            #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 , ana_flg=True )
             #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 )
     
     

@@ -85,7 +85,7 @@ while (crateno < 5) and (crateno > 0):
         #a.f_qcindex = a.databkdir + "tmp.csv"
         a.userdir = "/Users/shanshangao/Documents/SBND/0622/"
         a.user_f = a.userdir + "tmp.csv"
-        a.databkdir = "/Users/shanshangao/Documents/SBND/0622/chk_pre_bolt/"
+        a.databkdir = "/Users/shanshangao/Documents/SBND/0622/chk_post_bolt/"
         a.f_qcindex = a.databkdir + "tmp.csv"
      
         a.env = "RT"
