@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/26/2023 11:13:12 AM
+Last modified: 11/1/2023 12:21:48 PM
 """
 
 #defaut setting for scientific caculation
@@ -225,7 +225,10 @@ class CLS_CONFIG:
                     print ("I2C of FEMB%d is broken"%i)
                     fembs_found[i] = False
                     self.err_code +="-F4_I2C"
-        self.act_fembs[wib_ip] = fembs_found
+        if ( "10.226.34.34" in wib_ip)
+            self.act_fembs[wib_ip] = [True, True, True, True]
+        else:
+            self.act_fembs[wib_ip] = fembs_found
         print (self.act_fembs)
         self.WIB_PWR_FEMB(wib_ip, femb_sws=[0,0,0,0])
         return self.err_code
@@ -378,6 +381,9 @@ class CLS_CONFIG:
                 if self.act_fembs[wib_ip][femb_addr] == True:
                     femb_sws[femb_addr] = 1
             self.WIB_PWR_FEMB(wib_ip, femb_sws)
+        if ( "10.226.34.34" in wib_ip)
+            self.act_fembs[wib_ip] = [False, True, True, True]
+ 
 
     def FEMBs_CE_OFF(self):
         for wib_ip in list(self.act_fembs.keys()):

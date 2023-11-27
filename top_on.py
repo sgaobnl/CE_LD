@@ -83,9 +83,9 @@ while (crateno < 5) and (crateno > 0):
         #a.user_f = a.userdir + "tmp.csv"
         #a.databkdir = "/home/nfs/sgao/SBND_Installation/data/0622/chk/"
         #a.f_qcindex = a.databkdir + "tmp.csv"
-        a.userdir = "/Users/shanshangao/Documents/SBND/0622/"
+        a.userdir = "/Users/shanshangao/Documents/SBND/1127/"
         a.user_f = a.userdir + "tmp.csv"
-        a.databkdir = "/Users/shanshangao/Documents/SBND/0622/chk_a_short/"
+        a.databkdir = "/Users/shanshangao/Documents/SBND/1127/chk/"
         a.f_qcindex = a.databkdir + "tmp.csv"
      
         a.env = "RT"
