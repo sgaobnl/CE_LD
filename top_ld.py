@@ -29,7 +29,16 @@ import pickle
 from shutil import copyfile
 
 LD = CLS_CONFIG()
-LD.savedir = "/home/nfs/sgao/SBND_Installation/data/1128/crate1_2/"
+LD.savedir = "/home/nfs/sgao/SBND_Installation/data/1128/DAQ_LD/"
+if (os.path.exists(LD.savedir)):
+    pass
+else:
+    try:
+        os.makedirs(LD.savedir)
+    except OSError:
+        print ("Error to create folder %s"%LD.savedir)
+        sys.exit()
+ 
 LD.ldflg=True
 LD.WIB_IPs = [
               "10.226.34.11",

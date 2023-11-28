@@ -46,10 +46,26 @@ for crateno in cratenos:
     PTBslotno = 1
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
-        a.userdir = "/Users/shanshangao/Documents/SBND/1128/"  
-        a.databkdir = "/Users/shanshangao/Documents/SBND/1128/"
+        a.userdir = "/Users/shanshangao/Documents/SBND/1128/ON/"  
+        a.databkdir = "/Users/shanshangao/Documents/SBND/1128/ON/"
         a.user_f = a.userdir + "tmp.csv"
         a.f_qcindex = a.databkdir + "tmp.csv"
+        if (os.path.exists(a.userdir )):
+            pass
+        else:
+            try:
+                os.makedirs(a.userdir )
+            except OSError:
+                print ("Error to create folder %s"%a.userdir )
+                sys.exit()
+        if (os.path.exists(a.databkdir )):
+            pass
+        else:
+            try:
+                os.makedirs(a.databkdir )
+            except OSError:
+                print ("Error to create folder %s"%a.databkdir )
+                sys.exit()
      
         a.env = "RT"
         a.CLS.WIB_ver = 0x123
