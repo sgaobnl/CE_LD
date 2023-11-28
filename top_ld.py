@@ -29,7 +29,7 @@ import pickle
 from shutil import copyfile
 
 LD = CLS_CONFIG()
-LD.savedir = "/home/nfs/sgao/SBND_Installation/data/1128/DAQ_LD/"
+LD.savedir = "/home/nfs/sgao/SBND_Installation/data/1128/RMS/LD6/"
 if (os.path.exists(LD.savedir)):
     pass
 else:
@@ -38,7 +38,7 @@ else:
     except OSError:
         print ("Error to create folder %s"%LD.savedir)
         sys.exit()
- 
+
 LD.ldflg=True
 LD.WIB_IPs = [
               "10.226.34.11",
@@ -53,23 +53,25 @@ LD.WIB_IPs = [
               "10.226.34.24",
               "10.226.34.25",
               "10.226.34.26", 
-              #"10.226.34.31",
-              #"10.226.34.32",
-              #"10.226.34.33",
-              #"10.226.34.34",
-              #"10.226.34.35",
-              #"10.226.34.36",
-              #"10.226.34.41",
-              #"10.226.34.42",
-              #"10.226.34.43",
-              #"10.226.34.44",
-              #"10.226.34.45",
-              #"10.226.34.46"
+              "10.226.34.31",
+              "10.226.34.32",
+              "10.226.34.33",
+              "10.226.34.34",
+              "10.226.34.35",
+              "10.226.34.36",
+              "10.226.34.41",
+              "10.226.34.42",
+              "10.226.34.43",
+              "10.226.34.44",
+              "10.226.34.45",
+              "10.226.34.46"
               ]
 for wib_ip in LD.WIB_IPs:
     print (wib_ip)
     if ".16" in wib_ip:
         LD.act_fembs[wib_ip] = [True, True, False, False]
+#    elif ".14" in wib_ip:
+#        LD.act_fembs[wib_ip] = [True, True, False, False]
     elif ".26" in wib_ip:
         LD.act_fembs[wib_ip] = [True, True, False, False]
     elif ".36" in wib_ip:

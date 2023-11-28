@@ -30,43 +30,64 @@ from shutil import copyfile
 from femb_qc import FEMB_QC
 
 
-#crateno = int(input("Crate no(1-6): "))
-cratenos = []
-while True:
-    for ci in [1,2,3,4]:
-        onstr =  input("Turn on FEMBs at crate#%d ? (Y/N): "%(ci))
-        if "Y" in onstr or "y" in onstr:
-            cratenos.append(ci)
-    print (" FEMBs at crate  ", cratenos, "will be turned on") 
-    ynstr = input ("Confirm? (Y/N) ")
-    if "Y" in onstr or "y" in ynstr:
-        break
+#ce = FEMB_QC()
+#
+##crateno = int(input("Crate no(1-6): "))
+##PTBslotno = int(input("PTB slot no(1-6): "))
+##wib_ip = input( "WIB IP address: ")
+#ce.env = "RT"
+#ce.CLS.WIB_ver = 0x122
+#crateno = 1
+#PTBslotno = 2
+##wib_ip = "192.168.121.1"
+##wib_ip = "192.168.230.50"
+#wib_ip = "10.226.34.2"
+##mbb_ip = "192.168.121.11"
+##ce.CLS.MBB_IP = mbb_ip
+#
+#
+#
+#
+#
+#if True:
+#    ce.WIB_IPs = [wib_ip]
+#    ce.CLS.WIB_IPs = ce.WIB_IPs
+#    #ce.FEMB_CHK_ACQ(testcode=1)
+#
+#    FEMB_infos = ce.FEMB_CHKOUT_Input(crateno, PTBslotno)
+#    ce.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
+##    for wib_ip in ce.WIB_IPs:
+##        ce.CLS.WIB_SYNC(wib_ip)
+##
+##    while True:
+##        sync = input ("SYNC Nevis DAQ (Y/N)?: ")
+##        if "Y" in sync or "y" in sync:
+##            for wib_ip in ce.WIB_IPs:
+##                ce.CLS.WIB_SYNC(wib_ip)
+##        else:
+##            qflg = input ("Quit (Y/N)?: ")
+##            if "Y" in sync or "y" in qflg:
+##                print ("Done, exit")
+##                exit()
+##
 
-for crateno in cratenos:
-    PTBslotno = 1
+crateno = int(input("Crate no(1-6): "))
+PTBslotno = int(input("PTB slot no(1-6): "))
+
+#for PTBslotno in range(1,7):
+#for PTBslotno in [6]:
+while (crateno < 5) and (crateno > 0):
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
-        a.userdir = "/Users/shanshangao/Documents/SBND/1128/CHK/"  
-        a.databkdir = "/Users/shanshangao/Documents/SBND/1128/CHK/"
+        a.userdir = "/home/nfs/sgao/SBND_Installation/data/"
+        #a.user_f = a.userdir + "tmp.csv"
+        a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1128/"
+        #a.f_qcindex = a.databkdir + "tmp.csv"
+        # a.userdir = "/Users/shanshangao/Documents/SBND/0622/"
         a.user_f = a.userdir + "tmp.csv"
+        #a.databkdir = "/Users/shanshangao/Documents/SBND/0622/chk_post_bolt/"
         a.f_qcindex = a.databkdir + "tmp.csv"
-        if (os.path.exists(a.userdir )):
-            pass
-        else:
-            try:
-                os.makedirs(a.userdir )
-            except OSError:
-                print ("Error to create folder %s"%a.userdir )
-                sys.exit()
-        if (os.path.exists(a.databkdir )):
-            pass
-        else:
-            try:
-                os.makedirs(a.databkdir )
-            except OSError:
-                print ("Error to create folder %s"%a.databkdir )
-                sys.exit()
-      
+     
         a.env = "RT"
         a.CLS.WIB_ver = 0x123
         FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
@@ -81,14 +102,19 @@ for crateno in cratenos:
             a.CLS.FEMBs_SCAN()
             a.CLS.FEMBs_CE_OFF()
         else:
+            #a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
             a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1, ana_flg=True )
-        #PTBslotno = int(input("PTB slot no(1-6): "))
-        PTBslotno = PTBslotno +1 #int(input("PTB slot no(1-6): "))
-    #crateno = int(input("Crate no(1-6): "))
-    crateno = crateno + 1
-    PTBslotno = 1
-#    if (crateno < 5) and (crateno > 0):
-#        PTBslotno = int(input("PTB slot no(1-6): "))
+#            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 )
+#            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 6 )
+            #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 )
+    
+    #    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 7 )
+    #    exit()
+    
+        PTBslotno = int(input("PTB slot no(1-6): "))
+    crateno = int(input("Crate no(1-6): "))
+    if (crateno < 5) and (crateno > 0):
+        PTBslotno = int(input("PTB slot no(1-6): "))
 print ("Well Done")
 
 

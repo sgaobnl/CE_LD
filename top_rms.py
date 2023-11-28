@@ -75,7 +75,7 @@ for crateno in cratenos:
         print (a.WIB_IPs)
         a.CLS.WIB_IPs = a.WIB_IPs
 
-        a.CLS.pwr_femb_ignore = True
+        a.CLS.pwr_femb_ignore =  True
         if False:
             a.CLS.WIBs_SCAN()
             a.CLS.FEMBs_SCAN()
