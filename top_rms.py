@@ -46,8 +46,8 @@ for crateno in cratenos:
     PTBslotno = 1
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
-        a.userdir = "/Users/shanshangao/Documents/SBND/1128/RMS/"  
-        a.databkdir = "/Users/shanshangao/Documents/SBND/1128/RMS/"
+        a.userdir = "/home/nfs/sgao/SBND_Installation/data/1128/RMS/"  
+        a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1128/RMS//"
         a.user_f = a.userdir + "tmp.csv"
         a.f_qcindex = a.databkdir + "tmp.csv"
         if (os.path.exists(a.userdir )):
@@ -75,7 +75,7 @@ for crateno in cratenos:
         print (a.WIB_IPs)
         a.CLS.WIB_IPs = a.WIB_IPs
 
-        a.CLS.pwr_femb_ignore = False
+        a.CLS.pwr_femb_ignore = True
         if False:
             a.CLS.WIBs_SCAN()
             a.CLS.FEMBs_SCAN()
