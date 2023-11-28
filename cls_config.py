@@ -58,7 +58,6 @@ class CLS_CONFIG:
         self.pwr_int_f = False #only set to "True" for FEMB screening test
 
     def WIB_UDP_CTL(self, wib_ip, WIB_UDP_EN = False):
-        print (wib_ip)
         self.UDP.UDP_IP = wib_ip
         wib_reg_7_value = self.UDP.read_reg_wib (7)
         if (WIB_UDP_EN): #enable UDP output
@@ -719,15 +718,16 @@ class CLS_CONFIG:
                         break
             else:
                 runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
-                fn = self.savedir + "/" + "WIB" + wib_ip + "FEMB" + str(femb_addr) + "_Time" + runtime + ".bin"
+                fn = self.savedir + "/" + "WIB_" + wib_ip.replace(".","_") + "FEMB_" + str(femb_addr) + "_Time" + runtime + ".bin"
                 with open(fn, "wb") as fp:
                     pickle.dump(raw_asic, fp)
+                tmp = None
         else:
             pass
-            #tmp = None
+            tmp = None
 
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
-        #return tmp
+        return tmp
 
 #    def FEMB_Flash_id_wr(self, wib_ip, femb_addr, id_oft = 20000, id_value = 0xFFFFFFFF):
 #        if (id_oft < 20000 ) or (id_oft > 20048):

@@ -34,7 +34,7 @@ PTBslotno = int(input("PTB slot no(1-6): "))
 
 #for PTBslotno in range(1,7):
 #for PTBslotno in [6]:
-while (crateno < 5) and (crateno > 0):
+while (crateno < 3) and (crateno > 0):
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
 #        a.userdir = "/home/nfs/sgao/SBND_Installation/data/"
@@ -46,7 +46,7 @@ while (crateno < 5) and (crateno > 0):
         a.userdir = "/home/nfs/sgao/SBND_Installation/data/"
         a.user_f = a.userdir + "tmp.csv"
         #a.user_f = a.userdir + "tmp.csv"
-        a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1128/"
+        a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1128/crate1_2/"
         a.f_qcindex = a.databkdir + "tmp.csv"
  
      
@@ -59,23 +59,27 @@ while (crateno < 5) and (crateno > 0):
         print (a.WIB_IPs)
         a.CLS.WIB_IPs = a.WIB_IPs
 
-        a.CLS.pwr_femb_ignore = True
+        #a.CLS.pwr_femb_ignore = True
+        a.CLS.pwr_femb_ignore = False
         if False:
             a.CLS.WIBs_SCAN()
             a.CLS.FEMBs_SCAN()
             a.CLS.FEMBs_CE_OFF()
         else:
             #a.FEMB_QC_PWR( FEMB_infos, pwr_int_f = False)
-            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 , ana_flg=True )
-            #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 6 , ana_flg=True)
-            #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 , ana_flg=True )
+            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 , ana_flg=True ) #pulse
+            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 6 , ana_flg=True) #RMS
+            #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 , ana_flg=True ) #RMS
             #a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 5 )
     
     
-        PTBslotno = int(input("PTB slot no(1-6): "))
-    crateno = int(input("Crate no(1-6): "))
-    if (crateno < 5) and (crateno > 0):
-        PTBslotno = int(input("PTB slot no(1-6): "))
+        #PTBslotno = int(input("PTB slot no(1-6): "))
+        PTBslotno = PTBslotno +1
+    #crateno = int(input("Crate no(1-6): "))
+    PTBslotno = 1
+    crateno = crateno + 1
+    #if (crateno < 5) and (crateno > 0):
+    #    PTBslotno = int(input("PTB slot no(1-6): "))
 print ("Well Done")
 
 

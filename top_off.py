@@ -107,9 +107,11 @@ while (crateno < 5) and (crateno > 0):
     #    a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 7 )
     #    exit()
     
-        PTBslotno = int(input("PTB slot no(1-6): "))
+        #PTBslotno = int(input("PTB slot no(1-6): "))
+        PTBslotno = PTBslotno +1
     crateno = int(input("Crate no(1-6): "))
     if (crateno < 5) and (crateno > 0):
+        #PTBslotno = PTBslotno +1
         PTBslotno = int(input("PTB slot no(1-6): "))
 print ("Well Done")
 
