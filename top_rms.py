@@ -30,17 +30,17 @@ from shutil import copyfile
 from femb_qc import FEMB_QC
 
 
+#crateno = int(input("Crate no(1-6): "))
 cratenos = []
 while True:
     for ci in [1,2,3,4]:
-        onstr =  input("Turn FEMBs on crate#%d ON ? (Y/N): "%(ci))
+        onstr =  input("Turn on FEMBs at crate#%d ? (Y/N): "%(ci))
         if "Y" in onstr or "y" in onstr:
             cratenos.append(ci)
-    print (" FEMBs on crate  ", cratenos, "will be turned on") 
-    ynstr = input ("Confirm? (Y/N")
+    print (" FEMBs at crate  ", cratenos, "will be turned on") 
+    ynstr = input ("Confirm? (Y/N) ")
     if "Y" in onstr or "y" in ynstr:
         break
-    
 
 for crateno in cratenos:
     PTBslotno = 1
@@ -60,13 +60,17 @@ for crateno in cratenos:
         a.CLS.WIB_IPs = a.WIB_IPs
 
         a.CLS.pwr_femb_ignore = False
-        if True:
+        if False:
             a.CLS.WIBs_SCAN()
- #           a.CLS.FEMBs_SCAN()
-            a.CLS.FEMBs_CE_OFF_DIR(wib_ip=a.WIB_IPs[0])
+            a.CLS.FEMBs_SCAN()
+            a.CLS.FEMBs_CE_OFF()
+        else:
+            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 6, ana_flg=False )
+        #PTBslotno = int(input("PTB slot no(1-6): "))
         PTBslotno = PTBslotno +1 #int(input("PTB slot no(1-6): "))
     #crateno = int(input("Crate no(1-6): "))
-    #crateno = crateno + 1
+    crateno = crateno + 1
+    PTBslotno = 1
 #    if (crateno < 5) and (crateno > 0):
 #        PTBslotno = int(input("PTB slot no(1-6): "))
 print ("Well Done")

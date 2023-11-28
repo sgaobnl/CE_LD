@@ -391,6 +391,11 @@ class CLS_CONFIG:
             self.UDP.UDP_IP = wib_ip
             self.WIB_PWR_FEMB(wib_ip, [0, 0, 0, 0])
 
+    def FEMBs_CE_OFF_DIR(self, wib_ip):
+        for wib_ip in self.WIB_IPs :
+            self.UDP.UDP_IP = wib_ip
+            self.WIB_PWR_FEMB(wib_ip, [0, 0, 0, 0])
+
     def WIB_PLL_wr(self, wib_ip, addr, din):
         self.UDP.UDP_IP = wib_ip
         value = 0x01 + ((addr&0xFF)<<8) + ((din&0x00FF)<<16)
