@@ -81,14 +81,14 @@ while (crateno < 5) and (crateno > 0):
         a = FEMB_QC()
         a.userdir = "/home/nfs/sgao/SBND_Installation/data/"
         a.user_f = a.userdir + "tmp.csv"
-        a.databkdir = "/home/nfs/sgao/SBND_Installation/data/0622/off/"
+        a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1128/off/"
         a.f_qcindex = a.databkdir + "tmp.csv"
      
         a.env = "RT"
-        a.CLS.WIB_ver = 0x122
+        a.CLS.WIB_ver = 0x123
         FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
     
-        a.WIB_IPs = ["10.226.34." + str( ((crateno-1)%4)*6 + PTBslotno) ]
+        a.WIB_IPs = ["10.226.34." + str( crateno*10 + PTBslotno) ]
         print (a.WIB_IPs)
         a.CLS.WIB_IPs = a.WIB_IPs
 

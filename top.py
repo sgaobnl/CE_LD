@@ -79,20 +79,20 @@ PTBslotno = int(input("PTB slot no(1-6): "))
 while (crateno < 5) and (crateno > 0):
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
-        #a.userdir = "/home/nfs/sgao/SBND_Installation/data/"
-        #a.user_f = a.userdir + "tmp.csv"
-        #a.databkdir = "/home/nfs/sgao/SBND_Installation/data/0622/chk/"
-        #a.f_qcindex = a.databkdir + "tmp.csv"
-        a.userdir = "/Users/shanshangao/Documents/SBND/0622/"
+        a.userdir = "/home/nfs/sgao/SBND_Installation/data/"
         a.user_f = a.userdir + "tmp.csv"
-        a.databkdir = "/Users/shanshangao/Documents/SBND/0622/chk_a_short/"
+        a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1128/chk/"
         a.f_qcindex = a.databkdir + "tmp.csv"
+        #a.userdir = "/Users/shanshangao/Documents/SBND/11/"
+        #a.user_f = a.userdir + "tmp.csv"
+        #a.databkdir = "/Users/shanshangao/Documents/SBND/0622/chk_a_short/"
+        #a.f_qcindex = a.databkdir + "tmp.csv"
      
         a.env = "RT"
-        a.CLS.WIB_ver = 0x122
+        a.CLS.WIB_ver = 0x123
         FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
     
-        a.WIB_IPs = ["10.226.34." + str( ((crateno-1)%4)*6 + PTBslotno) ]
+        a.WIB_IPs = ["10.226.34." + str( crateno*10 + PTBslotno) ]
         print (a.WIB_IPs)
         a.CLS.WIB_IPs = a.WIB_IPs
 

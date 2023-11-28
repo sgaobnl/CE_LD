@@ -29,6 +29,7 @@ import pickle
 class CLS_CONFIG:
     def __init__(self):
         self.jumbo_flag = False 
+        self.ldflg = False # True --> configuration done by DAQ, only taking data
         self.pwr_femb_ignore = False
         self.FEMB_ver = 0x501
         self.WIB_ver = 0x117
@@ -57,6 +58,7 @@ class CLS_CONFIG:
         self.pwr_int_f = False #only set to "True" for FEMB screening test
 
     def WIB_UDP_CTL(self, wib_ip, WIB_UDP_EN = False):
+        print (wib_ip)
         self.UDP.UDP_IP = wib_ip
         wib_reg_7_value = self.UDP.read_reg_wib (7)
         if (WIB_UDP_EN): #enable UDP output
@@ -225,7 +227,7 @@ class CLS_CONFIG:
                     print ("I2C of FEMB%d is broken"%i)
                     fembs_found[i] = False
                     self.err_code +="-F4_I2C"
-        if ( "10.226.34.34" in wib_ip)
+        if ( "10.226.34.34" in wib_ip):
             self.act_fembs[wib_ip] = [True, True, True, True]
         else:
             self.act_fembs[wib_ip] = fembs_found
@@ -381,7 +383,7 @@ class CLS_CONFIG:
                 if self.act_fembs[wib_ip][femb_addr] == True:
                     femb_sws[femb_addr] = 1
             self.WIB_PWR_FEMB(wib_ip, femb_sws)
-        if ( "10.226.34.34" in wib_ip)
+        if ( "10.226.34.34" in wib_ip):
             self.act_fembs[wib_ip] = [False, True, True, True]
  
 
@@ -679,15 +681,17 @@ class CLS_CONFIG:
 
     def FEMB_UDPACQ(self, wib_ip, femb_addr, cfglog):
         self.UDP.UDP_IP = wib_ip
-        self.UDP.write_reg_wib_checked(0x01, 0x2) #Time Stamp Reset command encoded in 2MHz 
-        self.UDP.write_reg_wib_checked(0x01, 0x0) 
-        self.UDP.write_reg_wib_checked(18, 0x8000) #reset error counters
+        if not self.ldflg:
+            self.UDP.write_reg_wib_checked(0x01, 0x2) #Time Stamp Reset command encoded in 2MHz 
+            self.UDP.write_reg_wib_checked(0x01, 0x0) 
+            self.UDP.write_reg_wib_checked(18, 0x8000) #reset error counters
         #if (self.DAQstream_en):
         #    self.UDP.write_reg_wib_checked(20, 0x03) #disable data stream and synchronize to Nevis
         #    self.UDP.write_reg_wib_checked(20, 0x00) #enable data stream to Nevis
         d_sts = []
-        for i in range(self.sts_num):
-            d_sts.append( self.WIB_STATUS(wib_ip) )
+        if not self.ldflg:
+            for i in range(self.sts_num):
+                d_sts.append( self.WIB_STATUS(wib_ip) )
 
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True) #Enable HS data from the WIB to PC through UDP
         if self.act_fembs[wib_ip][femb_addr] == True:
@@ -700,23 +704,30 @@ class CLS_CONFIG:
                     raw_asic.append(rawdata )
                 else:
                     self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True) #Enable HS data from the WIB to PC through UDP
-            for cfg in cfglog:
-                tmp = [cfg]
-                if (cfg[0] == wib_ip) and (cfg[1] == femb_addr):
-                    tmp += [raw_asic] + [d_sts]
-                    #if self.f_save :
-                    if True :
-                        runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
-                        fn = self.savedir + "/" + "WIB" + cfg[0].replace(".", "_") + "_FEMB%d"%cfg[1] + "_%d_%02d"%(cfg[3], cfg[12]) + \
-                             "FE_%d%d%d%d%d%d%d%d%02d"%(cfg[13], cfg[14], cfg[15], cfg[16], cfg[17], cfg[18], cfg[27], cfg[28], cfg[29]) + "_Time" + runtime + ".bin"
-                        with open(fn, "wb") as fp:
-                            pickle.dump(tmp, fp)
-                    break
+            if not self.ldflg:
+                for cfg in cfglog:
+                    tmp = [cfg]
+                    if (cfg[0] == wib_ip) and (cfg[1] == femb_addr):
+                        tmp += [raw_asic] + [d_sts]
+                        #if self.f_save :
+                        if True :
+                            runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
+                            fn = self.savedir + "/" + "WIB" + cfg[0].replace(".", "_") + "_FEMB%d"%cfg[1] + "_%d_%02d"%(cfg[3], cfg[12]) + \
+                                 "FE_%d%d%d%d%d%d%d%d%02d"%(cfg[13], cfg[14], cfg[15], cfg[16], cfg[17], cfg[18], cfg[27], cfg[28], cfg[29]) + "_Time" + runtime + ".bin"
+                            with open(fn, "wb") as fp:
+                                pickle.dump(tmp, fp)
+                        break
+            else:
+                runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
+                fn = self.savedir + "/" + "WIB" + wib_ip + "FEMB" + str(femb_addr) + "_Time" + runtime + ".bin"
+                with open(fn, "wb") as fp:
+                    pickle.dump(raw_asic, fp)
         else:
-            tmp = None
+            pass
+            #tmp = None
 
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
-        return tmp
+        #return tmp
 
 #    def FEMB_Flash_id_wr(self, wib_ip, femb_addr, id_oft = 20000, id_value = 0xFFFFFFFF):
 #        if (id_oft < 20000 ) or (id_oft > 20048):
