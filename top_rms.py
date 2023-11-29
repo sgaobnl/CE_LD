@@ -34,7 +34,7 @@ from femb_qc import FEMB_QC
 cratenos = []
 while True:
     for ci in [1,2,3,4]:
-        onstr =  input("Turn on FEMBs at crate#%d ? (Y/N): "%(ci))
+        onstr =  input("Choose crate#%d ? (Y/N): "%(ci))
         if "Y" in onstr or "y" in onstr:
             cratenos.append(ci)
     print (" FEMBs at crate  ", cratenos, "will be turned on") 
@@ -46,8 +46,9 @@ for crateno in cratenos:
     PTBslotno = 1
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
-        a.userdir = "/home/nfs/sgao/SBND_Installation/data/1128/RMS/"  
-        a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1128/RMS//"
+        a.userdir = "/home/nfs/sgao/SBND_Installation/data/1129/RMS/"  
+        #a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1128/RMS//"
+        a.databkdir = a.userdir 
         a.user_f = a.userdir + "tmp.csv"
         a.f_qcindex = a.databkdir + "tmp.csv"
         if (os.path.exists(a.userdir )):

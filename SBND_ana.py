@@ -53,6 +53,7 @@ rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBN
 rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/0622/chk_pre_bolt/"""
 rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/0621/RMS20us/"""
 rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/0621/RMS20usHV1V/"""
+rawdir = """/Users/shanshangao/Downloads/tmp/1128/noise/noise/"""
 #rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/0621/RMS20usHVoff/"""
 
 chk_fns = []

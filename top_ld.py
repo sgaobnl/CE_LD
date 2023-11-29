@@ -29,7 +29,7 @@ import pickle
 from shutil import copyfile
 
 LD = CLS_CONFIG()
-LD.savedir = "/home/nfs/sgao/SBND_Installation/data/1128/RMS/LD6/"
+LD.savedir = "/home/nfs/sgao/SBND_Installation/data/1129/RMS/LD6/"
 if (os.path.exists(LD.savedir)):
     pass
 else:

@@ -141,97 +141,107 @@ class CLS_CONFIG:
 
     def FEMB_DECTECT(self, wib_ip):
         self.UDP.UDP_IP = wib_ip
-        self.WIB_PWR_FEMB(wib_ip, femb_sws=[1,1,1,1])
-        stats = self.WIB_STATUS(wib_ip)
-        keys = list(stats.keys())
-        fembs_found = [True, True, True, True]
         self.err_code += "#TIME" + stats["TIME"]
-        for i in range(4):
-            self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
-            for key in keys:
-                if key in "FEMB%d_LINK"%i:
-                    if (stats[key] != 0xFF):
-                        print ("FEMB%d LINK is broken!"%i)
+        if False
+            self.WIB_PWR_FEMB(wib_ip, femb_sws=[1,1,1,1])
+            stats = self.WIB_STATUS(wib_ip)
+            keys = list(stats.keys())
+            fembs_found = [True, True, True, True]
+            for i in range(4):
+                self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
+                for key in keys:
+                    if key in "FEMB%d_LINK"%i:
+                        if (stats[key] != 0xFF):
+                            print ("FEMB%d LINK is broken!"%i)
+                            fembs_found[i] = False
+                            self.err_code += "-F2_LINK"
+                    elif key in "FEMB%d_EQ"%i:
+                        if (stats[key] != 0xF):
+                            print ("FEMB%d EQ is broken!"%i)
+                            fembs_found[i] = False
+                            self.err_code += "-F3_EQ"
+                    elif key in "FEMB%d_BIAS_I"%i:
+                        if (stats[key] < 0.001 ):
+                            print ("FEMB%d BIAS current (%fA) is lower than expected"%(i, stats[key]) )
+                            fembs_found[i] = False
+                            self.err_code +="-F1_BIAS_L"
+                        elif (stats[key] > 0.1 ):
+                            print ("FEMB%d BIAS current (%fA) is higher than expected"%(i, stats[key]) )
+                            fembs_found[i] = False
+                            self.err_code += "-F1_BIAS_H"
+                    elif key in "FEMB%d_FMV39_I"%i:
+                        if (stats[key] < 0.010 ):
+                            print ("FEMB%d FM_V39 current (%fA) is lower than expected"%(i, stats[key] ))
+                            fembs_found[i] = False
+                            self.err_code += "-F1_FMV39_L"
+                        elif (stats[key] > 0.2 ):
+                            print ("FEMB%d FM_V39 current (%fA) is higher than expected"%(i, stats[key] ))
+                            fembs_found[i] = False
+                            self.err_code += "-F1_FMV39_H"
+                    elif key in "FEMB%d_FMV30_I"%i:
+                        if (stats[key] < 0.050 ):
+                            print ("FEMB%d FM_V30 current (%fA) is lower than expected"%(i, stats[key] ))
+                            fembs_found[i] = False
+                            self.err_code += "-F1_FMV30_L"
+                        elif (stats[key] > 0.5 ):
+                            print ("FEMB%d FM_V30 current (%fA) is higher than expected"%(i, stats[key] ))
+                            fembs_found[i] = False
+                            self.err_code += "-F1_FMV30_H"
+                    elif key in "FEMB%d_FMV18_I"%i:
+                        if (stats[key] < 0.200 ):
+                            print ("FEMB%d FM_V18 current (%fA) is lower than expected"%(i, stats[key] ))
+                            fembs_found[i] = False
+                            self.err_code += "-F1_FMV18_L"
+                        elif (stats[key] > 1.0 ):
+                            print ("FEMB%d FM_V18 current (%fA) is higher than expected"%(i, stats[key] ))
+                            fembs_found[i] = False
+                            self.err_code += "-F1_FMV18_H"
+                    elif key in "FEMB%d_AMV33_I"%i:
+                        if (stats[key] < 0.100 ):
+                            print ("FEMB%d AM_V33 current (%fA) is lower than expected"%(i, stats[key] ))
+                            fembs_found[i] = False if not self.FM_only_f else True
+                            self.err_code +="-F1_AMV33_L"if not self.FM_only_f else ""
+                        elif (stats[key] > 1.0 ):
+                            print ("FEMB%d AM_V33 current (%fA) is higher than expected"%(i, stats[key] ))
+                            fembs_found[i] = False if not self.FM_only_f else True
+                            self.err_code +="-F1_AMV33_H"if not self.FM_only_f else ""
+                    elif key in "FEMB%d_AMV28_I"%i:
+                        if (stats[key] < 0.100 ):
+                            print ("FEMB%d AM_V28 current (%fA) is lower than expected"%(i, stats[key] ))
+                            fembs_found[i] = False if not self.FM_only_f else True
+                            self.err_code +="-F1_AMV28_L"if not self.FM_only_f else ""
+                        elif (stats[key] > 1.5 ):
+                            print ("FEMB%d AM_V28 current (%fA) is higher than expected"%(i, stats[key] ))
+                            fembs_found[i] = False if not self.FM_only_f else True
+                            self.err_code +="-F1_AMV28_H"if not self.FM_only_f else ""
+                if (fembs_found[i]): #Link and current are good
+                    self.UDP.write_reg_femb(i, 0x0, 0x0)
+                    self.UDP.read_reg_femb(i, 0x102)
+                    ver_value = self.UDP.read_reg_femb(i, 0x101)
+                    if (ver_value > 0 ):
+                        if (ver_value&0xFFFF != self.FEMB_ver):
+                            print ("FEMB%d FE version is %x, which is different from default (%x)!"%(i, ver_value, self.FEMB_ver))
+                            fembs_found[i] = False
+                            self.err_code +="-F7_FW"
+                    elif (ver_value <= 0 ):
+                        print ("I2C of FEMB%d is broken"%i)
                         fembs_found[i] = False
-                        self.err_code += "-F2_LINK"
-                elif key in "FEMB%d_EQ"%i:
-                    if (stats[key] != 0xF):
-                        print ("FEMB%d EQ is broken!"%i)
-                        fembs_found[i] = False
-                        self.err_code += "-F3_EQ"
-                elif key in "FEMB%d_BIAS_I"%i:
-                    if (stats[key] < 0.001 ):
-                        print ("FEMB%d BIAS current (%fA) is lower than expected"%(i, stats[key]) )
-                        fembs_found[i] = False
-                        self.err_code +="-F1_BIAS_L"
-                    elif (stats[key] > 0.1 ):
-                        print ("FEMB%d BIAS current (%fA) is higher than expected"%(i, stats[key]) )
-                        fembs_found[i] = False
-                        self.err_code += "-F1_BIAS_H"
-                elif key in "FEMB%d_FMV39_I"%i:
-                    if (stats[key] < 0.010 ):
-                        print ("FEMB%d FM_V39 current (%fA) is lower than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
-                        self.err_code += "-F1_FMV39_L"
-                    elif (stats[key] > 0.2 ):
-                        print ("FEMB%d FM_V39 current (%fA) is higher than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
-                        self.err_code += "-F1_FMV39_H"
-                elif key in "FEMB%d_FMV30_I"%i:
-                    if (stats[key] < 0.050 ):
-                        print ("FEMB%d FM_V30 current (%fA) is lower than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
-                        self.err_code += "-F1_FMV30_L"
-                    elif (stats[key] > 0.5 ):
-                        print ("FEMB%d FM_V30 current (%fA) is higher than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
-                        self.err_code += "-F1_FMV30_H"
-                elif key in "FEMB%d_FMV18_I"%i:
-                    if (stats[key] < 0.200 ):
-                        print ("FEMB%d FM_V18 current (%fA) is lower than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
-                        self.err_code += "-F1_FMV18_L"
-                    elif (stats[key] > 1.0 ):
-                        print ("FEMB%d FM_V18 current (%fA) is higher than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
-                        self.err_code += "-F1_FMV18_H"
-                elif key in "FEMB%d_AMV33_I"%i:
-                    if (stats[key] < 0.100 ):
-                        print ("FEMB%d AM_V33 current (%fA) is lower than expected"%(i, stats[key] ))
-                        fembs_found[i] = False if not self.FM_only_f else True
-                        self.err_code +="-F1_AMV33_L"if not self.FM_only_f else ""
-                    elif (stats[key] > 1.0 ):
-                        print ("FEMB%d AM_V33 current (%fA) is higher than expected"%(i, stats[key] ))
-                        fembs_found[i] = False if not self.FM_only_f else True
-                        self.err_code +="-F1_AMV33_H"if not self.FM_only_f else ""
-                elif key in "FEMB%d_AMV28_I"%i:
-                    if (stats[key] < 0.100 ):
-                        print ("FEMB%d AM_V28 current (%fA) is lower than expected"%(i, stats[key] ))
-                        fembs_found[i] = False if not self.FM_only_f else True
-                        self.err_code +="-F1_AMV28_L"if not self.FM_only_f else ""
-                    elif (stats[key] > 1.5 ):
-                        print ("FEMB%d AM_V28 current (%fA) is higher than expected"%(i, stats[key] ))
-                        fembs_found[i] = False if not self.FM_only_f else True
-                        self.err_code +="-F1_AMV28_H"if not self.FM_only_f else ""
-            if (fembs_found[i]): #Link and current are good
-                self.UDP.write_reg_femb(i, 0x0, 0x0)
-                self.UDP.read_reg_femb(i, 0x102)
-                ver_value = self.UDP.read_reg_femb(i, 0x101)
-                if (ver_value > 0 ):
-                    if (ver_value&0xFFFF != self.FEMB_ver):
-                        print ("FEMB%d FE version is %x, which is different from default (%x)!"%(i, ver_value, self.FEMB_ver))
-                        fembs_found[i] = False
-                        self.err_code +="-F7_FW"
-                elif (ver_value <= 0 ):
-                    print ("I2C of FEMB%d is broken"%i)
-                    fembs_found[i] = False
-                    self.err_code +="-F4_I2C"
+                        self.err_code +="-F4_I2C"
         if ( "10.226.34.34" in wib_ip):
             self.act_fembs[wib_ip] = [True, True, True, True]
+        elif ( "10.226.34.16" in wib_ip):
+            self.act_fembs[wib_ip] = [True, True, False, False]
+        elif ( "10.226.34.26" in wib_ip):
+            self.act_fembs[wib_ip] = [True, True, False, False]
+        elif ( "10.226.34.36" in wib_ip):
+            self.act_fembs[wib_ip] = [True, True, False, False]
+        elif ( "10.226.34.46" in wib_ip):
+            self.act_fembs[wib_ip] = [True, True, False, False]
         else:
-            self.act_fembs[wib_ip] = fembs_found
-        print (self.act_fembs)
-        self.WIB_PWR_FEMB(wib_ip, femb_sws=[0,0,0,0])
+            self.act_fembs[wib_ip] = [True, True, True, True]
+            #self.act_fembs[wib_ip] = fembs_found
+        #print (self.act_fembs)
+        #self.WIB_PWR_FEMB(wib_ip, femb_sws=[0,0,0,0])
         return self.err_code
 
     def WIB_STATUS(self, wib_ip):

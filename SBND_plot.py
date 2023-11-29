@@ -104,16 +104,16 @@ def res_pkn(result):
 
 #exit()
 
-if False :   
-    rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/0622/chk_post_bolt/"""
+if True :   
+    rawdir = """/Users/shanshangao/Downloads/tmp/1128/noise/noise/"""
     result1 = result_rd(rawdir)
-    print (result1[0][1][1407-1], int(result1[0][1][1407-1]*193)) 
-    print (result1[0][1][1411-1], int(result1[0][1][1411-1]*193)) 
-    print (result1[2][1][426-1],  int(result1[2][1][426-1]*193 )) 
-    print (result1[2][1][1239-1], int(result1[2][1][1239-1]*193)) 
-    print (result1[4][1][953-1],  int(result1[4][1][953-1]*193 )) 
-    print (result1[5][1][426-1],  int(result1[5][1][426-1]*193 )) 
-    print (result1[5][1][1239-1], int(result1[5][1][1239-1]*193)) 
+#    print (result1[0][1][1407-1], int(result1[0][1][1407-1]*193)) 
+#    print (result1[0][1][1411-1], int(result1[0][1][1411-1]*193)) 
+#    print (result1[2][1][426-1],  int(result1[2][1][426-1]*193 )) 
+#    print (result1[2][1][1239-1], int(result1[2][1][1239-1]*193)) 
+#    print (result1[4][1][953-1],  int(result1[4][1][953-1]*193 )) 
+#    print (result1[5][1][426-1],  int(result1[5][1][426-1]*193 )) 
+#    print (result1[5][1][1239-1], int(result1[5][1][1239-1]*193)) 
 
 
     euch , eurms, evch , evrms, eych , eyrms, wuch , wurms, wvch , wvrms, wych , wyrms = res_rms(result1)
@@ -138,25 +138,32 @@ if False :
 #    plt.close()
 #
 #   
-#    import matplotlib.pyplot as plt
-#    fig = plt.figure(figsize=(18,6))
-#    plt.rcParams.update({'font.size': 18})
-#    plt.vlines(1984, 0, 4000, linestyles='dashed',color='k')
-#    plt.vlines(1984*2, 0, 4000, linestyles='dashed',color='k')
-#    plt.plot(wuch, np.array(wurms)*193, color='b', label = "U of West APA" )
-#    plt.plot(wvch, np.array(wvrms)*193, color='g', label = "V of West APA" )
-#    plt.plot(wych, np.array(wyrms)*193, color='r', label = "Y of West APA" )
-#    plt.ylim((0,1000))
-#    plt.xlim((0,6500))
-#    plt.title ("ENC Distribution @ (14mV/fC,  2.0$\mu$ss)")
-#    plt.ylabel ("ENC /e-")
-#    plt.xlabel ("Channel NO.")
-#    plt.legend()
-#    plt.grid()
-#    #    plt.plot(x, result2[i][1], color='r')
-#    #    plt.plot(x, result3[i][1], color='g')
-#    plt.show()
-#    plt.close()
+    for i in range(len(wurms)):
+        if wurms[i] < 2:
+            print (wuch[i])
+
+    for i in range(len(wvrms)):
+        if wvrms[i] < 2:
+            print (wvch[i])
+    import matplotlib.pyplot as plt
+    fig = plt.figure(figsize=(18,6))
+    plt.rcParams.update({'font.size': 18})
+    plt.vlines(1984, 0, 4000, linestyles='dashed',color='k')
+    plt.vlines(1984*2, 0, 4000, linestyles='dashed',color='k')
+    plt.plot(wuch, np.array(wurms)*193, color='b', label = "U of West APA" )
+    plt.plot(wvch, np.array(wvrms)*193, color='g', label = "V of West APA" )
+    plt.plot(wych, np.array(wyrms)*193, color='r', label = "Y of West APA" )
+    plt.ylim((0,5000))
+    plt.xlim((0,6500))
+    plt.title ("ENC Distribution @ (14mV/fC,  2.0$\mu$ss)")
+    plt.ylabel ("ENC /e-")
+    plt.xlabel ("Channel NO.")
+    plt.legend()
+    plt.grid()
+    #    plt.plot(x, result2[i][1], color='r')
+    #    plt.plot(x, result3[i][1], color='g')
+    plt.show()
+    plt.close()
 #    exit()
 
    
@@ -322,7 +329,7 @@ if False :
     plt.close()
 
 
-if True :   
+if False :   
     
     rawdir =  """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/0621/chk_post_bolt/"""
     rawdir =  """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/0621/RMS20us/"""
