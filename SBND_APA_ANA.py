@@ -157,6 +157,7 @@ def SBND_ANA(rawdir):
     dec_chn = SBND_MAP()
     lendec = len(dec_chn)
     for df in fns:
+        print ("Analyze: ", df)
         crateno = df[0]
         wibno   = df[1]
         fembno  = df[2]
@@ -178,164 +179,94 @@ def SBND_ANA(rawdir):
                 dec_chn[i].append(chn_pkps[decch])
                 dec_chn[i].append(chn_pkns[decch])
          
-    e_yrmss = []
-    e_urmss = []
-    e_vrmss = []
-    e_ypeds = []
-    e_upeds = []
-    e_vpeds = []
-    e_ypkps = []
-    e_upkps = []
-    e_vpkps = []
-    e_ypkns = []
-    e_upkns = []
-    e_vpkns = []
-    
-    w_yrmss = []
-    w_urmss = []
-    w_vrmss = []
-    w_ypeds = []
-    w_upeds = []
-    w_vpeds = []
-    w_ypkps = []
-    w_upkps = []
-    w_vpkps = []
-    w_ypkns = []
-    w_upkns = []
-    w_vpkns = []
-    
-    for chn in range(1,1986):
-        for i in range(lendec):
-            if (int(dec_chn[i][10]) == chn):
-                if (int(dec_chn[i][5]) <= 2): #west apa
-                    if len(dec_chn[i])>12:
-                        if "U" in dec_chn[i][9]:
-                            w_urmss.append( dec_chn[i][12])
-                            w_upeds.append( dec_chn[i][13])
-                            w_upkps.append( dec_chn[i][14])
-                            w_upkns.append( dec_chn[i][15])
-                        if "V" in dec_chn[i][9]:
-                            w_vrmss.append( dec_chn[i][12])
-                            w_vpeds.append( dec_chn[i][13])
-                            w_vpkps.append( dec_chn[i][14])
-                            w_vpkns.append( dec_chn[i][15])
-                        if "Y" in dec_chn[i][9]:
-                            w_yrmss.append( dec_chn[i][12])
-                            w_ypeds.append( dec_chn[i][13])
-                            w_ypkps.append( dec_chn[i][14])
-                            w_ypkns.append( dec_chn[i][15])
-                else:#east apa
-                    if len(dec_chn[i])>12:
-                        if "U" in dec_chn[i][9]:
-                            e_urmss.append( dec_chn[i][12])
-                            e_upeds.append( dec_chn[i][13])
-                            e_upkps.append( dec_chn[i][14])
-                            e_upkns.append( dec_chn[i][15])
-                        if "V" in dec_chn[i][9]:
-                            e_vrmss.append( dec_chn[i][12])
-                            e_vpeds.append( dec_chn[i][13])
-                            e_vpkps.append( dec_chn[i][14])
-                            e_vpkns.append( dec_chn[i][15])
-                        if "Y" in dec_chn[i][9]:
-                            e_yrmss.append( dec_chn[i][12])
-                            e_ypeds.append( dec_chn[i][13])
-                            e_ypkps.append( dec_chn[i][14])
-                            e_ypkns.append( dec_chn[i][15])
-    #    break
-    result = [
-                ["EU", e_urmss, e_upeds, e_upkps, e_upkns],
-                ["Ev", e_vrmss, e_vpeds, e_vpkps, e_vpkns],
-                ["EY", e_yrmss, e_ypeds, e_ypkps, e_ypkns],
-                ["WU", w_urmss, w_upeds, w_upkps, w_upkns],
-                ["Wv", w_vrmss, w_vpeds, w_vpkps, w_vpkns],
-                ["WY", w_yrmss, w_ypeds, w_ypkps, w_ypkns]
-             ]
-    
     fr =rawdir + "test_results"+".result" 
     with open(fr, 'wb') as f:
-        pickle.dump(result, f)
+        pickle.dump(dec_chn, f)
 
-def res_rms(result):
-    euch    = np.arange(len(result[0][1])) + 1
-    eurms   = result[0][1]
-    evch    = np.arange(len(result[1][1])) + 1 + len(result[0][1])
-    evrms   = result[1][1]
-    eych    = np.arange(len(result[2][1])) + 1 + len(result[0][1]) + len(result[1][1])
-    eyrms   = result[2][1]
-    wuch    = np.arange(len(result[3][1])) + 1
-    wurms   = result[3][1]
-    wvch    = np.arange(len(result[4][1])) + 1 + len(result[3][1])
-    wvrms   = result[4][1]
-    wych    = np.arange(len(result[5][1])) + 1 + len(result[3][1]) + len(result[4][1])
-    wyrms   = result[5][1]
-    return euch , eurms, evch , evrms, eych , eyrms, wuch , wurms, wvch , wvrms, wych , wyrms 
-
-def res_ped(result):
-    euped   = result[0][2]
-    evped   = result[1][2]
-    eyped   = result[2][2]
-    wuped   = result[3][2]
-    wvped   = result[4][2]
-    wyped   = result[5][2]
-    return euped, evped, eyped, wuped, wvped, wyped 
-
-def res_pkp(result):
-    eupkp   = result[0][3]
-    evpkp   = result[1][3]
-    eypkp   = result[2][3]
-    wupkp   = result[3][3]
-    wvpkp   = result[4][3]
-    wypkp   = result[5][3]
-    return eupkp, evpkp, eypkp, wupkp, wvpkp, wypkp 
-
-def res_pkn(result):
-    eupkn   = result[0][4]
-    evpkn   = result[1][4]
-    eypkn   = result[2][4]
-    wupkn   = result[3][4]
-    wvpkn   = result[4][4]
-    wypkn   = result[5][4]
-    return eupkn, evpkn, eypkn, wupkn, wvpkn, wypkn 
-
-
-def rms_plot(fdir, euch , eurms, evch , evrms, eych , eyrms, wuch , wurms, wvch , wvrms, wych , wyrms): 
+    return None
+#    for chn in range(1,1986):
+#        for i in range(lendec):
+#            if (int(dec_chn[i][10]) == chn):
+#                if (int(dec_chn[i][5]) <= 2): #west apa
+#                    if len(dec_chn[i])>12:
+#                        if "U" in dec_chn[i][9]:
+#                            w_urmss.append( dec_chn[i][12])
+#                            w_upeds.append( dec_chn[i][13])
+#                            w_upkps.append( dec_chn[i][14])
+#                            w_upkns.append( dec_chn[i][15])
+#                        if "V" in dec_chn[i][9]:
+#                            w_vrmss.append( dec_chn[i][12])
+#                            w_vpeds.append( dec_chn[i][13])
+#                            w_vpkps.append( dec_chn[i][14])
+#                            w_vpkns.append( dec_chn[i][15])
+#                        if "Y" in dec_chn[i][9]:
+#                            w_yrmss.append( dec_chn[i][12])
+#                            w_ypeds.append( dec_chn[i][13])
+#                            w_ypkps.append( dec_chn[i][14])
+#                            w_ypkns.append( dec_chn[i][15])
+#                else:#east apa
+#                    if len(dec_chn[i])>12:
+#                        if "U" in dec_chn[i][9]:
+#                            e_urmss.append( dec_chn[i][12])
+#                            e_upeds.append( dec_chn[i][13])
+#                            e_upkps.append( dec_chn[i][14])
+#                            e_upkns.append( dec_chn[i][15])
+#                        if "V" in dec_chn[i][9]:
+#                            e_vrmss.append( dec_chn[i][12])
+#                            e_vpeds.append( dec_chn[i][13])
+#                            e_vpkps.append( dec_chn[i][14])
+#                            e_vpkns.append( dec_chn[i][15])
+#                        if "Y" in dec_chn[i][9]:
+#                            e_yrmss.append( dec_chn[i][12])
+#                            e_ypeds.append( dec_chn[i][13])
+#                            e_ypkps.append( dec_chn[i][14])
+#                            e_ypkns.append( dec_chn[i][15])
+#    #    break
+#    result = [
+#                ["EU", e_urmss, e_upeds, e_upkps, e_upkns],
+#                ["Ev", e_vrmss, e_vpeds, e_vpkps, e_vpkns],
+#                ["EY", e_yrmss, e_ypeds, e_ypkps, e_ypkns],
+#                ["WU", w_urmss, w_upeds, w_upkps, w_upkns],
+#                ["Wv", w_vrmss, w_vpeds, w_vpkps, w_vpkns],
+#                ["WY", w_yrmss, w_ypeds, w_ypkps, w_ypkns]
+             ]
+def d_dec_plt(d, plt, n=-4):
+    wireno = d[10]
+    wirev = d[n]
+    if "U" in d[9]:
+        if wireno == 1:
+            plt.scatter(wireno, wirev, color='b', label = "U" )
+        else:
+            plt.scatter(wireno, wirev, color='b'  )
+    if "V" in d[9]:
+        if wireno == 1:
+            plt.scatter(wireno, wirev, color='g', label = "V" )
+        else:
+            plt.scatter(wireno, wirev, color='g'  )
+    if "Y" in d[9]:
+        if wireno == 1:
+            plt.scatter(wireno, wirev, color='g', label = "Y" )
+        else:
+            plt.scatter(wireno, wirev, color='g'  )
+    
+def dis_plot(dec_chn, fdir, title="EAST APA: RMS Distribution @ (14mV/fC, 2.0us)", fn = "EAST_APA_RMS.png"):
     import matplotlib.pyplot as plt
     fig = plt.figure(figsize=(10,6))
     plt.rcParams.update({'font.size': 18})
     plt.vlines(1984, 0, 4000, linestyles='dashed',color='k')
     plt.vlines(1984*2, 0, 4000, linestyles='dashed',color='k')
-    plt.plot(euch, np.array(eurms), color='b', label = "U of East APA" )
-    plt.plot(evch, np.array(evrms), color='g', label = "V of East APA" )
-    plt.plot(eych, np.array(eyrms), color='r', label = "Y of East APA" )
+    for d in dec_chn:
+        if d[5] > 2 :#Crate no, EAST APA
+            d_dec_plt(d, plt, n=-4)
     plt.ylim((0,10))
     plt.xlim((0,6000))
     plt.ylabel ("RMS / bit")
     plt.xlabel ("Channel NO.")
-    plt.title ("RMS Distribution @ (14mV/fC, 2.0us)")
+    plt.title (title)
     plt.legend()
     plt.grid()
-    ffig = fdir + "EAST_APA_RMS.png"
+    ffig = fdir + fn
 #    plt.savefig(ffig)
-    plt.show()
-    plt.close()
-
-    import matplotlib.pyplot as plt
-    fig = plt.figure(figsize=(10,6))
-    plt.rcParams.update({'font.size': 18})
-    plt.vlines(1984, 0, 4000, linestyles='dashed',color='k')
-    plt.vlines(1984*2, 0, 4000, linestyles='dashed',color='k')
-    plt.plot(wuch, np.array(wurms), color='b', label = "U of West APA" )
-    plt.plot(wvch, np.array(wvrms), color='g', label = "V of West APA" )
-    plt.plot(wych, np.array(wyrms), color='r', label = "Y of West APA" )
-    plt.ylim((0,10))
-    plt.xlim((0,6500))
-    plt.title ("ENC Distribution @ (14mV/fC,  2.0$\mu$ss)")
-    plt.ylabel ("ENC /e-")
-    plt.xlabel ("Channel NO.")
-    plt.legend()
-    plt.grid()
-    ffig = fdir + "WEST_APA_RMS.png"
-    #plt.savefig(ffig)
     plt.show()
     plt.close()
 
@@ -350,8 +281,8 @@ if (os.path.isfile(fr)):
 else:
     result = SBND_ANA(rawdir)
 
-euch , eurms, evch , evrms, eych , eyrms, wuch , wurms, wvch , wvrms, wych , wyrms = res_rms(result)
-rms_plot(rawdir, euch , eurms, evch , evrms, eych , eyrms, wuch , wurms, wvch , wvrms, wych , wyrms) 
+dis_plot(dec_chn=result, fdir=rawdir, title="EAST APA: RMS Distribution @ (14mV/fC, 2.0us)", fn = "EAST_APA_RMS.png"):
+
 exit()
 
     

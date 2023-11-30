@@ -141,10 +141,17 @@ class CLS_CONFIG:
 
     def FEMB_DECTECT(self, wib_ip):
         self.UDP.UDP_IP = wib_ip
+        stats = self.WIB_STATUS(wib_ip)
         self.err_code += "#TIME" + stats["TIME"]
-        if False
+        for i in range(4):
+             self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
+ 
+        if False:
             self.WIB_PWR_FEMB(wib_ip, femb_sws=[1,1,1,1])
             stats = self.WIB_STATUS(wib_ip)
+            self.err_code += "#TIME" + stats["TIME"]
+            for i in range(4):
+            	self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
             keys = list(stats.keys())
             fembs_found = [True, True, True, True]
             for i in range(4):

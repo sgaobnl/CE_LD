@@ -46,7 +46,7 @@ for crateno in cratenos:
     PTBslotno = 1
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
-        a.userdir = "/home/nfs/sgao/SBND_Installation/data/1129/ON/"  
+        a.userdir = "/home/nfs/sgao/SBND_Installation/data/ON/"  
         #a.databkdir =  "/home/nfs/sgao/SBND_Installation/data/1129/ON/"  
         a.databkdir = a.userdir 
         a.user_f = a.userdir + "tmp.csv"

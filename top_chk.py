@@ -46,7 +46,7 @@ for crateno in cratenos:
     PTBslotno = 1
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
-        a.userdir = "/home/nfs/sgao/SBND_Installation/data/1129/CHK/"  
+        a.userdir = "/home/nfs/sgao/SBND_Installation/data/CHK/"  
         #a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1128/RMS//"
         a.databkdir = a.userdir 
         a.user_f = a.userdir + "tmp.csv"
@@ -82,7 +82,7 @@ for crateno in cratenos:
             a.CLS.FEMBs_SCAN()
             a.CLS.FEMBs_CE_OFF()
         else:
-            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1, ana_flg= True )
+            a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1, ana_flg= False )
         #PTBslotno = int(input("PTB slot no(1-6): "))
         PTBslotno = PTBslotno +1 #int(input("PTB slot no(1-6): "))
     #crateno = int(input("Crate no(1-6): "))
