@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/28/2023 4:54:27 PM
+Last modified: 12/1/2023 11:37:50 AM
 """
 
 #defaut setting for scientific caculation
@@ -239,8 +239,10 @@ class FEMB_QC:
             femb_env = fembs[2]
             femb_rerun_f = fembs[3]
             femb_c_ret = fembs[4]
-            femb_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
-            errs = self.CLS.err_code.split("SLOT")
+            #femb_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
+            femb_date =""
+            #errs = self.CLS.err_code.split("SLOT")
+            errs = "" #self.CLS.err_code.split("SLOT")
             for er in errs[1:]:
                 if( int(er[0]) == femb_addr ):
                     if (len(er) <=2 ):
@@ -248,6 +250,7 @@ class FEMB_QC:
                     else:
                         femb_errlog = ("SLOT" + er[0: er.index("#IP")]) if "#IP" in er else ("SLOT" + er[0: ])
                     break
+            femb_errlog = ""
 
             if  "OFF" in femb_id:
                 pass

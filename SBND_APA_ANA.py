@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/28/2023 4:54:27 PM
+Last modified: 12/1/2023 10:19:54 AM
 """
 
 #defaut setting for scientific caculation
@@ -27,9 +27,10 @@ from cls_config import CLS_CONFIG
 from raw_convertor import RAW_CONV
 import pickle
 from shutil import copyfile
+import operator
 
 
-def FEMB_CHK(fembdata, rms_f = False):
+def FEMB_CHK(fembdata, rms_f = False, fs="./"):
     RAW_C = RAW_CONV()
     chn_rmss = []
     chn_peds = []
@@ -72,7 +73,10 @@ def FEMB_CHK(fembdata, rms_f = False):
         pkp_mean = np.mean(chn_pkps[gi*16 : (gi+1)*16])
         pkn_mean = np.mean(chn_pkns[gi*16 : (gi+1)*16])
         ped_thr= 30 
-    return (True, "pass-", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves,chn_avg_waves])
+
+    result = (True, "pass-", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves,chn_avg_waves])
+    FEMB_PLOT(result, fn=fs.replace(".bin", ".png"))
+    return result
 
 
 def FEMB_SUB_PLOT(ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx=False, ylabel_twx = "", e=None):
@@ -116,8 +120,9 @@ def FEMB_PLOT(results, fn="./"):
         FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
  
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
-#    plt.savefig(fn)
-    plt.show()
+#    fn = rawdir +  
+    plt.savefig(fn)
+#    plt.show()
     plt.close()
 
 def SBND_MAP():
@@ -135,13 +140,6 @@ def SBND_MAP():
     dec_chn = dec_chn[1:]
     return dec_chn
 
-#fp = """/Users/shanshangao/Downloads/tmp/LD1128/WIB10.226.34.41FEMB1_Time2023_11_28_09_25_28.bin"""
-#with open (fp, "rb") as fs:
-#    raw = pickle.load(fs)
-#RAW_C = RAW_CONV()
-#results = FEMB_CHK(raw)
-#FEMB_PLOT(results)
-  
 def SBND_ANA(rawdir):
     fns = []
     for root, dirs, files in os.walk(rawdir):
@@ -163,7 +161,7 @@ def SBND_ANA(rawdir):
         fembno  = df[2]
         with open (df[3], "rb") as fs:
             raw = pickle.load(fs)
-        results = FEMB_CHK(raw)
+        results = FEMB_CHK(raw, rms_f=False, fs=df[3])
         chn_rmss = results[2][0]
         chn_peds = results[2][1]
         chn_pkps = results[2][2]
@@ -182,97 +180,106 @@ def SBND_ANA(rawdir):
     fr =rawdir + "test_results"+".result" 
     with open(fr, 'wb') as f:
         pickle.dump(dec_chn, f)
+    fr =rawdir + "test_results"+".csv" 
+    with open (fr, 'w') as fp:
+        top_row = "APA,Crate,FEMB_SN,POSITION,WIB_CONNECTION,Crate_No,WIB_no,WIB_FEMB_LOC,FEMB_CH,Wire_type,Wire_No,,RMS Noise, Pedestal, Pulse_Pos_Peak, Pulse_Neg_Peak"
+        fp.write( top_row + "\n")
+        for x in dec_chn:
+                fp.write(",".join(str(i) for i in x) +  "," + "\n")
+    return dec_chn
 
-    return None
-#    for chn in range(1,1986):
-#        for i in range(lendec):
-#            if (int(dec_chn[i][10]) == chn):
-#                if (int(dec_chn[i][5]) <= 2): #west apa
-#                    if len(dec_chn[i])>12:
-#                        if "U" in dec_chn[i][9]:
-#                            w_urmss.append( dec_chn[i][12])
-#                            w_upeds.append( dec_chn[i][13])
-#                            w_upkps.append( dec_chn[i][14])
-#                            w_upkns.append( dec_chn[i][15])
-#                        if "V" in dec_chn[i][9]:
-#                            w_vrmss.append( dec_chn[i][12])
-#                            w_vpeds.append( dec_chn[i][13])
-#                            w_vpkps.append( dec_chn[i][14])
-#                            w_vpkns.append( dec_chn[i][15])
-#                        if "Y" in dec_chn[i][9]:
-#                            w_yrmss.append( dec_chn[i][12])
-#                            w_ypeds.append( dec_chn[i][13])
-#                            w_ypkps.append( dec_chn[i][14])
-#                            w_ypkns.append( dec_chn[i][15])
-#                else:#east apa
-#                    if len(dec_chn[i])>12:
-#                        if "U" in dec_chn[i][9]:
-#                            e_urmss.append( dec_chn[i][12])
-#                            e_upeds.append( dec_chn[i][13])
-#                            e_upkps.append( dec_chn[i][14])
-#                            e_upkns.append( dec_chn[i][15])
-#                        if "V" in dec_chn[i][9]:
-#                            e_vrmss.append( dec_chn[i][12])
-#                            e_vpeds.append( dec_chn[i][13])
-#                            e_vpkps.append( dec_chn[i][14])
-#                            e_vpkns.append( dec_chn[i][15])
-#                        if "Y" in dec_chn[i][9]:
-#                            e_yrmss.append( dec_chn[i][12])
-#                            e_ypeds.append( dec_chn[i][13])
-#                            e_ypkps.append( dec_chn[i][14])
-#                            e_ypkns.append( dec_chn[i][15])
-#    #    break
-#    result = [
-#                ["EU", e_urmss, e_upeds, e_upkps, e_upkns],
-#                ["Ev", e_vrmss, e_vpeds, e_vpkps, e_vpkns],
-#                ["EY", e_yrmss, e_ypeds, e_ypkps, e_ypkns],
-#                ["WU", w_urmss, w_upeds, w_upkps, w_upkns],
-#                ["Wv", w_vrmss, w_vpeds, w_vpkps, w_vpkns],
-#                ["WY", w_yrmss, w_ypeds, w_ypkps, w_ypkns]
-             ]
-def d_dec_plt(d, plt, n=-4):
-    wireno = d[10]
-    wirev = d[n]
-    if "U" in d[9]:
-        if wireno == 1:
-            plt.scatter(wireno, wirev, color='b', label = "U" )
-        else:
-            plt.scatter(wireno, wirev, color='b'  )
-    if "V" in d[9]:
-        if wireno == 1:
-            plt.scatter(wireno, wirev, color='g', label = "V" )
-        else:
-            plt.scatter(wireno, wirev, color='g'  )
-    if "Y" in d[9]:
-        if wireno == 1:
-            plt.scatter(wireno, wirev, color='g', label = "Y" )
-        else:
-            plt.scatter(wireno, wirev, color='g'  )
-    
-def dis_plot(dec_chn, fdir, title="EAST APA: RMS Distribution @ (14mV/fC, 2.0us)", fn = "EAST_APA_RMS.png"):
-    import matplotlib.pyplot as plt
-    fig = plt.figure(figsize=(10,6))
-    plt.rcParams.update({'font.size': 18})
-    plt.vlines(1984, 0, 4000, linestyles='dashed',color='k')
-    plt.vlines(1984*2, 0, 4000, linestyles='dashed',color='k')
+def d_dec_plt(dec_chn, n=-4):
+    euvals = []
+    evvals = []
+    eyvals = []
+    wuvals = []
+    wvvals = []
+    wyvals = []
+
     for d in dec_chn:
-        if d[5] > 2 :#Crate no, EAST APA
-            d_dec_plt(d, plt, n=-4)
-    plt.ylim((0,10))
-    plt.xlim((0,6000))
-    plt.ylabel ("RMS / bit")
-    plt.xlabel ("Channel NO.")
-    plt.title (title)
-    plt.legend()
-    plt.grid()
+        wireno = int(d[10])
+        if (len(d)==16):
+            wirev = d[n]
+        else:
+            wirev = -1
+        if int (d[5]) > 2:
+            if "U" in d[9]:
+                euvals.append([wireno,wirev])
+            if "V" in d[9]:
+                evvals.append([wireno,wirev])
+            if "Y" in d[9]:
+                eyvals.append([wireno,wirev])
+        else:
+            if "U" in d[9]:
+                wuvals.append([wireno,wirev])
+            if "V" in d[9]:
+                wvvals.append([wireno,wirev])
+            if "Y" in d[9]:
+                wyvals.append([wireno,wirev])
+
+    return euvals, evvals, eyvals, wuvals, wvvals, wyvals
+    
+def dis_plot(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[-4], ylim=[-2,10]):
+    import matplotlib.pyplot as plt
+    fig = plt.figure(figsize=(12,6))
+    plt.rcParams.update({'font.size': 12})
+    ax1 = plt.subplot(211)
+    ax2 = plt.subplot(212)
+
+    ax1.vlines(1984, 0, 4000, linestyles='dashed',color='k')
+    ax1.text(1000, 0, "U", color='b')
+    ax1.text(3000, 0, "V", color='g')
+    ax1.text(5000, 0, "Y", color='r')
+    ax1.vlines(1984*2, 0, 4000, linestyles='dashed',color='k')
+    ax2.vlines(1984, 0, 4000, linestyles='dashed',color='k')
+    ax2.vlines(1984*2, 0, 4000, linestyles='dashed',color='k')
+    ax2.text(1000, 0, "U", color='b')
+    ax2.text(3000, 0, "V", color='g')
+    ax2.text(5000, 0, "Y", color='r')
+
+
+    for n in ns:
+        euvals, evvals, eyvals, wuvals, wvvals, wyvals = d_dec_plt(dec_chn, n=n)
+
+        chns, vals=list(zip(*sorted(euvals, key=operator.itemgetter(0))))
+        ax1.plot(chns, vals, color='m', marker='.', mfc='b', mec='b', label = "U" )
+        chns, vals=list(zip(*sorted(wuvals, key=operator.itemgetter(0))))
+        ax2.plot(chns, vals, color='m', marker='.', mfc='b', mec='b', label = "U" )
+
+        chns, vals=list(zip(*sorted(evvals, key=operator.itemgetter(0))))
+        ax1.plot(np.array(chns)+1984, vals, color='m', marker='.', mfc='g', mec='g',  label = "V" )
+        chns, vals=list(zip(*sorted(wvvals, key=operator.itemgetter(0))))
+        ax2.plot(np.array(chns)+1984, vals, color='m', marker='.', mfc='g', mec='g',  label = "V" )
+
+        chns, vals=list(zip(*sorted(eyvals, key=operator.itemgetter(0))))
+        ax1.plot(np.array(chns)+1984*2, vals, color='m', marker='.', mfc='r', mec='r',  label = "Y" )
+        chns, vals=list(zip(*sorted(wyvals, key=operator.itemgetter(0))))
+        ax2.plot(np.array(chns)+1984*2, vals, color='m', marker='.', mfc='r', mec='r',  label = "Y" )
+    ax1.set_ylim((ylim))
+    ax1.set_xlim((0,6000))
+    ax1.set_ylabel ("RMS / bit")
+    ax1.set_xlabel ("Channel NO.")
+    ax1.set_title ("EAST APA: " + title)
+#    ax1.legend()
+    ax1.grid()
+
+    ax2.set_ylim((ylim))
+    ax2.set_xlim((0,6000))
+    ax2.set_ylabel ("RMS / bit")
+    ax2.set_xlabel ("Channel NO.")
+    ax2.set_title ("WEST APA: " + title)
+#    ax2.legend()
+    ax2.grid()
+
+
     ffig = fdir + fn
-#    plt.savefig(ffig)
+    plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
     plt.show()
     plt.close()
 
 
 
-rawdir = """/Users/shanshangao/Downloads/tmp/1129/CHK/LD1/"""
+rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/1129/CHK/LD1/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
     with open(fr, 'rb') as f:
@@ -281,95 +288,9 @@ if (os.path.isfile(fr)):
 else:
     result = SBND_ANA(rawdir)
 
-dis_plot(dec_chn=result, fdir=rawdir, title="EAST APA: RMS Distribution @ (14mV/fC, 2.0us)", fn = "EAST_APA_RMS.png"):
+dis_plot(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[-4], ylim=[-2,8])
+dis_plot(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[-3,-2,-1], ylim=[-100,4000])
 
-exit()
 
     
-print (len(w_urmss),len(w_vrmss), len(w_yrmss), len(e_urmss),len(e_vrmss), len(e_yrmss)  )
-import matplotlib.pyplot as plt
-fig = plt.figure(figsize=(10,6))
-x = np.arange(len(w_urmss)) + 1
-plt.plot(x, w_urmss)
-plt.show()
-plt.close()
-
-fig = plt.figure(figsize=(8.5,11))
-x = np.arange(len(e_urmss)) + 1
-plt.plot(x, e_urmss)
-plt.show()
-plt.close()
-
-fig = plt.figure(figsize=(8.5,11))
-x = np.arange(len(w_vrmss)) + 1
-plt.plot(x, w_vrmss)
-plt.show()
-plt.close()
-
-fig = plt.figure(figsize=(8.5,11))
-x = np.arange(len(e_vrmss)) + 1
-plt.plot(x, e_vrmss)
-plt.show()
-plt.close()
-
-fig = plt.figure(figsize=(8.5,11))
-x = np.arange(len(w_yrmss)) + 1
-plt.plot(x, w_yrmss)
-plt.show()
-plt.close()
-
-fig = plt.figure(figsize=(8.5,11))
-x = np.arange(len(e_yrmss)) + 1
-plt.plot(x, e_yrmss)
-plt.show()
-plt.close()
-exit()
-
-fig = plt.figure(figsize=(8.5,11))
-x = np.arange(len(w_upeds)) + 1
-plt.plot(x, w_upeds)
-plt.show()
-plt.close()
-
-fig = plt.figure(figsize=(8.5,11))
-x = np.arange(len(e_upeds)) + 1
-plt.plot(x, e_upeds)
-plt.show()
-plt.close()
-
-fig = plt.figure(figsize=(8.5,11))
-x = np.arange(len(w_vpeds)) + 1
-plt.plot(x, w_vpeds)
-plt.show()
-plt.close()
-
-fig = plt.figure(figsize=(8.5,11))
-x = np.arange(len(e_vpeds)) + 1
-plt.plot(x, e_vpeds)
-plt.show()
-plt.close()
-
-fig = plt.figure(figsize=(8.5,11))
-x = np.arange(len(w_ypeds)) + 1
-plt.plot(x, w_ypeds)
-plt.show()
-plt.close()
-
-fig = plt.figure(figsize=(8.5,11))
-x = np.arange(len(e_ypeds)) + 1
-plt.plot(x, e_ypeds)
-plt.show()
-plt.close()
-
-
-#    femb_date = qc_list[4]
-#    print(qc_pf)
-#    print(env)
-#    print(femb_id)
-#    print(femb_rerun_f)
-#    print(femb_date)
-
-  #  break
-    
-
 
