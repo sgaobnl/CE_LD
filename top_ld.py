@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/28/2023 4:53:22 PM
+Last modified: 12/1/2023 11:48:01 AM
 """
 
 #defaut setting for scientific caculation
@@ -23,10 +23,11 @@ import time
 from datetime import datetime
 from cls_config import CLS_CONFIG
 from raw_convertor import RAW_CONV
+from setdatadir import savedir
 
 LD = CLS_CONFIG()
 runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
-LD.savedir = "/home/nfs/sgao/SBND_Installation/data/LD_" + runtime + "/"
+LD.savedir = savedir + "/LD_" + runtime + "/"
 if (os.path.exists(LD.savedir)):
     pass
 else:

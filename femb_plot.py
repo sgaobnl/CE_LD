@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 12/1/2023 11:38:37 AM
+Last modified: 12/1/2023 11:41:03 AM
 """
 
 #defaut setting for scientific caculation
@@ -48,10 +48,7 @@ tmp = []
 for x in FEMB_infos:
     if fembno == int(x[x.find("WIBslot")+7]):
         tmp.append(x)
-
 FEMB_infos = tmp
-print (FEMB_infos)
-
 
 testcode = 1
 qcs = qc.FEMB_CHK_ANA(FEMB_infos, [qc_data], pwr_i=testcode)
