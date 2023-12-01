@@ -63,3 +63,25 @@ edit setsavedir.py and save.
 python top_ld.py  
 python top_ld.py  
 ```
+# SBND DATA Analysi
+## data collected by top_chk.py or top_rms.py 
+Use "femb_plot.py" to generate result for each FEMB. 
+```
+edit Line#33 and Line#34 to locate the destination raw file. 
+python femb_plot.py
+```
+## data collected by top_ld.py or top_rms.py 
+Use SBND_APA_ANA.py to generate result for the whole SBND channels. 
+```
+edit Line#282 to locate the destination directory. 
+python SBND_APA_ANA.py
+```
+
+# SBND APA mapping generation
+Use SBND_mapping.py to generate SBND_mapping.csv
+```
+python SBND_mapping.py
+```
+Note: It is not necessary to re-generate the mapping file until there is inconsistent mapping. 
+
+
