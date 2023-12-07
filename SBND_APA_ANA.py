@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 12/1/2023 10:19:54 AM
+Last modified: 12/7/2023 9:49:06 AM
 """
 
 #defaut setting for scientific caculation
@@ -28,6 +28,7 @@ from raw_convertor import RAW_CONV
 import pickle
 from shutil import copyfile
 import operator
+from fft_chn import chn_rfft_psd
 
 
 def FEMB_CHK(fembdata, rms_f = False, fs="./"):
@@ -56,11 +57,12 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
             chn_peds.append(aped)
             chn_pkps.append(apeakp)
             chn_pkns.append(apeakn)
-            chn_waves.append( chn_data[achn][feed_loc[0]: feed_loc[1]] )
+            #chn_waves.append( chn_data[achn][feed_loc[0]: feed_loc[1]] )
+            chn_waves.append( chn_data[achn] )
             avg_cnt = len(feed_loc)-2
 
             avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[0] + 100]) 
-            for i in (1, avg_cnt,1):
+            for i in range(1, avg_cnt,1):
                 #avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
                 avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i]+100]) 
             avg_wave = avg_wave/avg_cnt
@@ -118,6 +120,7 @@ def FEMB_PLOT(results, fn="./"):
         x = (np.arange(ts)) * 0.5
         y = chn_wfs[chni][0:ts]
         FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
+
  
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
 #    fn = rawdir +  
@@ -140,7 +143,7 @@ def SBND_MAP():
     dec_chn = dec_chn[1:]
     return dec_chn
 
-def SBND_ANA(rawdir):
+def SBND_ANA(rawdir, rms_f=False):
     fns = []
     for root, dirs, files in os.walk(rawdir):
         for fn in files:
@@ -176,6 +179,8 @@ def SBND_ANA(rawdir):
                 dec_chn[i].append(chn_peds[decch])
                 dec_chn[i].append(chn_pkps[decch])
                 dec_chn[i].append(chn_pkns[decch])
+                dec_chn[i].append((chn_wfs[decch]))
+                dec_chn[i].append((chn_avgwfs[decch]))
          
     fr =rawdir + "test_results"+".result" 
     with open(fr, 'wb') as f:
@@ -185,10 +190,10 @@ def SBND_ANA(rawdir):
         top_row = "APA,Crate,FEMB_SN,POSITION,WIB_CONNECTION,Crate_No,WIB_no,WIB_FEMB_LOC,FEMB_CH,Wire_type,Wire_No,,RMS Noise, Pedestal, Pulse_Pos_Peak, Pulse_Neg_Peak"
         fp.write( top_row + "\n")
         for x in dec_chn:
-                fp.write(",".join(str(i) for i in x) +  "," + "\n")
+            fp.write(",".join(str(i) for i in x[0:16]) +  "," + "\n")
     return dec_chn
 
-def d_dec_plt(dec_chn, n=-4):
+def d_dec_plt(dec_chn, n=1):
     euvals = []
     evvals = []
     eyvals = []
@@ -198,8 +203,8 @@ def d_dec_plt(dec_chn, n=-4):
 
     for d in dec_chn:
         wireno = int(d[10])
-        if (len(d)==16):
-            wirev = d[n]
+        if (len(d)>=16):
+            wirev = d[11+n]
         else:
             wirev = -1
         if int (d[5]) > 2:
@@ -219,7 +224,7 @@ def d_dec_plt(dec_chn, n=-4):
 
     return euvals, evvals, eyvals, wuvals, wvvals, wyvals
     
-def dis_plot(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[-4], ylim=[-2,10]):
+def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,10]):
     import matplotlib.pyplot as plt
     fig = plt.figure(figsize=(12,6))
     plt.rcParams.update({'font.size': 12})
@@ -274,22 +279,121 @@ def dis_plot(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
 
     ffig = fdir + fn
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
+    #plt.savefig(ffig)
     plt.show()
     plt.close()
 
 
+def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
+    apa = chnstr[0]
+    wiretype = chnstr[1]
+    wireno = int(chnstr[2:])
+    for d in dec_chn:
+        if (apa in d[0]) and (wiretype in d[9]) and (wireno == int(d[10])) and (len(d) >12):
+            APA = d[0]
+            Crate = d[1]
+            FEMB_SN = d[2]
+            POSITION = d[3]
+            WIB_CONNECTION = d[4]
+            Crate_No = d[5]
+            WIB_no = d[6]
+            WIB_FEMB_LOC = d[7]
+            FEMB_CH = d[8]
+            Wire_type = d[9]
+            Wire_No = d[10]
+            RMS = d[12]
+            Pedmean = d[13]
+            Plspp = d[14]
+            Plsnp = d[15]
+            wfs = d[16]
+            avgwfs = d[17]
+        #else:
+        #    print ("Channel without valid data...")
+            import matplotlib.pyplot as plt
 
-rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/1129/CHK/LD1/"""
+            fig = plt.figure(figsize=(8.5,8))
+            fig.suptitle("Test Result of %s"%chnstr, weight ="bold", fontsize = 12)
+            fig.text(0.10, 0.94-0.02, "APA: {}".format(APA)   )
+            fig.text(0.55, 0.94-0.02, "Crate: {}".format(Crate)   )
+            fig.text(0.10, 0.90-0.02, "FEMB SN: {}".format(FEMB_SN)   )
+            fig.text(0.55, 0.90-0.02, "WIB CONNECTION: {}".format(WIB_CONNECTION)   )
+            fig.text(0.10, 0.86-0.02, "Crate No: {}".format(Crate_No)   )
+            fig.text(0.55, 0.86-0.02, "WIB No: {}".format(WIB_no)   )
+            fig.text(0.10, 0.82-0.02, "WIB FEMB SLOT: {}".format(WIB_FEMB_LOC)   )
+            fig.text(0.55, 0.82-0.02, "CHN on FEMB: {}".format(FEMB_CH)   )
+            fig.text(0.10, 0.78-0.02, "Wire Type: {}".format(Wire_type)   )
+            fig.text(0.55, 0.78-0.02, "Wire No.: {}".format(Wire_No)   )
+
+            fig.text(0.10, 0.72-0.02, "RMS noise / bit: {:0.3f}".format(RMS), weight ="bold", color = 'b'  )
+            fig.text(0.55, 0.72-0.02, "Pedestal / bit: {}".format(Pedmean) , weight ="bold", color = 'b'  )
+            fig.text(0.10, 0.68-0.02, "Maximum Amplitude / bit: {}".format(Plspp) , weight ="bold", color = 'b'  )
+            fig.text(0.55, 0.68-0.02, "Minmum Amplitude / bit: {}".format(Plsnp) , weight ="bold", color = 'b'  )
+
+            ax1 = plt.subplot2grid((3, 2), (1, 0), colspan=1, rowspan=1)
+            ax2 = plt.subplot2grid((3, 2), (2, 0), colspan=1, rowspan=1)
+            ax3 = plt.subplot2grid((3, 2), (1, 1), colspan=1, rowspan=1)
+            ax4 = plt.subplot2grid((3, 2), (2, 1), colspan=1, rowspan=1)
+
+            if len(wfs) > 500:
+                wlen = 500
+            else:
+                wlen = len(wfs)
+            x = np.arange(wlen)
+            y = wfs[0:wlen]
+            FEMB_SUB_PLOT(ax1, x, y, title="Waveform", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C0')
+
+            wlen = len(wfs)
+            x = np.arange(wlen)
+            y = wfs[0:wlen]
+            FEMB_SUB_PLOT(ax2, x, y, title="Waveform", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C1')
+
+            wlen = len(avgwfs)
+            x = np.arange(wlen)
+            y = avgwfs[0:wlen]
+            FEMB_SUB_PLOT(ax3, x, y, title="Averaging Waveform", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C2')
+
+            f,p = chn_rfft_psd(wfs,  fft_s = len(wfs), avg_cycle = 1)
+            FEMB_SUB_PLOT(ax4, f, p, title="FFT ", xlabel="Frequency / Hz", ylabel=" / dB", color='C3')
+            
+            plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
+            plt.show()
+            #plt.savefig(fn)
+            plt.close()
+
+
+
+rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/1129/RMS2/LD/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
     with open(fr, 'rb') as f:
         result = pickle.load(f)
     pass
 else:
-    result = SBND_ANA(rawdir)
+    if "RMS" in rawdir:
+        rms_f = True
+    else:
+        rms_f = False
 
-dis_plot(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[-4], ylim=[-2,8])
-dis_plot(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[-3,-2,-1], ylim=[-100,4000])
+    result = SBND_ANA(rawdir, rms_f = rms_f)
+
+DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,8])
+#DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[2,3,4], ylim=[-100,4000])
+
+while True:
+    xstr = input ("Input a channel number with format EU0001 (or WU0001) > ")
+    if ("U" in xstr[1]) or ("V" in xstr[1]) or ("Y" in xstr[1]):
+        try:
+            wno = int(xstr[2:])
+            DIS_CHN_PLOT(dec_chn=result, chnstr=xstr)
+        except ValueError:
+            print ("Wrong number, please input again")
+    else:
+        yns = input ("Exit Y/N")
+        if ("Y" in yns) or ("y" in yns):
+            exit()
+
+    
+
 
 
     

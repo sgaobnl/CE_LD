@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 12/1/2023 11:37:50 AM
+Last modified: 12/7/2023 9:50:56 AM
 """
 
 #defaut setting for scientific caculation
@@ -315,7 +315,7 @@ class FEMB_QC:
                 if len(feed_loc) < self.avg_cnt+5:
                     self.avg_cnt = len(feed_loc)-1
                 avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[0] + 100]) 
-                for i in (1, self.avg_cnt,1):
+                for i in range(1, self.avg_cnt,1):
                     #avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
                     avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i]+100]) 
                 avg_wave = avg_wave/self.avg_cnt
