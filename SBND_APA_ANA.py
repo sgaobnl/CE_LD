@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 12/7/2023 9:49:06 AM
+Last modified: 12/7/2023 10:02:11 AM
 """
 
 #defaut setting for scientific caculation
@@ -279,8 +279,9 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
 
     ffig = fdir + fn
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
-    #plt.savefig(ffig)
-    plt.show()
+    plt.savefig(ffig)
+    print ("result saves at {}".format(ffig))
+    #plt.show()
     plt.close()
 
 
@@ -357,12 +358,13 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
             
             plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
             plt.show()
+            #print ("result saves at {}".format(ffig))
             #plt.savefig(fn)
             plt.close()
 
 
 
-rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/1129/RMS2/LD/"""
+rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/1129/RMS/LD1/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
     with open(fr, 'rb') as f:
@@ -377,11 +379,12 @@ else:
     result = SBND_ANA(rawdir, rms_f = rms_f)
 
 DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,8])
-#DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[2,3,4], ylim=[-100,4000])
+DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000])
 
 while True:
-    xstr = input ("Input a channel number with format EU0001 (or WU0001) > ")
-    if ("U" in xstr[1]) or ("V" in xstr[1]) or ("Y" in xstr[1]):
+    print ("Input a chnanel number following format (E/W)(U/V/Y)(Chn no.), e.g. EU0001")
+    xstr = input ("Input a channel number  > ")
+    if (len(xstr)>2) and (("E" in xstr[0]) or ("W" in xstr[0])) and (("U" in xstr[1]) or ("V" in xstr[1]) or ("Y" in xstr[1])):
         try:
             wno = int(xstr[2:])
             DIS_CHN_PLOT(dec_chn=result, chnstr=xstr)
