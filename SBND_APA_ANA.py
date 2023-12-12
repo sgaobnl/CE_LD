@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 12/7/2023 10:02:11 AM
+Last modified: 12/12/2023 1:36:31 PM
 """
 
 #defaut setting for scientific caculation
@@ -224,7 +224,7 @@ def d_dec_plt(dec_chn, n=1):
 
     return euvals, evvals, eyvals, wuvals, wvvals, wyvals
     
-def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,10]):
+def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,10], ylabel = "RMS / bit"):
     import matplotlib.pyplot as plt
     fig = plt.figure(figsize=(12,6))
     plt.rcParams.update({'font.size': 12})
@@ -247,22 +247,22 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
         euvals, evvals, eyvals, wuvals, wvvals, wyvals = d_dec_plt(dec_chn, n=n)
 
         chns, vals=list(zip(*sorted(euvals, key=operator.itemgetter(0))))
-        ax1.plot(chns, vals, color='m', marker='.', mfc='b', mec='b', label = "U" )
+        ax1.plot(chns, vals, color="C%d"%(n+1), marker='.', mfc='b', mec='b', label = "U" )
         chns, vals=list(zip(*sorted(wuvals, key=operator.itemgetter(0))))
-        ax2.plot(chns, vals, color='m', marker='.', mfc='b', mec='b', label = "U" )
+        ax2.plot(chns, vals, color="C%d"%(n+1), marker='.', mfc='b', mec='b', label = "U" )
 
         chns, vals=list(zip(*sorted(evvals, key=operator.itemgetter(0))))
-        ax1.plot(np.array(chns)+1984, vals, color='m', marker='.', mfc='g', mec='g',  label = "V" )
+        ax1.plot(np.array(chns)+1984, vals, color="C%d"%(n+1), marker='.', mfc='g', mec='g',  label = "V" )
         chns, vals=list(zip(*sorted(wvvals, key=operator.itemgetter(0))))
-        ax2.plot(np.array(chns)+1984, vals, color='m', marker='.', mfc='g', mec='g',  label = "V" )
+        ax2.plot(np.array(chns)+1984, vals, color="C%d"%(n+1), marker='.', mfc='g', mec='g',  label = "V" )
 
         chns, vals=list(zip(*sorted(eyvals, key=operator.itemgetter(0))))
-        ax1.plot(np.array(chns)+1984*2, vals, color='m', marker='.', mfc='r', mec='r',  label = "Y" )
+        ax1.plot(np.array(chns)+1984*2, vals, color="C%d"%(n+1), marker='.', mfc='r', mec='r',  label = "Y" )
         chns, vals=list(zip(*sorted(wyvals, key=operator.itemgetter(0))))
-        ax2.plot(np.array(chns)+1984*2, vals, color='m', marker='.', mfc='r', mec='r',  label = "Y" )
+        ax2.plot(np.array(chns)+1984*2, vals, color="C%d"%(n+1), marker='.', mfc='r', mec='r',  label = "Y" )
     ax1.set_ylim((ylim))
     ax1.set_xlim((0,6000))
-    ax1.set_ylabel ("RMS / bit")
+    ax1.set_ylabel (ylabel)
     ax1.set_xlabel ("Channel NO.")
     ax1.set_title ("EAST APA: " + title)
 #    ax1.legend()
@@ -270,7 +270,7 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
 
     ax2.set_ylim((ylim))
     ax2.set_xlim((0,6000))
-    ax2.set_ylabel ("RMS / bit")
+    ax2.set_ylabel (ylabel)
     ax2.set_xlabel ("Channel NO.")
     ax2.set_title ("WEST APA: " + title)
 #    ax2.legend()
@@ -279,9 +279,9 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
 
     ffig = fdir + fn
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
-    plt.savefig(ffig)
+    #plt.savefig(ffig)
     print ("result saves at {}".format(ffig))
-    #plt.show()
+    plt.show()
     plt.close()
 
 
@@ -364,7 +364,7 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
 
 
 
-rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/1129/RMS/LD1/"""
+rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/1129/RMS2/LD2/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
     with open(fr, 'rb') as f:
@@ -379,7 +379,7 @@ else:
     result = SBND_ANA(rawdir, rms_f = rms_f)
 
 DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,8])
-DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000])
+DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
 
 while True:
     print ("Input a chnanel number following format (E/W)(U/V/Y)(Chn no.), e.g. EU0001")
