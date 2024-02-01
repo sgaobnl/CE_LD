@@ -149,9 +149,9 @@ class CLS_CONFIG:
         if False:
             self.WIB_PWR_FEMB(wib_ip, femb_sws=[1,1,1,1])
             stats = self.WIB_STATUS(wib_ip)
-            self.err_code += "#TIME" + stats["TIME"]
+            self.err_code += "#TIME" + "xxxxx"
             for i in range(4):
-            	self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
+                self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
             keys = list(stats.keys())
             fembs_found = [True, True, True, True]
             for i in range(4):
@@ -702,6 +702,9 @@ class CLS_CONFIG:
 
     def FEMB_UDPACQ(self, wib_ip, femb_addr, cfglog):
         self.UDP.UDP_IP = wib_ip
+        self.UDP.write_reg_wib(0x1E, 0) #disable MP mode
+        self.UDP.write_reg_wib(0x1E, 0) #disable MP mode
+        self.UDP.write_reg_wib(0x1E, 0) #disable MP mode
         if not self.ldflg:
             self.UDP.write_reg_wib_checked(0x01, 0x2) #Time Stamp Reset command encoded in 2MHz 
             self.UDP.write_reg_wib_checked(0x01, 0x0) 
@@ -744,11 +747,43 @@ class CLS_CONFIG:
                 with open(fn, "wb") as fp:
                     pickle.dump(raw_asic, fp)
                 tmp = None
+                wib_regs = []
+                if femb_addr == 0:
+                    for addr in range(0, 0x2A+1,1):
+                        val = self.UDP.read_reg_wib(addr)
+                        wib_regs.append((addr,val))
+                    for addr in range(0xFF, 0x102+1,1):
+                        val = self.UDP.read_reg_wib(addr)
+                        wib_regs.append((addr,val))
+                    wibfn = fn[0:-4] + ".wib"
+                    with open(wibfn, "wb") as fp:
+                        pickle.dump(wib_regs, fp)
+                femb_regs = []
+                if True:
+                    for addr in range(0, 0x2B+1,1):
+                        val = self.UDP.read_reg_wib(addr)
+                        femb_regs.append((addr,val))
+                    for addr in range(0x100, 0x104+1,1):
+                        val = self.UDP.read_reg_wib(addr)
+                        femb_regs.append((addr,val))
+                    for addr in range(0x200, 0x298+1,1):
+                        val = self.UDP.read_reg_wib(addr)
+                        femb_regs.append((addr,val))
+                    for addr in range(0x300, 0x3FF+1,1):
+                        val = self.UDP.read_reg_wib(addr)
+                        femb_regs.append((addr,val))
+                    fembfn = fn[0:-4] + ".femb"
+                    with open(fembfn, "wb") as fp:
+                        pickle.dump(femb_regs, fp)
         else:
             pass
             tmp = None
 
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
+        self.UDP.write_reg_wib(0x1E, 3) #enable MP mode
+        self.UDP.write_reg_wib(0x1E, 3) #enable MP mode
+        self.UDP.write_reg_wib(0x1E, 3) #enable MP mode
+ 
         return tmp
 
 #    def FEMB_Flash_id_wr(self, wib_ip, femb_addr, id_oft = 20000, id_value = 0xFFFFFFFF):

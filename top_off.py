@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 12/1/2023 11:47:13 AM
+Last modified: 4/28/2023 4:53:22 PM
 """
 
 #defaut setting for scientific caculation
@@ -28,7 +28,7 @@ from raw_convertor import RAW_CONV
 import pickle
 from shutil import copyfile
 from femb_qc import FEMB_QC
-from setdatadir import savedir
+
 
 cratenos = []
 while True:
@@ -46,7 +46,7 @@ for crateno in cratenos:
     PTBslotno = 1
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
-        a.userdir = savedir + "/OFF/"
+        a.userdir = "/home/nfs/sgao/SBND_Installation/data/1129/OFF/"  
         #a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1129/OFF/"
         a.databkdir = a.userdir 
         a.user_f = a.userdir + "tmp.csv"
