@@ -45,7 +45,6 @@ class RAW_CONV():
                 pkg_index.append(i)
                 i = i + pkg_len
             else:
-                break
                 i = i + 1 
                 k.append(i)
     
