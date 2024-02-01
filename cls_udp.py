@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: 4/1/2019 5:20:51 PM
+Last modified: Wed Jan 31 21:24:22 2024
 """
 
 #defaut setting for scientific caculation
@@ -54,6 +54,10 @@ class CLS_UDP:
         #set up listening socket, do before sending read request
         sock_readresp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
         sock_readresp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if self.MultiPort:
+            self.UDP_PORT_RREGRESP = 0x7D10 + int(self.UDP_IP[-2:])
+        else:
+            self.UDP_PORT_RREGRESP = 32002
         sock_readresp.bind(('', self.UDP_PORT_RREGRESP ))
         sock_readresp.settimeout(2)
 
@@ -142,12 +146,28 @@ class CLS_UDP:
         sock_readresp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
         sock_readresp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         if (femb_addr == 0 ):
+            if self.MultiPort:
+                self.UDPFEMB0_PORT_RREGRESP = 0x7910 + int(self.UDP_IP[-2:])
+            else:
+                self.UDPFEMB0_PORT_RREGRESP = 32018
             sock_readresp.bind(('', self.UDPFEMB0_PORT_RREGRESP ))
         elif (femb_addr == 1 ):
+            if self.MultiPort:
+                self.UDPFEMB1_PORT_RREGRESP = 0x7A10 + int(self.UDP_IP[-2:])
+            else:
+                self.UDPFEMB1_PORT_RREGRESP = 32034
             sock_readresp.bind(('', self.UDPFEMB1_PORT_RREGRESP ))
         elif (femb_addr == 2 ):
+            if self.MultiPort:
+                self.UDPFEMB2_PORT_RREGRESP = 0x7B10 + int(self.UDP_IP[-2:])
+            else:
+                self.UDPFEMB2_PORT_RREGRESP = 32050
             sock_readresp.bind(('', self.UDPFEMB2_PORT_RREGRESP ))
         elif (femb_addr == 3 ):
+            if self.MultiPort:
+                self.UDPFEMB3_PORT_RREGRESP = 0x7C10 + int(self.UDP_IP[-2:])
+            else:
+                self.UDPFEMB3_PORT_RREGRESP = 32066
             sock_readresp.bind(('', self.UDPFEMB3_PORT_RREGRESP ))
         sock_readresp.settimeout(2)
 
@@ -487,6 +507,7 @@ class CLS_UDP:
         self.KEY1 = 0xDEAD
         self.KEY2 = 0xBEEF
         self.FOOTER = 0xFFFF
+        self.MultiPort = False
         self.UDP_PORT_WREG = 32000
         self.UDP_PORT_RREG = 32001
         self.UDP_PORT_RREGRESP = 32002

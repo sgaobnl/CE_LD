@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 11/1/2023 12:21:48 PM
+Last modified: Wed Jan 31 21:28:24 2024
 """
 
 #defaut setting for scientific caculation
@@ -38,6 +38,7 @@ class CLS_CONFIG:
         self.MBB_IP  = "192.168.121.11"
         self.act_fembs = {}
         self.UDP = CLS_UDP()
+        self.UDP.MultiPort = True #enable MP mode
         self.UDP.jumbo_flag = self.jumbo_flag
         self.Int_CLK =  True 
         self.pllfile ="./Si5344-RevD-SBND_V2-100MHz_REVD_PTC.txt" 
@@ -702,9 +703,9 @@ class CLS_CONFIG:
 
     def FEMB_UDPACQ(self, wib_ip, femb_addr, cfglog):
         self.UDP.UDP_IP = wib_ip
-        self.UDP.write_reg_wib(0x1E, 0) #disable MP mode
-        self.UDP.write_reg_wib(0x1E, 0) #disable MP mode
-        self.UDP.write_reg_wib(0x1E, 0) #disable MP mode
+        #self.UDP.write_reg_wib(0x1E, 0) #disable MP mode
+        #self.UDP.write_reg_wib(0x1E, 0) #disable MP mode
+        #self.UDP.write_reg_wib(0x1E, 0) #disable MP mode
         if not self.ldflg:
             self.UDP.write_reg_wib_checked(0x01, 0x2) #Time Stamp Reset command encoded in 2MHz 
             self.UDP.write_reg_wib_checked(0x01, 0x0) 
@@ -780,9 +781,9 @@ class CLS_CONFIG:
             tmp = None
 
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
-        self.UDP.write_reg_wib(0x1E, 3) #enable MP mode
-        self.UDP.write_reg_wib(0x1E, 3) #enable MP mode
-        self.UDP.write_reg_wib(0x1E, 3) #enable MP mode
+        #self.UDP.write_reg_wib(0x1E, 3) #enable MP mode
+        #self.UDP.write_reg_wib(0x1E, 3) #enable MP mode
+        #self.UDP.write_reg_wib(0x1E, 3) #enable MP mode
  
         return tmp
 
