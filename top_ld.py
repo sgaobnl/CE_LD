@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Jan 31 21:28:26 2024
+Last modified: Wed Jan 31 21:29:19 2024
 """
 
 #defaut setting for scientific caculation
@@ -41,6 +41,7 @@ else:
         sys.exit()
 
 LD.ldflg=True
+LD.UDP.MultiPort = True
 LD.WIB_IPs = [
               "10.226.34.11",
               "10.226.34.12",
