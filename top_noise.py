@@ -51,10 +51,11 @@ while (crateno < 3) and (crateno > 0):
  
      
         a.env = "RT"
-        a.CLS.WIB_ver = 0x123
+        a.CLS.WIB_ver = 0x124
         FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
     
         a.WIB_IPs = ["10.226.34." + str( crateno*10 + PTBslotno) ]
+        a.CLS.UDP.MultiPort = True
 
         print (a.WIB_IPs)
         a.CLS.WIB_IPs = a.WIB_IPs

@@ -27,6 +27,7 @@ import codecs
 
 class CLS_UDP:
     def write_reg(self, reg , data ):
+        self.udp_port_update()
         regVal = int(reg)
         if (regVal < 0) or (regVal > self.MAX_REG_NUM):
             return None
@@ -47,6 +48,7 @@ class CLS_UDP:
         sock_write.close()
 
     def read_reg(self, reg ):
+        self.udp_port_update()
         regVal = int(reg)
         if (regVal < 0) or (regVal > self.MAX_REG_NUM):
                 return -1
@@ -54,10 +56,6 @@ class CLS_UDP:
         #set up listening socket, do before sending read request
         sock_readresp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
         sock_readresp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        if self.MultiPort:
-            self.UDP_PORT_RREGRESP = 0x7D10 + int(self.UDP_IP[-2:])
-        else:
-            self.UDP_PORT_RREGRESP = 32002
         sock_readresp.bind(('', self.UDP_PORT_RREGRESP ))
         sock_readresp.settimeout(2)
 
@@ -92,6 +90,7 @@ class CLS_UDP:
         self.write_reg( reg,data )
 
     def write_reg_femb(self, femb_addr, reg , data ):
+        self.udp_port_update()
         regVal = int(reg)
         if (regVal < 0) or (regVal > self.MAX_REG_NUM):
             return None
@@ -139,6 +138,7 @@ class CLS_UDP:
             sys.exit()
 
     def read_reg_femb(self, femb_addr, reg ):
+        self.udp_port_update()
         regVal = int(reg)
         if (regVal < 0) or (regVal > self.MAX_REG_NUM):
                 return None
@@ -146,28 +146,12 @@ class CLS_UDP:
         sock_readresp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
         sock_readresp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         if (femb_addr == 0 ):
-            if self.MultiPort:
-                self.UDPFEMB0_PORT_RREGRESP = 0x7910 + int(self.UDP_IP[-2:])
-            else:
-                self.UDPFEMB0_PORT_RREGRESP = 32018
             sock_readresp.bind(('', self.UDPFEMB0_PORT_RREGRESP ))
         elif (femb_addr == 1 ):
-            if self.MultiPort:
-                self.UDPFEMB1_PORT_RREGRESP = 0x7A10 + int(self.UDP_IP[-2:])
-            else:
-                self.UDPFEMB1_PORT_RREGRESP = 32034
             sock_readresp.bind(('', self.UDPFEMB1_PORT_RREGRESP ))
         elif (femb_addr == 2 ):
-            if self.MultiPort:
-                self.UDPFEMB2_PORT_RREGRESP = 0x7B10 + int(self.UDP_IP[-2:])
-            else:
-                self.UDPFEMB2_PORT_RREGRESP = 32050
             sock_readresp.bind(('', self.UDPFEMB2_PORT_RREGRESP ))
         elif (femb_addr == 3 ):
-            if self.MultiPort:
-                self.UDPFEMB3_PORT_RREGRESP = 0x7C10 + int(self.UDP_IP[-2:])
-            else:
-                self.UDPFEMB3_PORT_RREGRESP = 32066
             sock_readresp.bind(('', self.UDPFEMB3_PORT_RREGRESP ))
         sock_readresp.settimeout(2)
 
@@ -362,6 +346,7 @@ class CLS_UDP:
 ########################################################################################################
 #Code below for Bloomberg mode
     def bl_write_reg_send(self, sock_write, WRITE_MESSAGE, wib=True, femb = 0):
+        self.udp_port_update()
         if (wib == True):
             sock_write.sendto(WRITE_MESSAGE,(self.UDP_IP, self.UDP_PORT_WREG ))
         else:
@@ -500,6 +485,52 @@ class CLS_UDP:
         self.bl_write_reg_close(sock_write)
 #Code above for Bloomberg mode
 ########################################################################################################
+
+    def udp_port_update(self):
+        if self.MultiPort:
+            self.UDP_PORT_WREG = 32000
+            self.UDP_PORT_RREG = 32001
+            self.UDP_PORT_RREGRESP = 0x7D10 + int(self.UDP_IP[-2:])
+            self.UDP_PORT_HSDATA = 32003
+
+            self.UDPFEMB0_PORT_WREG =     0x7900 
+            self.UDPFEMB0_PORT_RREG =     0x7901
+            self.UDPFEMB0_PORT_RREGRESP = 0x7910 + int(self.UDP_IP[-2:])
+
+            self.UDPFEMB1_PORT_WREG =     0x7A00
+            self.UDPFEMB1_PORT_RREG =     0x7A01
+            self.UDPFEMB1_PORT_RREGRESP = 0x7A10 + int(self.UDP_IP[-2:])
+
+            self.UDPFEMB2_PORT_WREG =     0x7B00
+            self.UDPFEMB2_PORT_RREG =     0x7B01
+            self.UDPFEMB2_PORT_RREGRESP = 0x7B10 + int(self.UDP_IP[-2:])
+
+            self.UDPFEMB3_PORT_WREG =     0x7C00
+            self.UDPFEMB3_PORT_RREG =     0x7C01
+            self.UDPFEMB3_PORT_RREGRESP = 0x7C10 + int(self.UDP_IP[-2:])
+        else:
+            self.UDP_PORT_WREG = 32000
+            self.UDP_PORT_RREG = 32001
+            self.UDP_PORT_RREGRESP = 32002
+            self.UDP_PORT_HSDATA = 32003
+
+            self.UDPFEMB0_PORT_WREG =     32016
+            self.UDPFEMB0_PORT_RREG =     32017
+            self.UDPFEMB0_PORT_RREGRESP = 32018
+
+            self.UDPFEMB1_PORT_WREG =     32032
+            self.UDPFEMB1_PORT_RREG =     32033
+            self.UDPFEMB1_PORT_RREGRESP = 32034
+
+            self.UDPFEMB2_PORT_WREG =     32048
+            self.UDPFEMB2_PORT_RREG =     32049
+            self.UDPFEMB2_PORT_RREGRESP = 32050
+
+            self.UDPFEMB3_PORT_WREG =     32064
+            self.UDPFEMB3_PORT_RREG =     32065
+            self.UDPFEMB3_PORT_RREGRESP = 32066
+
+
 
     #__INIT__#
     def __init__(self):
