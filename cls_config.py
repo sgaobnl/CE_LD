@@ -32,7 +32,7 @@ class CLS_CONFIG:
         self.ldflg = False # True --> configuration done by DAQ, only taking data
         self.pwr_femb_ignore = False
         self.FEMB_ver = 0x501
-        self.WIB_ver = 0x117
+        self.WIB_ver = 0x124
         self.WIB_IPs = ["192.168.121.1", "192.168.121.2", "192.168.121.3", \
                         "192.168.121.4", "192.168.121.5", "192.168.121.6",] #WIB IPs connected to host-PC
         self.MBB_IP  = "192.168.121.11"

@@ -30,6 +30,7 @@ LD.WIB_IPs = [
               "10.226.34.13",
               "10.226.34.14",
               "10.226.34.15",
+#              "10.226.34.16"
               "10.226.34.16", 
               "10.226.34.21",
               "10.226.34.22",
@@ -54,9 +55,11 @@ x = input ("Choose MP mode, 1:ON. 0:OFF. --> ")
 if "1" in x:
     print ("Turn MP on for all WIBs") 
     mp = 1
+    LD.UDP.MultiPort = True
 elif "0" in x:
     print ("Turn MP off for all WIBs") 
     mp = 0
+    LD.UDP.MultiPort = False 
 else:
     print ("Wrong value, exit anyway") 
     exit()
@@ -73,6 +76,10 @@ for wib_ip in LD.WIB_IPs:
     if mp == 1:
         LD.UDP.UDP_PORT_RREGRESP = 32000 + 0x10 + int(wib_ip[-2:])
         val = LD.UDP.read_reg_wib(0xFF)
+        print (hex(val))
+        #val = LD.UDP.read_reg_wib(0x08)
+        #print (hex(val))
+        #val = LD.UDP.read_reg_femb(0, 0x101)
         print (hex(val))
     elif mp == 0:
         LD.UDP.UDP_PORT_RREGRESP = 32002

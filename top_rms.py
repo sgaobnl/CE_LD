@@ -47,6 +47,7 @@ for crateno in cratenos:
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
         a.userdir = "/home/nfs/sgao/SBND_Installation/data/1129/RMS/"  
+        a.userdir = "/scratch_local/SBND_Installation/data/sgao_02022024/RMS3/"
         #a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1128/RMS//"
         a.databkdir = a.userdir 
         a.user_f = a.userdir + "tmp.csv"
@@ -69,12 +70,13 @@ for crateno in cratenos:
                 sys.exit()
       
         a.env = "RT"
-        a.CLS.WIB_ver = 0x123
+        a.CLS.WIB_ver = 0x124
         FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
     
         a.WIB_IPs = ["10.226.34." + str( crateno*10 + PTBslotno) ]
         print (a.WIB_IPs)
         a.CLS.WIB_IPs = a.WIB_IPs
+        a.CLS.UDP.MultiPort = True
 
         a.CLS.pwr_femb_ignore =  True
         if False:

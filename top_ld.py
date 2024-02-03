@@ -30,7 +30,7 @@ from shutil import copyfile
 
 LD = CLS_CONFIG()
 LD.val=200
-LD.savedir = "/scratch_local/SBND_Installation/data/sgao_01302024/LD5/"
+LD.savedir = "/scratch_local/SBND_Installation/data/sgao_02022024/LD5_DAQ/"
 if (os.path.exists(LD.savedir)):
     pass
 else:
