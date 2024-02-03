@@ -47,26 +47,25 @@ LD.WIB_IPs = [
               "10.226.34.13",
               "10.226.34.14",
               "10.226.34.15",
-              "10.226.34.16" #delete later
-#              "10.226.34.16", 
-#              "10.226.34.21",
-#              "10.226.34.22",
-#              "10.226.34.23",
-#              "10.226.34.24",
-#              "10.226.34.25",
-#              "10.226.34.26", 
-#              "10.226.34.31",
-#              "10.226.34.32",
-#              "10.226.34.33",
-#              "10.226.34.34",
-#              "10.226.34.35",
-#              "10.226.34.36",
-#              "10.226.34.41",
-#              "10.226.34.42",
-#              "10.226.34.43",
-#              "10.226.34.44",
-#              "10.226.34.45",
-#              "10.226.34.46"
+              "10.226.34.16", 
+              "10.226.34.21",
+              "10.226.34.22",
+              "10.226.34.23",
+              "10.226.34.24",
+              "10.226.34.25",
+              "10.226.34.26", 
+              "10.226.34.31",
+              "10.226.34.32",
+              "10.226.34.33",
+              "10.226.34.34",
+              "10.226.34.35",
+              "10.226.34.36",
+              "10.226.34.41",
+              "10.226.34.42",
+              "10.226.34.43",
+              "10.226.34.44",
+              "10.226.34.45",
+              "10.226.34.46"
               ]
 for wib_ip in LD.WIB_IPs:
     print (wib_ip)
@@ -95,7 +94,7 @@ for wib_ip in LD.WIB_IPs:
             if fembno == 5:
                 LD.UDP.write_reg_femb_checked(fembno, 0x2A, (fembno<<4)+0)
             else:
-                LD.UDP.write_reg_femb_checked(fembno, 0x2A, (fembno<<4)+3)
+                LD.UDP.write_reg_femb_checked(fembno, 0x2A, (fembno<<4)+0)
             val = LD.UDP.read_reg_femb(fembno, 0x2A)
             print (wib_ip, fembno, hex(val))
             #if val >= 0:
@@ -150,15 +149,7 @@ while True:
             if LD.act_fembs[wib_ip][fembno]:
                 LD.UDP.write_reg_femb_checked(fembno, 0x2A, (fembno<<4)+3)
 
-#    for wib_ip in LD.WIB_IPs:
-#        LD.UDP.UDP_IP = wib_ip
-#        LD.UDP.write_reg_wib_checked(20, 0)
-#        time.sleep(0.1)
-#        LD.UDP.write_reg_wib_checked(20, 2)
-#        time.sleep(0.1)
-#        LD.UDP.write_reg_wib_checked(20, 0)
-#        time.sleep(0.1)
-    print ("chn mapping")
+   print ("chn mapping")
  
     flg = False
     for wib_ip in LD.WIB_IPs:
