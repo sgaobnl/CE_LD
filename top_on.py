@@ -28,7 +28,7 @@ from raw_convertor import RAW_CONV
 import pickle
 from shutil import copyfile
 from femb_qc import FEMB_QC
-
+from setdatadir import savedir
 
 #crateno = int(input("Crate no(1-6): "))
 cratenos = []
@@ -46,7 +46,8 @@ for crateno in cratenos:
     PTBslotno = 1
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
-        a.userdir = "/home/nfs/sgao/SBND_Installation/data/1129/ON/"  
+        #a.userdir = "/home/nfs/sgao/SBND_Installation/data/1129/ON/"
+        a.userdir = savedir + "/ON/"
         #a.databkdir =  "/home/nfs/sgao/SBND_Installation/data/1129/ON/"  
         a.databkdir = a.userdir 
         a.user_f = a.userdir + "tmp.csv"
