@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 12/12/2023 1:36:31 PM
+Last modified: 1/29/2024 11:16:04 AM
 """
 
 #defaut setting for scientific caculation
@@ -364,7 +364,7 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
 
 
 
-rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/1129/RMS2/LD2/"""
+rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/LD_data/run_10588_top_ld_data/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
     with open(fr, 'rb') as f:
