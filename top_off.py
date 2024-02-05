@@ -28,7 +28,7 @@ from raw_convertor import RAW_CONV
 import pickle
 from shutil import copyfile
 from femb_qc import FEMB_QC
-
+from setdatadir import savedir
 
 cratenos = []
 while True:
