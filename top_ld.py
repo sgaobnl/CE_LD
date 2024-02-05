@@ -27,10 +27,13 @@ from cls_config import CLS_CONFIG
 from raw_convertor import RAW_CONV
 import pickle
 from shutil import copyfile
+from setdatadir import savedir
 
 LD = CLS_CONFIG()
 LD.val=200
-LD.savedir = "/scratch_local/SBND_Installation/data/sgao_02022024/LD5_DAQ/"
+runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
+LD.savedir = savedir + "/LD_" + runtime + "/"
+
 if (os.path.exists(LD.savedir)):
     pass
 else:
@@ -39,6 +42,7 @@ else:
     except OSError:
         print ("Error to create folder %s"%LD.savedir)
         sys.exit()
+print("Save data in "+LD.savedir)
 
 LD.ldflg=True
 LD.UDP.MultiPort = True
