@@ -28,16 +28,16 @@ from raw_convertor import RAW_CONV
 import pickle
 from shutil import copyfile
 from femb_qc import FEMB_QC
-
+from setdatadir import savedir
 
 cratenos = []
 while True:
     for ci in [1,2,3,4]:
-        onstr =  input("Choose crate#%d ON ? (Y/N): "%(ci))
+        onstr =  input("Choose crate#%d OFF ? (Y/N): "%(ci))
         if "Y" in onstr or "y" in onstr:
             cratenos.append(ci)
-    print (" FEMBs on crate  ", cratenos, "will be turned on") 
-    ynstr = input ("Confirm? (Y/N")
+    print (" FEMBs on crate  ", cratenos, "will be turned off") 
+    ynstr = input ("Confirm? (Y/N)")
     if "Y" in onstr or "y" in ynstr:
         break
     
@@ -46,7 +46,8 @@ for crateno in cratenos:
     PTBslotno = 1
     while (PTBslotno < 7) and (PTBslotno > 0):
         a = FEMB_QC()
-        a.userdir = "/home/nfs/sgao/SBND_Installation/data/1129/OFF/"  
+        #a.userdir = "/home/nfs/sgao/SBND_Installation/data/1129/OFF/"  
+        a.userdir = savedir + "/OFF/"
         #a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1129/OFF/"
         a.databkdir = a.userdir 
         a.user_f = a.userdir + "tmp.csv"
@@ -69,7 +70,7 @@ for crateno in cratenos:
                 sys.exit()
       
         a.env = "RT"
-        a.CLS.WIB_ver = 0x124
+        a.CLS.WIB_ver = 0x125
         FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
     
         a.WIB_IPs = ["10.226.34." + str( crateno*10 + PTBslotno) ]
