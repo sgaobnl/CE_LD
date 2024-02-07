@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Jan 31 21:29:19 2024
+Last modified: Wed Feb  7 09:48:37 2024
 """
 
 #defaut setting for scientific caculation
@@ -136,19 +136,19 @@ while True:
             if LD.act_fembs[wib_ip][fembno]:
                 LD.UDP.write_reg_femb_checked(fembno, 0x2A, (fembno<<4)+3)
 
-    for wib_ip in LD.WIB_IPs:
-        LD.UDP.UDP_IP = wib_ip
-        LD.UDP.write_reg_wib_checked(20, 0)
-    time.sleep(0.1)
-    for wib_ip in LD.WIB_IPs:
-        LD.UDP.UDP_IP = wib_ip
-        LD.UDP.write_reg_wib_checked(20, 2)
-    time.sleep(0.1)
-    for wib_ip in LD.WIB_IPs:
-        LD.UDP.UDP_IP = wib_ip
-        LD.UDP.write_reg_wib_checked(20, 0)
-    time.sleep(0.1)
-    print ("chn mapping")
+#    for wib_ip in LD.WIB_IPs:
+#        LD.UDP.UDP_IP = wib_ip
+#        LD.UDP.write_reg_wib_checked(20, 0)
+#    time.sleep(0.1)
+#    for wib_ip in LD.WIB_IPs:
+#        LD.UDP.UDP_IP = wib_ip
+#        LD.UDP.write_reg_wib_checked(20, 2)
+#    time.sleep(0.1)
+#    for wib_ip in LD.WIB_IPs:
+#        LD.UDP.UDP_IP = wib_ip
+#        LD.UDP.write_reg_wib_checked(20, 0)
+#    time.sleep(0.1)
+#    print ("chn mapping")
  
     flg = False
     for wib_ip in LD.WIB_IPs:
