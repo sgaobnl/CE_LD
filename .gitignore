@@ -4,3 +4,5 @@
 *.py~
 *.swo
 *~
+LD_result/LD_2024_02_07_13_06_36.ld
+.DS_Store

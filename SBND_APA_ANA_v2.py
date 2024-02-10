@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Feb  9 21:56:16 2024
+Last modified: Fri Feb  9 23:36:47 2024
 """
 
 #defaut setting for scientific caculation
@@ -30,10 +30,13 @@ from shutil import copyfile
 import operator
 from fft_chn import chn_rfft_psd
 
+result_dir = "./LD_result/"
+
 
 def FEMB_CHK(fembdata, rms_f = False, fs="./"):
     RAW_C = RAW_CONV()
     chn_rmss = []
+    chn_rmss_filtered = []
     chn_peds = []
     chn_pkps = []
     chn_pkns = []
@@ -64,24 +67,26 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
             else:
                 achn_ped_sub2 = achn_ped_sub[0:maxloc-50] + achn_ped_sub[maxloc+50:] 
 
-            arms = np.std(achn_ped_sub2)
+            arms = np.std(achn_ped)
+            arms_2 = np.std(achn_ped_sub2)
             aped = int(np.mean(achn_ped))
             apeakp = int(np.mean(chn_peakp[achn]))
             apeakn = int(np.mean(chn_peakn[achn]))
             chn_rmss.append(arms)
+            chn_rmss_filtered.append(arms_2)
             chn_peds.append(aped)
             chn_pkps.append(apeakp)
             chn_pkns.append(apeakn)
             #chn_waves.append( chn_data[achn][feed_loc[0]: feed_loc[1]] )
-            chn_waves.append( chn_data[achn] )
-            avg_cnt = len(feed_loc)-2
+            #chn_waves.append( chn_data[achn] )
+            #avg_cnt = len(feed_loc)-2
 
-            avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[0] + 100]) 
-            for i in range(1, avg_cnt,1):
-                #avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
-                avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i]+100]) 
-            avg_wave = avg_wave/avg_cnt
-            chn_avg_waves.append(avg_wave)
+            #avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[0] + 100]) 
+            #for i in range(1, avg_cnt,1):
+            #    #avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
+            #    avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i]+100]) 
+            #avg_wave = avg_wave/avg_cnt
+            #chn_avg_waves.append(avg_wave)
     ana_err_code = ""
     rms_mean = np.mean(chn_rmss)
 
@@ -91,7 +96,7 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
         pkn_mean = np.mean(chn_pkns[gi*16 : (gi+1)*16])
         ped_thr= 30 
 
-    result = (True, "pass-", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves,chn_avg_waves])
+    result = (True, "pass-", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_rmss_filtered])
 #    FEMB_PLOT(result, fn=fs.replace(".bin", ".png"))
     return result
 
@@ -158,7 +163,7 @@ def SBND_MAP():
     dec_chn = dec_chn[1:]
     return dec_chn
 
-def SBND_ANA(rawdir, rms_f=False):
+def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
     fns = []
     for root, dirs, files in os.walk(rawdir):
         for fn in files:
@@ -184,8 +189,9 @@ def SBND_ANA(rawdir, rms_f=False):
         chn_peds = results[2][1]
         chn_pkps = results[2][2]
         chn_pkns = results[2][3]
-        chn_wfs =  results[2][4]
-        chn_avgwfs =  results[2][5]
+        chn_rmss_filtered = results[2][4]
+        #chn_wfs =  results[2][4]
+        #chn_avgwfs =  results[2][5]
     
         for i in range(lendec):
             if (int(dec_chn[i][5]) == crateno) and (int(dec_chn[i][6]) == wibno ) and (int(dec_chn[i][7]) == fembno ) :
@@ -194,19 +200,20 @@ def SBND_ANA(rawdir, rms_f=False):
                 dec_chn[i].append(chn_peds[decch])
                 dec_chn[i].append(chn_pkps[decch])
                 dec_chn[i].append(chn_pkns[decch])
-                dec_chn[i].append((chn_wfs[decch]))
-                dec_chn[i].append((chn_avgwfs[decch]))
+                dec_chn[i].append(chn_rmss_filtered[decch])
+                #dec_chn[i].append((chn_wfs[decch]))
+                #dec_chn[i].append((chn_avgwfs[decch]))
          
-    fr =rawdir + "test_results"+".result" 
-    with open(fr, 'wb') as f:
+#    fr = result_dir + "/" + rn + ".ld" 
+    with open(rn, 'wb') as f:
         pickle.dump(dec_chn, f)
-    fr =rawdir + "test_results"+".csv" 
-    with open (fr, 'w') as fp:
-        top_row = "APA,Crate,FEMB_SN,POSITION,WIB_CONNECTION,Crate_No,WIB_no,WIB_FEMB_LOC,FEMB_CH,Wire_type,Wire_No,,RMS Noise, Pedestal, Pulse_Pos_Peak, Pulse_Neg_Peak"
-        fp.write( top_row + "\n")
-        for x in dec_chn:
-            fp.write(",".join(str(i) for i in x[0:16]) +  "," + "\n")
-    return dec_chn
+    #fr =rawdir + "test_results"+".csv" 
+    #with open (fr, 'w') as fp:
+    #    top_row = "APA,Crate,FEMB_SN,POSITION,WIB_CONNECTION,Crate_No,WIB_no,WIB_FEMB_LOC,FEMB_CH,Wire_type,Wire_No,,RMS Noise, Pedestal, Pulse_Pos_Peak, Pulse_Neg_Peak, RMS(filtered),"
+    #    fp.write( top_row + "\n")
+    #    for x in dec_chn:
+    #        fp.write(",".join(str(i) for i in x[0:17]) +  "," + "\n")
+    #return dec_chn
 
 def d_dec_plt(dec_chn, n=1):
     euvals = []
@@ -386,36 +393,57 @@ rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_00_13_
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_36/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
-fr =rawdir + "test_results"+".result" 
-if (os.path.isfile(fr)):
-    with open(fr, 'rb') as f:
-        result = pickle.load(f)
-    pass
-else:
-    #if "RMS" in rawdir:
-    #    rms_f = True
-    #else:
-    rms_f = False
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/"""
+#fr =rawdir + "test_results"+".result" 
+#if (os.path.isfile(fr)):
+#    with open(fr, 'rb') as f:
+#        result = pickle.load(f)
+#    pass
+#else:
+#    #if "RMS" in rawdir:
+#    #    rms_f = True
+#    #else:
+result_dir = "./LD_result/"
+d1ns = []
+for root, dirs, files in os.walk(rawdir):
+    for d1n in dirs:
+        if ("2024_" in d1n) :
+            d1ns.append(rawdir + d1n + "/")
+    break
 
-    result = SBND_ANA(rawdir, rms_f = rms_f)
+for d1n in d1ns:
+    for root, dirs, files in os.walk(d1n):
+        for d2n in dirs:
+            if ("LD_2024_" in d2n) :
+                anadir = d1n + d2n + "/"
+                print (anadir)
+                rn = result_dir + "/" + d2n + ".ld"
+                if (os.path.isfile(rn)):
+                    pass
+                else:
+                    rms_f = False
+                    result = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
+        exit()
+        break
 
-DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,8])
-DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
 
-while True:
-    print ("Input a chnanel number following format (E/W)(U/V/Y)(Chn no.), e.g. EU0001")
-    xstr = input ("Input a channel number  > ")
-    if (len(xstr)>2) and (("E" in xstr[0]) or ("W" in xstr[0])) and (("U" in xstr[1]) or ("V" in xstr[1]) or ("Y" in xstr[1])):
-        try:
-            wno = int(xstr[2:])
-            DIS_CHN_PLOT(dec_chn=result, chnstr=xstr)
-        except ValueError:
-            print ("Wrong number, please input again")
-    else:
-        yns = input ("Exit Y/N")
-        if ("Y" in yns) or ("y" in yns):
-            exit()
-
+#DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,8])
+#DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
+#
+#while True:
+#    print ("Input a chnanel number following format (E/W)(U/V/Y)(Chn no.), e.g. EU0001")
+#    xstr = input ("Input a channel number  > ")
+#    if (len(xstr)>2) and (("E" in xstr[0]) or ("W" in xstr[0])) and (("U" in xstr[1]) or ("V" in xstr[1]) or ("Y" in xstr[1])):
+#        try:
+#            wno = int(xstr[2:])
+#            DIS_CHN_PLOT(dec_chn=result, chnstr=xstr)
+#        except ValueError:
+#            print ("Wrong number, please input again")
+#    else:
+#        yns = input ("Exit Y/N")
+#        if ("Y" in yns) or ("y" in yns):
+#            exit()
+#
     
 
 
