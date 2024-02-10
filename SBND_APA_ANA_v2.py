@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Feb  9 23:36:47 2024
+Last modified: Sat Feb 10 00:11:30 2024
 """
 
 #defaut setting for scientific caculation
@@ -30,7 +30,6 @@ from shutil import copyfile
 import operator
 from fft_chn import chn_rfft_psd
 
-result_dir = "./LD_result/"
 
 
 def FEMB_CHK(fembdata, rms_f = False, fs="./"):
@@ -204,7 +203,6 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
                 #dec_chn[i].append((chn_wfs[decch]))
                 #dec_chn[i].append((chn_avgwfs[decch]))
          
-#    fr = result_dir + "/" + rn + ".ld" 
     with open(rn, 'wb') as f:
         pickle.dump(dec_chn, f)
     #fr =rawdir + "test_results"+".csv" 
@@ -213,7 +211,7 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
     #    fp.write( top_row + "\n")
     #    for x in dec_chn:
     #        fp.write(",".join(str(i) for i in x[0:17]) +  "," + "\n")
-    #return dec_chn
+    return dec_chn
 
 def d_dec_plt(dec_chn, n=1):
     euvals = []
@@ -246,7 +244,7 @@ def d_dec_plt(dec_chn, n=1):
 
     return euvals, evvals, eyvals, wuvals, wvvals, wyvals
     
-def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,10], ylabel = "RMS / bit"):
+def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,10], ylabel = "RMS / bit"):
     import matplotlib.pyplot as plt
     fig = plt.figure(figsize=(12,6))
     plt.rcParams.update({'font.size': 12})
@@ -299,11 +297,11 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
     ax2.grid()
 
 
-    ffig = fdir + fn
+    ffig = fdir[0:-3] + fn 
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
-    #plt.savefig(ffig)
+    plt.savefig(ffig)
     print ("result saves at {}".format(ffig))
-    plt.show()
+    #plt.show()
     plt.close()
 
 
@@ -386,24 +384,10 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
 
 
 
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_00_00_05/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_12_26_03/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_13_24_29/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_00_13_55/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_36/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/"""
-#fr =rawdir + "test_results"+".result" 
-#if (os.path.isfile(fr)):
-#    with open(fr, 'rb') as f:
-#        result = pickle.load(f)
-#    pass
-#else:
-#    #if "RMS" in rawdir:
-#    #    rms_f = True
-#    #else:
-result_dir = "./LD_result/"
+rawdir = """/scratch_local/SBND_Installation/data/commissioning/"""
+
+result_dir = rawdir + "LD_result/"
+
 d1ns = []
 for root, dirs, files in os.walk(rawdir):
     for d1n in dirs:
@@ -419,15 +403,17 @@ for d1n in d1ns:
                 print (anadir)
                 rn = result_dir + "/" + d2n + ".ld"
                 if (os.path.isfile(rn)):
-                    pass
+                    with open(rn, 'rb') as f:
+                        result = pickle.load(f)
+                    DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8])
                 else:
                     rms_f = False
                     result = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
-        exit()
+                    DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8])
+                exit()
         break
 
 
-#DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,8])
 #DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
 #
 #while True:
