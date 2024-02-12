@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 1/29/2024 11:16:04 AM
+Last modified: Fri Feb  9 21:56:16 2024
 """
 
 #defaut setting for scientific caculation
@@ -49,7 +49,22 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
             else:
                 for af in range(len(feed_loc[0:-2])):
                     achn_ped += chn_data[achn][feed_loc[af]+100: feed_loc[af+1]-100 ] 
-            arms = np.std(achn_ped)
+            maxloc = np.where(achn_ped == np.max(achn_ped))[0][0]
+            if maxloc < 50:
+                achn_ped_sub = achn_ped[50:]
+            elif maxloc > len(achn_ped)-50:
+                achn_ped_sub = achn_ped[0:-50]
+            else:
+                achn_ped_sub = achn_ped[0:maxloc-50] + achn_ped[maxloc+50:] 
+            minloc = np.where(achn_ped == np.min(achn_ped))[0][0]
+            if minloc < 50:
+                achn_ped_sub2 = achn_ped_sub[50:]
+            elif minloc > len(achn_ped_sub)-50:
+                achn_ped_sub2 = achn_ped_sub[0:-50]
+            else:
+                achn_ped_sub2 = achn_ped_sub[0:maxloc-50] + achn_ped_sub[maxloc+50:] 
+
+            arms = np.std(achn_ped_sub2)
             aped = int(np.mean(achn_ped))
             apeakp = int(np.mean(chn_peakp[achn]))
             apeakn = int(np.mean(chn_peakn[achn]))
@@ -77,7 +92,7 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
         ped_thr= 30 
 
     result = (True, "pass-", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves,chn_avg_waves])
-    FEMB_PLOT(result, fn=fs.replace(".bin", ".png"))
+#    FEMB_PLOT(result, fn=fs.replace(".bin", ".png"))
     return result
 
 
@@ -364,18 +379,23 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
 
 
 
-#rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/1129/RMS2/LD2/"""
-rawdir = """/scratch_local/SBND_Installation/data/commissioning/2024_02_04/LD_2024_02_04_11_49_19/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_00_00_05/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_12_26_03/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_13_24_29/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_00_13_55/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_36/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
     with open(fr, 'rb') as f:
         result = pickle.load(f)
     pass
 else:
-    if "RMS" in rawdir:
-        rms_f = True
-    else:
-        rms_f = False
+    #if "RMS" in rawdir:
+    #    rms_f = True
+    #else:
+    rms_f = False
 
     result = SBND_ANA(rawdir, rms_f = rms_f)
 
