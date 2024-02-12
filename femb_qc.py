@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Mon May  6 23:34:41 2019
+Last modified: 4/28/2023 4:54:27 PM
 """
 
 #defaut setting for scientific caculation
@@ -32,13 +32,13 @@ from shutil import copyfile
 class FEMB_QC:
     def __init__(self):
         self.jumbo_flag = False
-        self.userdir = "I:/SBND_QC/"
-        self.user_f = self.userdir + "FEMB_QCindex.csv"
-        self.databkdir = "I:/SBND_QC/FEMB_QC/"
-        self.f_qcindex = self.databkdir + "FEMB_QCindex.csv"
+        self.userdir = "/Users/shanshangao/Documents/SBND/0621/"
+        self.user_f = self.userdir + "tmp.csv"
+        self.databkdir = "/Users/shanshangao/Documents/SBND/0621/PreEast"
+        self.f_qcindex = self.databkdir + "tmp.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
-        self.pwr_n = 10
+        self.pwr_n = 1
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
         self.CLS.FEMB_ver = 0x501
@@ -47,11 +47,11 @@ class FEMB_QC:
         self.RAW_C.jumbo_flag = self.jumbo_flag 
         self.raw_data = []
         self.env = "RT"
-        self.avg_cnt = 0
-        with open(self.user_f, 'a') as fp:
-            pass
-        with open(self.f_qcindex, 'a') as fp:
-            pass
+        self.avg_cnt = 1
+        #with open(self.user_f, 'a') as fp:
+        #    pass
+        #with open(self.f_qcindex, 'a') as fp:
+        #    pass
 
     def FEMB_INDEX_LOAD(self):
         self.femb_qclist = []
@@ -95,7 +95,10 @@ class FEMB_QC:
         return FEMB_infos
 
     def FEMB_CHK_ACQ(self, testcode = 0):
-        self.CLS.val = 100 
+        if testcode == 5 or testcode == 6 :
+            self.CLS.val = 200 
+        else:
+            self.CLS.val = 100 
         self.CLS.sts_num = 1
         self.CLS.f_save = False
         self.CLS.FM_only_f = False
@@ -105,6 +108,7 @@ class FEMB_QC:
         testn = testcode % 10
         if testn == 1:
             #14mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08
+            #cfglog = self.CLS.CE_CHK_CFG(pls_cs=2, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
         elif testn == 2:
             #7.8mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x08
@@ -120,10 +124,14 @@ class FEMB_QC:
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1)
         elif testn == 6:
             #14mV/fC, 2.0us, 900mV, RMS 
-            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=0)
+            #cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=0)
+            #14mV/fC, 0.5us, 200mV, RMS 
+            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=0, snc=1)
         elif testn == 7:
             #7.8mV/fC, 2.0us, 200mV, RMS 
-            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=1, sg1=0, st0 =1, st1=1, snc=1)
+            #cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=1, sg1=0, st0 =1, st1=1, snc=1)
+            #14mV/fC, 2.0us, 200mV, RMS 
+            cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1)
         elif testn == 8:
             #14mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
@@ -134,8 +142,13 @@ class FEMB_QC:
             #14mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x08
             cfglog = self.CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=1, swdac2=0, data_cs=0)
         time.sleep(2)
-        qc_data = self.CLS.TPC_UDPACQ(cfglog)
-        self.CLS.FEMBs_CE_OFF()
+        print ("FEMB are configurated") 
+        self.CLS.savedir = self.databkdir 
+        if testcode == 7:
+            qc_data = None
+        else:
+            qc_data = self.CLS.TPC_UDPACQ(cfglog)
+#        self.CLS.FEMBs_CE_OFF()
         return qc_data
 
     def FEMB_BL_RB(self,  snc=1, sg0=0, sg1=1, st0 =1, st1=1, slk0=0, slk1=0, sdf=1): #default 14mV/fC, 2.0us, 200mV
@@ -298,9 +311,10 @@ class FEMB_QC:
                 chn_waves.append( chn_data[achn][feed_loc[0]: feed_loc[1]] )
                 if len(feed_loc) < self.avg_cnt+5:
                     self.avg_cnt = len(feed_loc)-1
-                avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[1]]) 
-                for i in (1, self.avg_cnt,1):
-                    avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
+                avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[0] + 100]) 
+                for i in range(1, self.avg_cnt,1):
+                    #avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
+                    avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i]+100]) 
                 avg_wave = avg_wave/self.avg_cnt
                 chn_avg_waves.append(avg_wave)
         ana_err_code = ""
@@ -343,8 +357,8 @@ class FEMB_QC:
             qc_data = self.FEMB_CHK_ACQ(testcode = pwr_i)
             qcs = self.FEMB_CHK_ANA(FEMB_infos, qc_data, pwr_i)
             pwr_qcs += qcs
-            print ("Power Cycle %d of %d is done, wait 30 seconds"%(pwr_i, self.pwr_n))
-            time.sleep(30)
+#            print ("Power Cycle %d of %d is done, wait 30 seconds"%(pwr_i, self.pwr_n))
+#            time.sleep(30)
         self.CLS.pwr_int_f = False
 
         saves = []
@@ -377,7 +391,7 @@ class FEMB_QC:
                 pickle.dump(self.raw_data, f)
         self.FEMB_PLOT(pwr_int_f = pwr_int_f)
         self.raw_data = []
-        print ("Result is saved in %s"%self.user_f )
+        #print ("Result is saved in %s"%self.user_f )
 
     def FEMB_SUB_PLOT(self, ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx=False, ylabel_twx = "", e=None):
         ax.set_title(title)
@@ -650,44 +664,35 @@ class FEMB_QC:
         with open(fn, 'wb') as f:
             pickle.dump(BL_T_data, f)
 
-    def FEMB_CHKOUT_Input(self):
-        FEMBlist = self.FEMB_INDEX_LOAD()
+    def FEMB_CHKOUT_Input(self, crateno=0, slotno=0):
+        #FEMBlist = self.FEMB_INDEX_LOAD()
         FEMB_infos = []
         env = self.env
         for i in range(4):
-            while (True):
-                print ("Please enter ID of FEMB(AM) in WIB slot%d (input \"OFF\" if no FEMB): "%i)
-                FEMB_id = input("(e.g. TAC01) >>")
-                cf = input("WIB slot%d with FEMB ID is \"#%s\", Y or N? "%(i, FEMB_id) )
-                if (cf == "Y"):
-                    break
+            FEMB_id = "Crate%d_PTBslot%d_WIBslot%d"%(crateno, slotno, i)
             c_ret = ""
             rerun_f = "N"
             FEMB_infos.append("SLOT%d"%i + "\n" + FEMB_id + "\n" + env + "\n" + rerun_f + "\n" + c_ret )
         return FEMB_infos
 
-    def FEMB_CHKOUT(self, FEMB_infos, pwr_int_f = False, testcode = 1):
+    def FEMB_CHKOUT(self, FEMB_infos, pwr_int_f = False, testcode = 1, ana_flg=True):
         pwr_qcs = []
         self.CLS.pwr_int_f = pwr_int_f
         qc_data = self.FEMB_CHK_ACQ(testcode = testcode)
-        qcs = self.FEMB_CHK_ANA(FEMB_infos, qc_data, pwr_i=testcode)
-        pwr_qcs += qcs
-        self.CLS.pwr_int_f = False
-        if (len(pwr_qcs) > 0 ):
-            fn =self.databkdir  + "FEMB_CHKOUT_" + pwr_qcs[0][1] +"_" + pwr_qcs[0][4] + ".bin" 
-            with open(fn, 'wb') as f:
-                pickle.dump(self.raw_data, f)
-        self.FEMB_PLOT(pwr_int_f = pwr_int_f)
+        if ana_flg:
+            qcs = self.FEMB_CHK_ANA(FEMB_infos, qc_data, pwr_i=testcode)
+            pwr_qcs += qcs
+            self.CLS.pwr_int_f = False
+            if (len(pwr_qcs) > 0 ):
+                fn =self.databkdir  + "FEMB_CHKOUT_" + pwr_qcs[0][1] +"_" + pwr_qcs[0][4] + ".bin" 
+                with open(fn, 'wb') as f:
+                    pickle.dump(self.raw_data, f)
+            self.FEMB_PLOT(pwr_int_f = pwr_int_f)
         self.raw_data = []
-        print ("Result is saved in %s"%self.user_f )
+        #print ("Result is saved in %s"%self.user_f )
+#        self.CLS.FEMBs_CE_OFF()
 
 
-
-a = FEMB_QC()
-a.env = "RT"
-FEMB_infos = a.FEMB_CHKOUT_Input()
-a.FEMB_CHKOUT(FEMB_infos, pwr_int_f = False, testcode = 1 )
-print ("Well Done")
 
 ##warm test
 #flg = "N"

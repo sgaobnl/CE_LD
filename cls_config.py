@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/24/2019 12:24:18 PM
+Last modified: Wed Jan 31 21:28:24 2024
 """
 
 #defaut setting for scientific caculation
@@ -17,6 +17,7 @@ import numpy as np
 #import pylab as pl
 
 import sys 
+import os
 import string
 import time
 from datetime import datetime
@@ -28,23 +29,27 @@ import pickle
 class CLS_CONFIG:
     def __init__(self):
         self.jumbo_flag = False 
+        self.ldflg = False # True --> configuration done by DAQ, only taking data
+        self.pwr_femb_ignore = False
         self.FEMB_ver = 0x501
-        self.WIB_ver = 0x109
+        self.WIB_ver = 0x124
         self.WIB_IPs = ["192.168.121.1", "192.168.121.2", "192.168.121.3", \
                         "192.168.121.4", "192.168.121.5", "192.168.121.6",] #WIB IPs connected to host-PC
-        self.MBB_IP  = "192.168.121.10"
+        self.MBB_IP  = "192.168.121.11"
         self.act_fembs = {}
         self.UDP = CLS_UDP()
+        self.UDP.MultiPort = True #enable MP mode
         self.UDP.jumbo_flag = self.jumbo_flag
-        self.Int_CLK = True
-        self.pllfile ="./Si5344-RevD-SBND_V3.txt" 
+        self.Int_CLK =  True 
+        self.pllfile ="./Si5344-RevD-SBND_V2-100MHz_REVD_PTC.txt" 
+        #self.pllfile ="./
         self.fecfg_f ="./fecfg.csv" 
         self.FEREG_MAP = FE_REG_MAPPING()
         self.DAQstream_en =  True
-        self.pwr_dly = 10 #delay(s) after power operation
+        self.pwr_dly = 3 #delay(s) after power operation
         self.sts_num = 1 #how many times statitics data are collected
         self.val = 100 #how many UDP HS package are collected per time
-        self.f_save = False #if False, no raw data is saved, if True, no further data analysis 
+        self.f_save = True #if False, no raw data is saved, if True, no further data analysis 
         self.savedir = "./" 
         self.FM_only_f = False #Only FM, no AM
         self.err_code = ""
@@ -62,7 +67,7 @@ class CLS_CONFIG:
             wib_reg_7_value = wib_reg_7_value | 0x80000000 #bit31 of reg7 for disable wib udp control
         self.UDP.write_reg_wib_checked (7, wib_reg_7_value)
 
-    def WIBs_SCAN(self, wib_verid=0x109):
+    def WIBs_SCAN(self ):
         print ("Finding available WIBs starts...")
         active_wibs = []
         for wib_ip in self.WIB_IPs:
@@ -70,9 +75,11 @@ class CLS_CONFIG:
             for i in range(5):
                 wib_ver_rb = self.UDP.read_reg_wib (0xFF)
                 wib_ver_rb = self.UDP.read_reg_wib (0xFF)
-                if ((wib_ver_rb&0x0F00) == wib_verid&0x0F00) and ( wib_ver_rb >= 0):
-                    print ("WIB with IP = %s is found"%wib_ip) 
+                #if ((wib_ver_rb&0x0F00) == wib_verid&0x0F00) and ( wib_ver_rb >= 0):
+                if ((wib_ver_rb&0x0FFF) == self.WIB_ver&0x0FFF) and ( wib_ver_rb >= 0):
+                    print ("WIB_V%s with IP = %s is found"%(hex(wib_ver_rb&0x0FFF), wib_ip)) 
                     active_wibs.append(wib_ip)
+                    self.WIB_CLKCMD_cs(wib_ip )# choose clock source
                     break
                 elif ( wib_ver_rb == -2):
                     print ("Timeout. WIB with IP = %s isn't mounted, mask this IP"%wib_ip) 
@@ -81,6 +88,10 @@ class CLS_CONFIG:
                 if (i == 4):
                     print ("WIB with IP = %s get error (%x readback from CLS_UDP.read_reg()), mask this IP"%(wib_ip, wib_ver_rb)) 
             self.WIB_UDP_CTL( wib_ip, WIB_UDP_EN = False)
+            print ("enable data stream and synchronize to Nevis")
+            self.UDP.write_reg_wib_checked(20, 0x00) #disable data stream and synchronize to Nevis
+            self.UDP.write_reg_wib_checked(20, 0x03) #disable data stream and synchronize to Nevis
+            self.UDP.write_reg_wib_checked(20, 0x00) #disable data stream and synchronize to Nevis
         self.WIB_IPs = active_wibs
 
         if len(active_wibs) == 0:
@@ -90,6 +101,8 @@ class CLS_CONFIG:
             print ("WIB scanning is done" )
 
     def WIB_PWR_FEMB(self, wib_ip, femb_sws=[1,1,1,1]):
+        if self.pwr_femb_ignore: 
+            return None
         print ("FEMBs power operation on the WIB with IP = %s, wait a moment"%wib_ip)
         self.UDP.UDP_IP = wib_ip
         if (self.pwr_int_f):
@@ -114,106 +127,129 @@ class CLS_CONFIG:
                 if ( femb_sws[i] == 1):
                     pwr_status |= np.uint32(pwr_ctl[i])
                     self.UDP.write_reg_wib_checked (0x8, pwr_status )
-                    time.sleep(1)
+                    time.sleep(0.5)
                 else:
                     if (i == 3) and (femb_sws == [0, 0, 0, 0]):
                         pwr_status = 0x00000000
                     else:
                         pwr_status &= (~np.uint32(pwr_ctl[i]) | 0x00100000)
                     self.UDP.write_reg_wib_checked (0x8, pwr_status )
-                    time.sleep(1)
-        time.sleep(self.pwr_dly)
+                    time.sleep(0.5)
+        if 1 in femb_sws:
+            time.sleep(self.pwr_dly)
+        else:
+            time.sleep(1)
 
     def FEMB_DECTECT(self, wib_ip):
         self.UDP.UDP_IP = wib_ip
-        self.WIB_PWR_FEMB(wib_ip, femb_sws=[1,1,1,1])
         stats = self.WIB_STATUS(wib_ip)
-        keys = list(stats.keys())
-        fembs_found = [True, True, True, True]
         self.err_code += "#TIME" + stats["TIME"]
         for i in range(4):
-            self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
-            for key in keys:
-                if key in "FEMB%d_LINK"%i:
-                    if (stats[key] != 0xFF):
-                        print ("FEMB%d LINK is broken!"%i)
+             self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
+ 
+        if False:
+            self.WIB_PWR_FEMB(wib_ip, femb_sws=[1,1,1,1])
+            stats = self.WIB_STATUS(wib_ip)
+            self.err_code += "#TIME" + "xxxxx"
+            for i in range(4):
+                self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
+            keys = list(stats.keys())
+            fembs_found = [True, True, True, True]
+            for i in range(4):
+                self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
+                for key in keys:
+                    if key in "FEMB%d_LINK"%i:
+                        if (stats[key] != 0xFF):
+                            print ("FEMB%d LINK is broken!"%i)
+                            fembs_found[i] = False
+                            self.err_code += "-F2_LINK"
+                    elif key in "FEMB%d_EQ"%i:
+                        if (stats[key] != 0xF):
+                            print ("FEMB%d EQ is broken!"%i)
+                            fembs_found[i] = False
+                            self.err_code += "-F3_EQ"
+                    elif key in "FEMB%d_BIAS_I"%i:
+                        if (stats[key] < 0.001 ):
+                            print ("FEMB%d BIAS current (%fA) is lower than expected"%(i, stats[key]) )
+                            fembs_found[i] = False
+                            self.err_code +="-F1_BIAS_L"
+                        elif (stats[key] > 0.1 ):
+                            print ("FEMB%d BIAS current (%fA) is higher than expected"%(i, stats[key]) )
+                            fembs_found[i] = False
+                            self.err_code += "-F1_BIAS_H"
+                    elif key in "FEMB%d_FMV39_I"%i:
+                        if (stats[key] < 0.010 ):
+                            print ("FEMB%d FM_V39 current (%fA) is lower than expected"%(i, stats[key] ))
+                            fembs_found[i] = False
+                            self.err_code += "-F1_FMV39_L"
+                        elif (stats[key] > 0.2 ):
+                            print ("FEMB%d FM_V39 current (%fA) is higher than expected"%(i, stats[key] ))
+                            fembs_found[i] = False
+                            self.err_code += "-F1_FMV39_H"
+                    elif key in "FEMB%d_FMV30_I"%i:
+                        if (stats[key] < 0.050 ):
+                            print ("FEMB%d FM_V30 current (%fA) is lower than expected"%(i, stats[key] ))
+                            fembs_found[i] = False
+                            self.err_code += "-F1_FMV30_L"
+                        elif (stats[key] > 0.5 ):
+                            print ("FEMB%d FM_V30 current (%fA) is higher than expected"%(i, stats[key] ))
+                            fembs_found[i] = False
+                            self.err_code += "-F1_FMV30_H"
+                    elif key in "FEMB%d_FMV18_I"%i:
+                        if (stats[key] < 0.200 ):
+                            print ("FEMB%d FM_V18 current (%fA) is lower than expected"%(i, stats[key] ))
+                            fembs_found[i] = False
+                            self.err_code += "-F1_FMV18_L"
+                        elif (stats[key] > 1.0 ):
+                            print ("FEMB%d FM_V18 current (%fA) is higher than expected"%(i, stats[key] ))
+                            fembs_found[i] = False
+                            self.err_code += "-F1_FMV18_H"
+                    elif key in "FEMB%d_AMV33_I"%i:
+                        if (stats[key] < 0.100 ):
+                            print ("FEMB%d AM_V33 current (%fA) is lower than expected"%(i, stats[key] ))
+                            fembs_found[i] = False if not self.FM_only_f else True
+                            self.err_code +="-F1_AMV33_L"if not self.FM_only_f else ""
+                        elif (stats[key] > 1.0 ):
+                            print ("FEMB%d AM_V33 current (%fA) is higher than expected"%(i, stats[key] ))
+                            fembs_found[i] = False if not self.FM_only_f else True
+                            self.err_code +="-F1_AMV33_H"if not self.FM_only_f else ""
+                    elif key in "FEMB%d_AMV28_I"%i:
+                        if (stats[key] < 0.100 ):
+                            print ("FEMB%d AM_V28 current (%fA) is lower than expected"%(i, stats[key] ))
+                            fembs_found[i] = False if not self.FM_only_f else True
+                            self.err_code +="-F1_AMV28_L"if not self.FM_only_f else ""
+                        elif (stats[key] > 1.5 ):
+                            print ("FEMB%d AM_V28 current (%fA) is higher than expected"%(i, stats[key] ))
+                            fembs_found[i] = False if not self.FM_only_f else True
+                            self.err_code +="-F1_AMV28_H"if not self.FM_only_f else ""
+                if (fembs_found[i]): #Link and current are good
+                    self.UDP.write_reg_femb(i, 0x0, 0x0)
+                    self.UDP.read_reg_femb(i, 0x102)
+                    ver_value = self.UDP.read_reg_femb(i, 0x101)
+                    if (ver_value > 0 ):
+                        if (ver_value&0xFFFF != self.FEMB_ver):
+                            print ("FEMB%d FE version is %x, which is different from default (%x)!"%(i, ver_value, self.FEMB_ver))
+                            fembs_found[i] = False
+                            self.err_code +="-F7_FW"
+                    elif (ver_value <= 0 ):
+                        print ("I2C of FEMB%d is broken"%i)
                         fembs_found[i] = False
-                        self.err_code += "-F2_LINK"
-                elif key in "FEMB%d_EQ"%i:
-                    if (stats[key] != 0xF):
-                        print ("FEMB%d EQ is broken!"%i)
-                        fembs_found[i] = False
-                        self.err_code += "-F3_EQ"
-                elif key in "FEMB%d_BIAS_I"%i:
-                    if (stats[key] < 0.001 ):
-                        print ("FEMB%d BIAS current (%fA) is lower than expected"%(i, stats[key]) )
-                        fembs_found[i] = False
-                        self.err_code +="-F1_BIAS_L"
-                    elif (stats[key] > 0.1 ):
-                        print ("FEMB%d BIAS current (%fA) is higher than expected"%(i, stats[key]) )
-                        fembs_found[i] = False
-                        self.err_code += "-F1_BIAS_H"
-                elif key in "FEMB%d_FMV39_I"%i:
-                    if (stats[key] < 0.010 ):
-                        print ("FEMB%d FM_V39 current (%fA) is lower than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
-                        self.err_code += "-F1_FMV39_L"
-                    elif (stats[key] > 0.2 ):
-                        print ("FEMB%d FM_V39 current (%fA) is higher than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
-                        self.err_code += "-F1_FMV39_H"
-                elif key in "FEMB%d_FMV30_I"%i:
-                    if (stats[key] < 0.050 ):
-                        print ("FEMB%d FM_V30 current (%fA) is lower than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
-                        self.err_code += "-F1_FMV30_L"
-                    elif (stats[key] > 0.5 ):
-                        print ("FEMB%d FM_V30 current (%fA) is higher than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
-                        self.err_code += "-F1_FMV30_H"
-                elif key in "FEMB%d_FMV18_I"%i:
-                    if (stats[key] < 0.200 ):
-                        print ("FEMB%d FM_V18 current (%fA) is lower than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
-                        self.err_code += "-F1_FMV18_L"
-                    elif (stats[key] > 1.0 ):
-                        print ("FEMB%d FM_V18 current (%fA) is higher than expected"%(i, stats[key] ))
-                        fembs_found[i] = False
-                        self.err_code += "-F1_FMV18_H"
-                elif key in "FEMB%d_AMV33_I"%i:
-                    if (stats[key] < 0.100 ):
-                        print ("FEMB%d AM_V33 current (%fA) is lower than expected"%(i, stats[key] ))
-                        fembs_found[i] = False if not self.FM_only_f else True
-                        self.err_code +="-F1_AMV33_L"if not self.FM_only_f else ""
-                    elif (stats[key] > 1.0 ):
-                        print ("FEMB%d AM_V33 current (%fA) is higher than expected"%(i, stats[key] ))
-                        fembs_found[i] = False if not self.FM_only_f else True
-                        self.err_code +="-F1_AMV33_H"if not self.FM_only_f else ""
-                elif key in "FEMB%d_AMV28_I"%i:
-                    if (stats[key] < 0.100 ):
-                        print ("FEMB%d AM_V28 current (%fA) is lower than expected"%(i, stats[key] ))
-                        fembs_found[i] = False if not self.FM_only_f else True
-                        self.err_code +="-F1_AMV28_L"if not self.FM_only_f else ""
-                    elif (stats[key] > 1.5 ):
-                        print ("FEMB%d AM_V28 current (%fA) is higher than expected"%(i, stats[key] ))
-                        fembs_found[i] = False if not self.FM_only_f else True
-                        self.err_code +="-F1_AMV28_H"if not self.FM_only_f else ""
-            if (fembs_found[i]): #Link and current are good
-                self.UDP.write_reg_femb(i, 0x0, 0x0)
-                self.UDP.read_reg_femb(i, 0x102)
-                ver_value = self.UDP.read_reg_femb(i, 0x101)
-                if (ver_value > 0 ):
-                    if (ver_value&0xFFFF != self.FEMB_ver):
-                        print ("FEMB%d FE version is %x, which is different from default (%x)!"%(i, ver_value, self.FEMB_ver))
-                        fembs_found[i] = False
-                        self.err_code +="-F7_FW"
-                elif (ver_value <= 0 ):
-                    print ("I2C of FEMB%d is broken"%i)
-                    fembs_found[i] = False
-                    self.err_code +="-F4_I2C"
-        self.act_fembs[wib_ip] = fembs_found
-        print (self.act_fembs)
-        self.WIB_PWR_FEMB(wib_ip, femb_sws=[0,0,0,0])
+                        self.err_code +="-F4_I2C"
+        if ( "10.226.34.34" in wib_ip):
+            self.act_fembs[wib_ip] = [True, True, True, True]
+        elif ( "10.226.34.16" in wib_ip):
+            self.act_fembs[wib_ip] = [True, True, False, False]
+        elif ( "10.226.34.26" in wib_ip):
+            self.act_fembs[wib_ip] = [True, True, False, False]
+        elif ( "10.226.34.36" in wib_ip):
+            self.act_fembs[wib_ip] = [True, True, False, False]
+        elif ( "10.226.34.46" in wib_ip):
+            self.act_fembs[wib_ip] = [True, True, False, False]
+        else:
+            self.act_fembs[wib_ip] = [True, True, True, True]
+            #self.act_fembs[wib_ip] = fembs_found
+        #print (self.act_fembs)
+        #self.WIB_PWR_FEMB(wib_ip, femb_sws=[0,0,0,0])
         return self.err_code
 
     def WIB_STATUS(self, wib_ip):
@@ -222,7 +258,7 @@ class CLS_CONFIG:
         status_dict = {}
         status_dict["TIME"] = runtime
 
-        self.UDP.write_reg_wib_checked(0x4, 0x8) #Internal clock is selected
+#        self.UDP.write_reg_wib_checked(0x4, 0x8) #Internal clock is selected
         self.UDP.write_reg_wib_checked(0x12, 0x8000)
         self.UDP.write_reg_wib_checked(0x12, 0x100)
         time.sleep(0.02)
@@ -358,15 +394,23 @@ class CLS_CONFIG:
             else:
                 self.UDP.write_reg_wib_checked(0x1F, 0x1FB) #normal operation
             self.UDP.write_reg_wib_checked(0x0F, 0x0) #normal operation
-            self.WIB_CLKCMD_cs(wib_ip )# choose clock source
+#            self.WIB_CLKCMD_cs(wib_ip )# choose clock source
             femb_sws = [0, 0, 0, 0]
             for femb_addr in range(4):
                 if self.act_fembs[wib_ip][femb_addr] == True:
                     femb_sws[femb_addr] = 1
             self.WIB_PWR_FEMB(wib_ip, femb_sws)
+        if ( "10.226.34.34" in wib_ip):
+            self.act_fembs[wib_ip] = [False, True, True, True]
+ 
 
     def FEMBs_CE_OFF(self):
         for wib_ip in list(self.act_fembs.keys()):
+            self.UDP.UDP_IP = wib_ip
+            self.WIB_PWR_FEMB(wib_ip, [0, 0, 0, 0])
+
+    def FEMBs_CE_OFF_DIR(self, wib_ip):
+        for wib_ip in self.WIB_IPs :
             self.UDP.UDP_IP = wib_ip
             self.WIB_PWR_FEMB(wib_ip, [0, 0, 0, 0])
 
@@ -374,11 +418,11 @@ class CLS_CONFIG:
         self.UDP.UDP_IP = wib_ip
         value = 0x01 + ((addr&0xFF)<<8) + ((din&0x00FF)<<16)
         self.UDP.write_reg_wib_checked (11,value)
-        time.sleep(0.01)
+        time.sleep(0.001)
         self.UDP.write_reg_wib_checked (10,1)
-        time.sleep(0.01)
+        time.sleep(0.001)
         self.UDP.write_reg_wib_checked (10,0)
-        time.sleep(0.02)
+        time.sleep(0.002)
 
     def WIB_PLL_cfg(self, wib_ip ):
         with open(self.pllfile,"r") as f:
@@ -395,7 +439,7 @@ class CLS_CONFIG:
                     adr = int(line[2:tmp],16)
                     adrs_h.append((adr&0xFF00)>>8)
                     adrs_l.append((adr&0xFF))
-                    datass.append((int(line[tmp+3:-2],16))&0xFF)
+                    datass.append(int((line[tmp+3:tmp+5]), 16)&0xFF)
         self.UDP.UDP_IP = wib_ip
         lol_flg = False
         for i in range(5):
@@ -415,7 +459,12 @@ class CLS_CONFIG:
             self.UDP.write_reg_wib_checked (4, 0x03)
 
         else:
-            print ("configurate PLL of WIB (%s), please wait..."%wib_ip)
+            self.UDP.write_reg_wib (10,0xFF0)
+            time.sleep(0.01)
+            self.UDP.write_reg_wib (10,0xFF0)
+            time.sleep(0.2)
+            
+            print ("configurate PLL of WIB (%s), please wait a few minutes..."%wib_ip)
             p_addr = 1
             #step1
             page4 = adrs_h[0]
@@ -431,14 +480,14 @@ class CLS_CONFIG:
             self.WIB_PLL_wr( wib_ip, adrs_l[2], datass[2])
             time.sleep(0.5)
             #step4
-            for cnt in range(len(adrs_h)):
+            for cnt in range(3, len(adrs_h), 1):
                 if (page4 == adrs_h[cnt]):
-                    tmpadr = adrs_l[2]
                     self.WIB_PLL_wr(wib_ip, adrs_l[cnt], datass[cnt])
                 else:
                     page4 = adrs_h[cnt]
                     self.WIB_PLL_wr( wib_ip, p_addr, page4)
                     self.WIB_PLL_wr(wib_ip, adrs_l[cnt], datass[cnt])
+            #    print (cnt, adrs_h[cnt], adrs_l[cnt], datass[cnt])
             for i in range(10):
                 time.sleep(3)
                 print ("check PLL status, please wait...")
@@ -450,7 +499,8 @@ class CLS_CONFIG:
                 INTR = (ver_value & 0x40000)>>18
                 if (lol == 1):
                     print ("PLL of WIB(%s) is locked"%wib_ip)
-                    self.UDP.write_reg_wib_checked (4, 0x03)
+                    #self.UDP.write_reg_wib_checked (4, 0x03)
+                    self.UDP.write_reg_wib_checked (4, 0x01)
                     break
                 if (i ==9):
                     print ("Fail to configurate PLL of WIB(%s), please check if MBB is on or 16MHz from dAQ"%wib_ip)
@@ -461,7 +511,9 @@ class CLS_CONFIG:
         self.UDP.UDP_IP = wib_ip
         if (self.Int_CLK ):
             self.UDP.write_reg_wib_checked(0x04, 0x08) #select WIB onboard system clock and CMD
+            print ("select WIB onboard system clock and CMD, plese select system clock and CMD from MBB ")
         else:
+            print ("select system clock and CMD from MBB")
             self.WIB_PLL_cfg(wib_ip ) #select system clock and CMD from MBB
 
 
@@ -640,110 +692,171 @@ class CLS_CONFIG:
                 d_wib.append( self.FEMB_UDPACQ(wib_ip, femb_addr, cfglog) )
         return d_wib
 
+    def WIB_SYNC(self, wib_ip):
+        self.UDP.UDP_IP = wib_ip
+        self.UDP.write_reg_wib_checked(0x14, 0x0) #
+        time.sleep(0.1)
+        self.UDP.write_reg_wib_checked(0x14, 0x2) #
+        time.sleep(0.1)
+        self.UDP.write_reg_wib_checked(0x14, 0x0) #
+        time.sleep(0.1)
+
     def FEMB_UDPACQ(self, wib_ip, femb_addr, cfglog):
         self.UDP.UDP_IP = wib_ip
-        self.UDP.write_reg_wib_checked(0x01, 0x2) #Time Stamp Reset command encoded in 2MHz 
-        self.UDP.write_reg_wib_checked(0x01, 0x0) 
-        self.UDP.write_reg_wib_checked(18, 0x8000) #reset error counters
-        if (self.DAQstream_en):
-            self.UDP.write_reg_wib_checked(20, 0x03) #disable data stream and synchronize to Nevis
-            self.UDP.write_reg_wib_checked(20, 0x00) #enable data stream to Nevis
+        #self.UDP.write_reg_wib(0x1E, 0) #disable MP mode
+        #self.UDP.write_reg_wib(0x1E, 0) #disable MP mode
+        #self.UDP.write_reg_wib(0x1E, 0) #disable MP mode
+        if not self.ldflg:
+            self.UDP.write_reg_wib_checked(0x01, 0x2) #Time Stamp Reset command encoded in 2MHz 
+            self.UDP.write_reg_wib_checked(0x01, 0x0) 
+            self.UDP.write_reg_wib_checked(18, 0x8000) #reset error counters
+        #if (self.DAQstream_en):
+        #    self.UDP.write_reg_wib_checked(20, 0x03) #disable data stream and synchronize to Nevis
+        #    self.UDP.write_reg_wib_checked(20, 0x00) #enable data stream to Nevis
         d_sts = []
-        for i in range(self.sts_num):
-            d_sts.append( self.WIB_STATUS(wib_ip) )
+        if not self.ldflg:
+            for i in range(self.sts_num):
+                d_sts.append( self.WIB_STATUS(wib_ip) )
+
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True) #Enable HS data from the WIB to PC through UDP
         if self.act_fembs[wib_ip][femb_addr] == True:
             print ("Take data from WIB%s FEMB%d"%(wib_ip, femb_addr))
             raw_asic = []
             for asic in range(8):
                 self.FEMB_ASIC_CS(wib_ip, femb_addr, asic)
-                raw_asic.append( self.UDP.get_rawdata_packets(self.val) )
-            for cfg in cfglog:
-                tmp = [cfg]
-                if (cfg[0] == wib_ip) and (cfg[1] == femb_addr):
-                    tmp += [raw_asic] + [d_sts]
-                    if self.f_save :
-                        fn = self.savedir + "/" + "WIB" + cfg[0].replace(".", "_") + "_FEMB%d"%cfg[1] + "_%d_%02d"%(cfg[3], cfg[12]) + \
-                             "FE_%d%d%d%d%d%d%d%d%02d"%(cfg[13], cfg[14], cfg[15], cfg[16], cfg[17], cfg[18], cfg[27], cfg[28], cfg[29]) + ".bin"
-                        with open(fn, "wb") as fp:
-                            pickle.dump(tmp, fp)
-                        tmp = None
-                    break
+                rawdata = self.UDP.get_rawdata_packets(self.val) 
+                if rawdata != None:
+                    raw_asic.append(rawdata )
+                else:
+                    self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True) #Enable HS data from the WIB to PC through UDP
+            if not self.ldflg:
+                for cfg in cfglog:
+                    tmp = [cfg]
+                    if (cfg[0] == wib_ip) and (cfg[1] == femb_addr):
+                        tmp += [raw_asic] + [d_sts]
+                        #if self.f_save :
+                        if True :
+                            runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
+                            fn = self.savedir + "/" + "WIB" + cfg[0].replace(".", "_") + "_FEMB%d"%cfg[1] + "_%d_%02d"%(cfg[3], cfg[12]) + \
+                                 "FE_%d%d%d%d%d%d%d%d%02d"%(cfg[13], cfg[14], cfg[15], cfg[16], cfg[17], cfg[18], cfg[27], cfg[28], cfg[29]) + "_Time" + runtime + ".bin"
+                            with open(fn, "wb") as fp:
+                                pickle.dump(tmp, fp)
+                        break
+            else:
+                runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
+                fn = self.savedir + "/" + "WIB_" + wib_ip.replace(".","_") + "FEMB_" + str(femb_addr) + "_Time" + runtime + ".bin"
+                with open(fn, "wb") as fp:
+                    pickle.dump(raw_asic, fp)
+                tmp = None
+                wib_regs = []
+                if femb_addr == 0:
+                    for addr in range(0, 0x2A+1,1):
+                        val = self.UDP.read_reg_wib(addr)
+                        wib_regs.append((addr,val))
+                    for addr in range(0xFF, 0x102+1,1):
+                        val = self.UDP.read_reg_wib(addr)
+                        wib_regs.append((addr,val))
+                    wibfn = fn[0:-4] + ".wib"
+                    with open(wibfn, "wb") as fp:
+                        pickle.dump(wib_regs, fp)
+                femb_regs = []
+                if True:
+                    for addr in range(0, 0x2B+1,1):
+                        val = self.UDP.read_reg_wib(addr)
+                        femb_regs.append((addr,val))
+                    for addr in range(0x100, 0x104+1,1):
+                        val = self.UDP.read_reg_wib(addr)
+                        femb_regs.append((addr,val))
+                    for addr in range(0x200, 0x298+1,1):
+                        val = self.UDP.read_reg_wib(addr)
+                        femb_regs.append((addr,val))
+                    for addr in range(0x300, 0x3FF+1,1):
+                        val = self.UDP.read_reg_wib(addr)
+                        femb_regs.append((addr,val))
+                    fembfn = fn[0:-4] + ".femb"
+                    with open(fembfn, "wb") as fp:
+                        pickle.dump(femb_regs, fp)
         else:
+            pass
             tmp = None
+
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
+        #self.UDP.write_reg_wib(0x1E, 3) #enable MP mode
+        #self.UDP.write_reg_wib(0x1E, 3) #enable MP mode
+        #self.UDP.write_reg_wib(0x1E, 3) #enable MP mode
+ 
         return tmp
 
-    def FEMB_Flash_id_wr(self, wib_ip, femb_addr, id_oft = 20000, id_value = 0xFFFFFFFF):
-        if (id_oft < 20000 ) or (id_oft > 20048):
-            print "Invalid Flash ID programming"
-            pass
-        else:
-            id_oft_v = id_oft
-            self.UDP.UDP_IP = wib_ip
-            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Enable HS data from the WIB to PC through UDP
-            if self.act_fembs[wib_ip][femb_addr] == True:
-                #print ("WIB%s FEMB%d"%(wib_ip, femb_addr))
-                #read flash
-                self.UDP.write_reg_femb_checked (femb_addr, 13, 1)
-                for i in range(0x10)
-                    self.UDP.write_reg_femb_checked (femb_addr, 11, id_oft_v*256)
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 3)
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x103)
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x0)
-                    time.sleep(0.01)
-                    id_flg = False 
-                    for i in range(64):
-                        if self.UDP.read_reg_femb (femb_addr, 0x240+i) != 0xFFFFFFFF :
-                            id_oft_v +=1
-                            id_flg = True
-                            break
-                    if (not id_flg):
-                        break
-
-                #writ flash
-                #step1
-                self.UDP.write_reg_femb_checked (femb_addr, 9, 1)
-                self.UDP.write_reg_femb_checked (femb_addr, 13, 1) #enable flash programmer
-                #step2
-                self.UDP.write_reg_femb_checked (femb_addr, 0x200+i, id_value) 
-                for i in range(63):
-                    self.UDP.write_reg_femb_checked (femb_addr, 0x201+i, 0xFFFFFFFF) 
-                #step3
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 6) #write enable (use before write@bulk erase) 
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x106) #start FPGA FLASH operation
-                time.sleep(0.001)
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 0) 
-                #step4
-                self.UDP.write_reg_femb_checked (femb_addr, 11, id_oft_v*256) #write enable (use before write@bulk erase) 
-                #step5
-                while (True):
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 2) #write
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 102) 
-                    time.sleep(0.001)
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 5) #read status
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 105) 
-                    time.sleep(0.001)
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 5) 
-                    f_sts = self.UDP.read_reg_femb(femb_addr, 12) 
-                    self.UDP.write_reg_femb_checked (femb_addr, 10, 2) 
-                    if (f_sts != 3)
-                        break
-
-                #step6 #read back
-                self.UDP.write_reg_femb_checked (femb_addr, 11, id_oft_v*256)
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 3)
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x103)
-                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x0)
-                time.sleep(0.01)
-                rd_v = []
-                for i in range(64):
-                    rd_v.append(self.UDP.read_reg_femb (femb_addr, 0x240+i))
-
-
-            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
-
-            return [id_flg, id_adr, id_value]
+#    def FEMB_Flash_id_wr(self, wib_ip, femb_addr, id_oft = 20000, id_value = 0xFFFFFFFF):
+#        if (id_oft < 20000 ) or (id_oft > 20048):
+#            print "Invalid Flash ID programming"
+#            pass
+#        else:
+#            id_oft_v = id_oft
+#            self.UDP.UDP_IP = wib_ip
+#            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Enable HS data from the WIB to PC through UDP
+#            if self.act_fembs[wib_ip][femb_addr] == True:
+#                #print ("WIB%s FEMB%d"%(wib_ip, femb_addr))
+#                #read flash
+#                self.UDP.write_reg_femb_checked (femb_addr, 13, 1)
+#                for i in range(0x10)
+#                    self.UDP.write_reg_femb_checked (femb_addr, 11, id_oft_v*256)
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 3)
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x103)
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 0x0)
+#                    time.sleep(0.01)
+#                    id_flg = False 
+#                    for i in range(64):
+#                        if self.UDP.read_reg_femb (femb_addr, 0x240+i) != 0xFFFFFFFF :
+#                            id_oft_v +=1
+#                            id_flg = True
+#                            break
+#                    if (not id_flg):
+#                        break
+#
+#                #writ flash
+#                #step1
+#                self.UDP.write_reg_femb_checked (femb_addr, 9, 1)
+#                self.UDP.write_reg_femb_checked (femb_addr, 13, 1) #enable flash programmer
+#                #step2
+#                self.UDP.write_reg_femb_checked (femb_addr, 0x200+i, id_value) 
+#                for i in range(63):
+#                    self.UDP.write_reg_femb_checked (femb_addr, 0x201+i, 0xFFFFFFFF) 
+#                #step3
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 6) #write enable (use before write@bulk erase) 
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x106) #start FPGA FLASH operation
+#                time.sleep(0.001)
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 0) 
+#                #step4
+#                self.UDP.write_reg_femb_checked (femb_addr, 11, id_oft_v*256) #write enable (use before write@bulk erase) 
+#                #step5
+#                while (True):
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 2) #write
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 102) 
+#                    time.sleep(0.001)
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 5) #read status
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 105) 
+#                    time.sleep(0.001)
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 5) 
+#                    f_sts = self.UDP.read_reg_femb(femb_addr, 12) 
+#                    self.UDP.write_reg_femb_checked (femb_addr, 10, 2) 
+#                    if (f_sts != 3)
+#                        break
+#
+#                #step6 #read back
+#                self.UDP.write_reg_femb_checked (femb_addr, 11, id_oft_v*256)
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 3)
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x103)
+#                self.UDP.write_reg_femb_checked (femb_addr, 10, 0x0)
+#                time.sleep(0.01)
+#                rd_v = []
+#                for i in range(64):
+#                    rd_v.append(self.UDP.read_reg_femb (femb_addr, 0x240+i))
+#
+#
+#            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
+#
+#            return [id_flg, id_adr, id_value]
 
 
 #    def FEMB_Flash_id_wr(self, wib_ip, femb_addr, id_type = 3, id_value = 0xFFFFFFFF):
