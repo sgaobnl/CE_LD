@@ -365,7 +365,7 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
 
 
 #rawdir = """D:/OneDrive - Brookhaven National Laboratory/LArTPC/Test_Summary/SBND/SBND_Fermilab_Flange_Installation/SBND_Installation_Data/SBND/1129/RMS2/LD2/"""
-rawdir = """/scratch_local/SBND_Installation/data/commissioning/2024_02_04/LD_2024_02_04_11_49_19/"""
+rawdir = """/scratch_local/SBND_Installation/data/commissioning/02_09_2024/final_chilly_checkout/LD_2024_02_09_18_07_18/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
     with open(fr, 'rb') as f:
