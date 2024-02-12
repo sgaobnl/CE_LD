@@ -28,13 +28,14 @@ from timeit import default_timer as timer
 #from femb_udp_cmdline import FEMB_UDP
 from cls_udp import CLS_UDP
 wib= CLS_UDP()
+wib.MultiPort = True
 #for lastip in ["11", "12"]:
 for lastip in ["1"]:
     if lastip == "1":
         wibno = 0
     else:
         wibno = 1
-    wib.UDP_IP = "192.168.121.1" #please change the IP address
+    wib.UDP_IP = "10.226.34.41" #please change the IP address
     runtime =  datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
     print ( "BNL_check_time >> " + runtime )
     print ( "WIB fake data mode. Power for FEMBs will be turned off!!!" )
