@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Jan 31 21:28:24 2024
+Last modified: Mon Feb 12 16:16:14 2024
 """
 
 #defaut setting for scientific caculation
@@ -70,6 +70,13 @@ class CLS_CONFIG:
     def WIBs_SCAN(self ):
         print ("Finding available WIBs starts...")
         active_wibs = []
+        for wib_ip in self.WIB_IPs:
+            if self.UDP.MultiPort :
+                self.UDP.write_reg_wib(0x1E, 3)
+            else:
+                self.UDP.write_reg_wib(0x1E, 0)
+        time.sleep(1)
+
         for wib_ip in self.WIB_IPs:
             self.UDP.UDP_IP = wib_ip
             for i in range(5):
@@ -679,6 +686,14 @@ class CLS_CONFIG:
         self.UDP.write_reg_wib_checked ( 7, wib_asic)
 
     def TPC_UDPACQ(self, cfglog):
+        for wib_ip in list(self.act_fembs.keys()):
+            self.UDP.UDP_IP = wib_ip
+            if self.UDP.MultiPort :
+                self.UDP.write_reg_wib(0x1E, 3)
+            else:
+                self.UDP.write_reg_wib(0x1E, 0)
+        time.sleep(1)
+
         tpc_data = []
         for wib_ip in list(self.act_fembs.keys()):
             tpc_data += self.WIB_UDPACQ( wib_ip, cfglog)
