@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sat Feb 10 00:18:38 2024
+Last modified: Sat Feb 10 00:11:30 2024
 """
 
 #defaut setting for scientific caculation
@@ -410,6 +410,7 @@ for d1n in d1ns:
                     rms_f = False
                     result = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
                     DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8])
+                exit()
         break
 
 
