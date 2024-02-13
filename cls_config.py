@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Mon Feb 12 16:16:14 2024
+Last modified: 2/13/2024 11:02:22 AM
 """
 
 #defaut setting for scientific caculation
@@ -506,8 +506,8 @@ class CLS_CONFIG:
                 INTR = (ver_value & 0x40000)>>18
                 if (lol == 1):
                     print ("PLL of WIB(%s) is locked"%wib_ip)
-                    #self.UDP.write_reg_wib_checked (4, 0x03)
-                    self.UDP.write_reg_wib_checked (4, 0x01)
+                    self.UDP.write_reg_wib_checked (4, 0x03)
+                    #self.UDP.write_reg_wib_checked (4, 0x01)
                     break
                 if (i ==9):
                     print ("Fail to configurate PLL of WIB(%s), please check if MBB is on or 16MHz from dAQ"%wib_ip)
