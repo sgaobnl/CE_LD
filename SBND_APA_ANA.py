@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Feb  9 21:56:16 2024
+Last modified: Wed Feb 14 12:46:18 2024
 """
 
 #defaut setting for scientific caculation
@@ -92,7 +92,7 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
         ped_thr= 30 
 
     result = (True, "pass-", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_waves,chn_avg_waves])
-#    FEMB_PLOT(result, fn=fs.replace(".bin", ".png"))
+    FEMB_PLOT(result, fn=fs.replace(".bin", ".png"))
     return result
 
 
@@ -386,6 +386,7 @@ rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_00_13_
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_36/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_13_19_34_00/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
     with open(fr, 'rb') as f:
