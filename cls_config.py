@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 2/13/2024 11:02:22 AM
+Last modified: Thu Feb 15 12:04:59 2024
 """
 
 #defaut setting for scientific caculation
@@ -777,16 +777,16 @@ class CLS_CONFIG:
                 femb_regs = []
                 if True:
                     for addr in range(0, 0x2B+1,1):
-                        val = self.UDP.read_reg_wib(addr)
+                        val = self.UDP.read_reg_femb(addr)
                         femb_regs.append((addr,val))
                     for addr in range(0x100, 0x104+1,1):
-                        val = self.UDP.read_reg_wib(addr)
+                        val = self.UDP.read_reg_femb(addr)
                         femb_regs.append((addr,val))
                     for addr in range(0x200, 0x298+1,1):
-                        val = self.UDP.read_reg_wib(addr)
+                        val = self.UDP.read_reg_femb(addr)
                         femb_regs.append((addr,val))
                     for addr in range(0x300, 0x3FF+1,1):
-                        val = self.UDP.read_reg_wib(addr)
+                        val = self.UDP.read_reg_femb(addr)
                         femb_regs.append((addr,val))
                     fembfn = fn[0:-4] + ".femb"
                     with open(fembfn, "wb") as fp:

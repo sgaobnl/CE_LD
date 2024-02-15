@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Feb 14 12:46:18 2024
+Last modified: Thu Feb 15 12:09:31 2024
 """
 
 #defaut setting for scientific caculation
@@ -44,7 +44,7 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
         chn_data, feed_loc, chn_peakp, chn_peakn = RAW_C.raw_conv_peak(adata)
         for achn in range(len(chn_data)):
             achn_ped = []
-            if (rms_f):
+            if (rms_f) or (len(feed_loc)==0):
                 achn_ped += chn_data[achn] 
             else:
                 for af in range(len(feed_loc[0:-2])):
@@ -66,21 +66,27 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
 
             arms = np.std(achn_ped_sub2)
             aped = int(np.mean(achn_ped))
-            apeakp = int(np.mean(chn_peakp[achn]))
-            apeakn = int(np.mean(chn_peakn[achn]))
+            if chn_peakp == None:
+                apeakp = int(np.max(achn_ped))
+                apeakn = int(np.min(achn_ped))
+            else:
+                apeakp = int(np.mean(chn_peakp[achn]))
+                apeakn = int(np.mean(chn_peakn[achn]))
             chn_rmss.append(arms)
             chn_peds.append(aped)
             chn_pkps.append(apeakp)
             chn_pkns.append(apeakn)
             #chn_waves.append( chn_data[achn][feed_loc[0]: feed_loc[1]] )
             chn_waves.append( chn_data[achn] )
-            avg_cnt = len(feed_loc)-2
-
-            avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[0] + 100]) 
-            for i in range(1, avg_cnt,1):
-                #avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
-                avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i]+100]) 
-            avg_wave = avg_wave/avg_cnt
+            if len(feed_loc) >2:
+                avg_cnt = len(feed_loc)-2
+                avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[0] + 100]) 
+                for i in range(1, avg_cnt,1):
+                    #avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
+                    avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i]+100]) 
+                avg_wave = avg_wave/avg_cnt
+            else:
+                avg_wave = np.array(chn_data[achn][0:  100]) 
             chn_avg_waves.append(avg_wave)
     ana_err_code = ""
     rms_mean = np.mean(chn_rmss)
@@ -386,7 +392,8 @@ rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_00_13_
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_36/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_13_19_34_00/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_09_13_41/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
     with open(fr, 'rb') as f:

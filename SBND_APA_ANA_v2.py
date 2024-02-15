@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sat Feb 10 00:11:30 2024
+Last modified: Fri Feb  9 23:55:19 2024
 """
 
 #defaut setting for scientific caculation
@@ -46,7 +46,7 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
         chn_data, feed_loc, chn_peakp, chn_peakn = RAW_C.raw_conv_peak(adata)
         for achn in range(len(chn_data)):
             achn_ped = []
-            if (rms_f):
+            if (rms_f) or (len(feed_loc) == 0):
                 achn_ped += chn_data[achn] 
             else:
                 for af in range(len(feed_loc[0:-2])):
@@ -69,8 +69,12 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
             arms = np.std(achn_ped)
             arms_2 = np.std(achn_ped_sub2)
             aped = int(np.mean(achn_ped))
-            apeakp = int(np.mean(chn_peakp[achn]))
-            apeakn = int(np.mean(chn_peakn[achn]))
+            if chn_peakp != None:
+                apeakp = int(np.mean(chn_peakp[achn]))
+                apeakn = int(np.mean(chn_peakn[achn]))
+            else:
+                apeakp = np.max(achn_ped)
+                apeakn = np.min(achn_ped)
             chn_rmss.append(arms)
             chn_rmss_filtered.append(arms_2)
             chn_peds.append(aped)
@@ -183,6 +187,8 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
         fembno  = df[2]
         with open (df[3], "rb") as fs:
             raw = pickle.load(fs)
+        if len(raw) != 8:
+            return None
         results = FEMB_CHK(raw, rms_f=False, fs=df[3])
         chn_rmss = results[2][0]
         chn_peds = results[2][1]
@@ -403,14 +409,17 @@ for d1n in d1ns:
                 print (anadir)
                 rn = result_dir + "/" + d2n + ".ld"
                 if (os.path.isfile(rn)):
+                    continue
                     with open(rn, 'rb') as f:
                         result = pickle.load(f)
                     DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8])
                 else:
                     rms_f = False
                     result = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
-                    DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8])
-                exit()
+                    if result == None:
+                        continue
+                    else:
+                        DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8])
         break
 
 
