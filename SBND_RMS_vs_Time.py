@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Mon Feb 12 15:19:26 2024
+Last modified: Tue Feb 20 16:24:52 2024
 """
 
 #defaut setting for scientific caculation
@@ -23,6 +23,7 @@ import time
 import pickle
 from shutil import copyfile
 import operator
+import pandas as pd
 
 def d_dec_plt(dec_chn, n=1):
     euvals = []
@@ -104,7 +105,8 @@ def RMS_TS_ANA(rmsts, result_dir):
     wyss = []
 
     for x in rmsts:
-        ts.append(x[0])
+        tstr = datetime.datetime.fromtimestamp(x[0]).strftime("%Y-%m-%d %H:%M:%S")
+        ts.append(tstr)
         eums.append(x[1][0][0])
         euss.append(x[1][0][1])
         wums.append(x[1][1][0])
@@ -118,13 +120,13 @@ def RMS_TS_ANA(rmsts, result_dir):
         wyms.append(x[1][5][0])
         wyss.append(x[1][5][1])
     #t0 = int(ts[0]//(3600*24))*3600*24
-    t0 = int(ts[0])
-    t0str = datetime.datetime.fromtimestamp(t0).strftime("%Y-%m-%d %H:%M:%S")
-    t0str = t0str[0:11] + "00:00:00"
+    #t0 = int(ts[0])
+    #t0str = datetime.datetime.fromtimestamp(t0).strftime("%Y-%m-%d %H:%M:%S")
+    #t0str = t0str[0:11] + "00:00:00"
 
-    datex = datetime.datetime.strptime(t0str, "%Y-%m-%d %H:%M:%S")
-    t0 = datex.timestamp()
-    ts = (np.array(ts)-t0)/3600.0
+    #datex = datetime.datetime.strptime(t0str, "%Y-%m-%d %H:%M:%S")
+    #t0 = datex.timestamp()
+    #ts = (np.array(ts)-t0)/3600.0
 
     import matplotlib.pyplot as plt
     fig = plt.figure(figsize=(12,9))
@@ -132,6 +134,7 @@ def RMS_TS_ANA(rmsts, result_dir):
     ax1 = plt.subplot(311)
     ax2 = plt.subplot(312)
     ax3 = plt.subplot(313)
+    ts = pd.to_datetime(ts)
 
     ax1.errorbar(ts, eums, euss, marker='o', color='C1', label="EAST APA U")
     ax1.errorbar(ts, wums, wuss, marker='o', color='C4', label="WEST APA U")
@@ -139,26 +142,33 @@ def RMS_TS_ANA(rmsts, result_dir):
     ax2.errorbar(ts, wvms, wvss, marker='s', color='C5', label="WEST APA V")
     ax3.errorbar(ts, eyms, eyss, marker='x', color='C3', label="EAST APA Y")
     ax3.errorbar(ts, wyms, wyss, marker='x', color='C6', label="WEST APA Y")
-    for x in range(0, int(np.max(ts))+24, 24):
-        ax1.vlines(x, 0, 5, linestyles='dashed',color='k')
-        ax2.vlines(x, 0, 5, linestyles='dashed',color='k')
-        ax3.vlines(x, 0, 5, linestyles='dashed',color='k')
+    #for x in range(0, int(np.max(ts))+24, 24):
+    #    ax1.vlines(x, 0, 5, linestyles='dashed',color='k')
+    #    ax2.vlines(x, 0, 5, linestyles='dashed',color='k')
+    #    ax3.vlines(x, 0, 5, linestyles='dashed',color='k')
     ax1.set_ylim((0,5))
     ax2.set_ylim((0,5))
     ax3.set_ylim((0,5))
     ax1.set_ylabel ("RMS noise / bit")
     ax2.set_ylabel ("RMS noise / bit")
     ax3.set_ylabel ("RMS noise / bit")
-    ax3.set_xlabel ("Time / hour")
-    ax1.text(0,4.5,t0str)
-    ax2.text(0,4.5,t0str)
-    ax3.text(0,4.5,t0str)
-    ax1.grid(axis='y')
-    ax2.grid(axis='y')
-    ax3.grid(axis='y')
+    #ax3.set_xlabel ("Time / hour")
+    #ax1.text(0,4.5,t0str)
+    #ax2.text(0,4.5,t0str)
+    #ax3.text(0,4.5,t0str)
+    #ax1.grid(axis='y')
+    #ax2.grid(axis='y')
+    #ax3.grid(axis='y')
+    ax1.grid()
+    ax2.grid()
+    ax3.grid()
+
     ax1.legend()
     ax2.legend()
     ax3.legend()
+    plt.gcf().autofmt_xdate()
+    plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
+    #plt.show()
     plt.savefig(result_dir + "RMS_vs_Time.png")
     plt.close()
 
