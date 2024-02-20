@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Thu Feb 15 12:22:00 2024
+Last modified: Tue Feb 20 13:17:17 2024
 """
 
 #defaut setting for scientific caculation
@@ -71,6 +71,7 @@ class CLS_CONFIG:
         print ("Finding available WIBs starts...")
         active_wibs = []
         for wib_ip in self.WIB_IPs:
+            self.UDP.UDP_IP = wib_ip
             if self.UDP.MultiPort :
                 self.UDP.write_reg_wib(0x1E, 3)
             else:
