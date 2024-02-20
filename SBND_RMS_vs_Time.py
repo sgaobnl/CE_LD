@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue Feb 20 16:24:52 2024
+Last modified: Tue Feb 20 16:56:05 2024
 """
 
 #defaut setting for scientific caculation
@@ -173,9 +173,9 @@ def RMS_TS_ANA(rmsts, result_dir):
     plt.close()
 
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_result/"""
-rawdir = """/scratch_local/SBND_Installation/data/commissioning/"""
+rawdir = """/scratch_local/SBND_Installation/data/commissioning/LD_result/"""
 
-result_dir = rawdir + "LD_result/"
+result_dir = rawdir 
 
 rmsts = []
 for root, dirs, files in os.walk(rawdir):
