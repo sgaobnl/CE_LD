@@ -1,0 +1,12 @@
+#Test Mode,Gain,Tp,Baseline,Pulser,,,
+#0,14mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x08,,,
+#1,14mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08,,,
+#2,7.8mV/fC, 2.0us, 900mV, FPGA_DAC enable = 0x08,,,
+#3,7.8mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08,,,
+#4,14mV/fC, 2.0us, 200mV, ASIC_DAC enable = 0x08,,,
+#5,14mV/fC, 2.0us, 200mV, RMS ,,,
+#6,14mV/fC, 2.0us, 900mV, RMS ,,,
+#7,7.8mV/fC, 2.0us, 200mV, RMS ,,,
+#8,14mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08,,,
+#9,7.8mV/fC, 2.0us, 200mV, FPGA_DAC enable = 0x08,,,
+#Result,ENV,FEMB_ID,Retun Test,Date,Error_Code,Note, Test Mode

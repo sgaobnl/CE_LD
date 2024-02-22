@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 7/15/2016 11:47:39 AM
-Last modified: 4/8/2019 6:44:50 PM
+Last modified: 2/22/2024 11:16:21 AM
 """
 
 #defaut setting for scientific caculation
@@ -22,6 +22,8 @@ class RAW_CONV():
     def raw_conv_feedloc(self, raw_data):
         smps = int(len(raw_data) //2)
         dataNtuple =struct.unpack_from(">%dH"%(smps),raw_data)
+        print (self.jumbo_flag)
+        exit()
         if (self.jumbo_flag == True):
             pkg_len = int(0x1E06/2)
         else:

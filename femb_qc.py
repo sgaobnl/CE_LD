@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/7/2019 2:23:28 PM
+Last modified: 2/22/2024 11:30:37 AM
 """
 
 #defaut setting for scientific caculation
@@ -47,8 +47,9 @@ class FEMB_QC:
         self.databkdir = self.userdir + "/BAK/"
         self.f_qcindex = self.databkdir + "FEMB_CHKOUT_index.csv"
         self.CLS.WIB_IPs = self.WIB_IPs
-        self.CLS.FEMB_ver = 0x501
+        self.CLS.FEMB_ver = 0x407
         self.CLS.jumbo_flag = self.jumbo_flag 
+        self.CLS.UDP.jumbo_flag = self.jumbo_flag 
         self.RAW_C.jumbo_flag = self.jumbo_flag 
 
         if (os.path.exists(self.userdir)):
@@ -426,14 +427,26 @@ class FEMB_QC:
     def FEMB_CHKOUT_Input(self):
         FEMB_infos = []
         env = self.env
-        for i in range(4):
-            while (True):
-                print ("Please enter ID of FEMB(AM) in WIB slot%d (input \"OFF\" if no FEMB): "%i)
-                FEMB_id = input("(e.g. TAC01) >>")
-                cf = input("WIB slot%d with FEMB ID is \"#%s\", Y or N? "%(i, FEMB_id) )
-                if (cf == "Y"):
+        while True:
+            try :
+                fembslotno = int(input("FEMB on WIB Slot# (1-4) :"))
+                if (1<= fembslotno) and (fembslotno <=4):
+                    self.CLS.femb_sws[fembslotno-1] = 1
                     break
-            c_ret = ""
+            except OSError:
+                print ("Please input a number between 1 to 4 according to which WIB slot is attached with a FEMB")
+
+        for i in range(4):
+            if self.CLS.femb_sws[i] == 1:
+                while (True):
+                    print ("Please enter ID of FEMB(AM) in WIB slot%d (input \"OFF\" if no FEMB): "%i)
+                    FEMB_id = input("(e.g. TAC01) >>")
+                    cf = input("WIB slot%d with FEMB ID is \"#%s\", Y or N? "%(i, FEMB_id) )
+                    if (cf == "Y"):
+                        break
+            else:
+                FEMB_id = "OFF"
+            c_ret = "-"
             rerun_f = "N"
             FEMB_infos.append("SLOT%d"%i + "\n" + FEMB_id + "\n" + env + "\n" + rerun_f + "\n" + c_ret )
         return FEMB_infos

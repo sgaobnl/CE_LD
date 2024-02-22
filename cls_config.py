@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 2/22/2024 10:54:08 AM
+Last modified: 2/22/2024 11:15:46 AM
 """
 
 #defaut setting for scientific caculation
@@ -127,17 +127,21 @@ class CLS_CONFIG:
         time.sleep(self.pwr_dly)
 
     def FEMB_DECTECT(self, wib_ip):
+        fembs_found = [True, True, True, True]
+        if True: #Do not do FEMB Detection operation
+            for i in range(4):
+                if self.femb_sws[i] != 0:
+                    fembs_found[i] = True
+
+                else:
+                    fembs_found[i] = False
+            self.act_fembs[wib_ip] = fembs_found
+            return None
         self.UDP.UDP_IP = wib_ip
         self.WIB_PWR_FEMB(wib_ip, femb_sws=self.femb_sws)
-        stats = self.WIB_STATUS(wib_ip)
         keys = list(stats.keys())
-        fembs_found = [True, True, True, True]
-        for i in range(4):
-            if self.femb_sws[i] != 0:
-                fembs_found[i] = True
-            else:
-                fembs_found[i] = False
         
+        stats = self.WIB_STATUS(wib_ip)
         self.err_code += "#TIME" + stats["TIME"]
         for i in range(4):
             if fembs_found[i] == False:
@@ -222,7 +226,6 @@ class CLS_CONFIG:
                     fembs_found[i] = False
                     self.err_code +="-F4_I2C"
         self.act_fembs[wib_ip] = fembs_found
-        print (self.act_fembs)
         self.WIB_PWR_FEMB(wib_ip, femb_sws=[0,0,0,0])
         return self.err_code
 
