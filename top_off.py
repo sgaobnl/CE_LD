@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/28/2023 4:53:22 PM
+Last modified: 2/22/2024 11:49:06 AM
 """
 
 #defaut setting for scientific caculation
@@ -30,64 +30,45 @@ from shutil import copyfile
 from femb_qc import FEMB_QC
 from setdatadir import savedir
 
-cratenos = []
-while True:
-    for ci in [1,2,3,4]:
-        onstr =  input("Choose crate#%d OFF ? (Y/N): "%(ci))
-        if "Y" in onstr or "y" in onstr:
-            cratenos.append(ci)
-    print (" FEMBs on crate  ", cratenos, "will be turned off") 
-    ynstr = input ("Confirm? (Y/N)")
-    if "Y" in onstr or "y" in ynstr:
-        break
-    
 
-for crateno in cratenos:
-    PTBslotno = 1
-    while (PTBslotno < 7) and (PTBslotno > 0):
-        a = FEMB_QC()
-        #a.userdir = "/home/nfs/sgao/SBND_Installation/data/1129/OFF/"  
-        a.userdir = savedir + "/OFF/"
-        #a.databkdir = "/home/nfs/sgao/SBND_Installation/data/1129/OFF/"
-        a.databkdir = a.userdir 
-        a.user_f = a.userdir + "tmp.csv"
-        a.f_qcindex = a.databkdir + "tmp.csv"
-        if (os.path.exists(a.userdir )):
-            pass
-        else:
-            try:
-                os.makedirs(a.userdir )
-            except OSError:
-                print ("Error to create folder %s"%a.userdir )
-                sys.exit()
-        if (os.path.exists(a.databkdir )):
-            pass
-        else:
-            try:
-                os.makedirs(a.databkdir )
-            except OSError:
-                print ("Error to create folder %s"%a.databkdir )
-                sys.exit()
-      
-        a.env = "RT"
-        a.CLS.WIB_ver = 0x125
-        FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
-    
-        a.WIB_IPs = ["10.226.34." + str( crateno*10 + PTBslotno) ]
-        a.CLS.UDP.MultiPort = True
-        print (a.WIB_IPs)
-        a.CLS.WIB_IPs = a.WIB_IPs
+a = FEMB_QC()
+crateno = 1
+PTBslotno = 1
+for i in range(4):
+    a.CLS.femb_sws[i] = 0
 
-        a.CLS.pwr_femb_ignore = False
-        if True:
-            a.CLS.WIBs_SCAN()
- #           a.CLS.FEMBs_SCAN()
-            a.CLS.FEMBs_CE_OFF_DIR(wib_ip=a.WIB_IPs[0])
-        PTBslotno = PTBslotno +1 #int(input("PTB slot no(1-6): "))
-    #crateno = int(input("Crate no(1-6): "))
-    #crateno = crateno + 1
-#    if (crateno < 5) and (crateno > 0):
-#        PTBslotno = int(input("PTB slot no(1-6): "))
+a.userdir = savedir + "/ON/"
+a.databkdir = a.userdir 
+a.user_f = a.userdir + "tmp.csv"
+a.f_qcindex = a.databkdir + "tmp.csv"
+if (os.path.exists(a.userdir )):
+    pass
+else:
+    try:
+        os.makedirs(a.userdir )
+    except OSError:
+        print ("Error to create folder %s"%a.userdir )
+        sys.exit()
+if (os.path.exists(a.databkdir )):
+    pass
+else:
+    try:
+        os.makedirs(a.databkdir )
+    except OSError:
+        print ("Error to create folder %s"%a.databkdir )
+        sys.exit()
+
+a.env = "RT"
+a.CLS.WIB_ver = 0x120
+FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
+
+a.WIB_IPs = ["192.168.121.1" ]
+a.CLS.UDP.MultiPort = False
+a.CLS.WIB_IPs = a.WIB_IPs
+a.CLS.WIBs_SCAN()
+for wib_ip in a.WIB_IPs:
+    a.CLS.FEMBs_CE_OFF_DIR(wib_ip )
+
 print ("Well Done")
 
 

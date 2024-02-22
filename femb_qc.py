@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/28/2023 4:54:27 PM
+Last modified: 2/22/2024 12:25:46 PM
 """
 
 #defaut setting for scientific caculation
@@ -41,7 +41,7 @@ class FEMB_QC:
         self.pwr_n = 1
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
-        self.CLS.FEMB_ver = 0x501
+        self.CLS.FEMB_ver = 0x407
         self.CLS.jumbo_flag = self.jumbo_flag 
         self.RAW_C = RAW_CONV()
         self.RAW_C.jumbo_flag = self.jumbo_flag 
@@ -95,10 +95,10 @@ class FEMB_QC:
         return FEMB_infos
 
     def FEMB_CHK_ACQ(self, testcode = 0):
-        if testcode == 5 or testcode == 6 :
-            self.CLS.val = 200 
-        else:
-            self.CLS.val = 100 
+        #if testcode == 5 or testcode == 6 :
+        #    self.CLS.val = 400 
+        #else:
+        #    self.CLS.val = 600 
         self.CLS.sts_num = 1
         self.CLS.f_save = False
         self.CLS.FM_only_f = False
@@ -415,6 +415,8 @@ class FEMB_QC:
             for a_femb_data in self.raw_data:
                 qc_list = a_femb_data[0]
                 qc_pf = qc_list[0]
+                if "PASS" not in qc_pf:
+                    continue
                 env = qc_list[1]
                 femb_id = qc_list[2]
                 femb_rerun_f = qc_list[3]
@@ -516,12 +518,14 @@ class FEMB_QC:
                         fig.text(0.55, 0.75, "Power 0.1s Interruption Enabled", color ='r' )
 
                     fig.text(0.10, 0.73, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_V"%femb_addr]) + \
-                                         "V, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_V"%femb_addr]) + \
-                                         "V, AM V28 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_V"%femb_addr]) + "V")
+                                         "V, AM V33 = " + "{0:.4f}V".format(d_sts["FEMB%d_AMV33_V"%femb_addr]) )
+                                         #"V, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_V"%femb_addr]) + \
+                                         #"V, AM V28 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_V"%femb_addr]) + "V")
 
                     fig.text(0.10, 0.71, "BIAS = " + "{0:.4f}".format(d_sts["FEMB%d_BIAS_I"%femb_addr]) + \
-                                         "A, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_I"%femb_addr]) + \
-                                         "A, AM V28 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_I"%femb_addr]) + "A")
+                                         "A, AM V33 = " + "{0:.4f}A".format(d_sts["FEMB%d_AMV33_I"%femb_addr]) )
+                                         #"A, AM V33 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV33_I"%femb_addr]) + \
+                                         #"A, AM V28 = " + "{0:.4f}".format(d_sts["FEMB%d_AMV28_I"%femb_addr]) + "A")
 
                     fig.text(0.10, 0.69, "FM V39 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV39_V"%femb_addr]) + \
                                          "V, FM V30 = " + "{0:.4f}".format(d_sts["FEMB%d_FMV30_V"%femb_addr]) + \

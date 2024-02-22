@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue Feb 20 13:17:17 2024
+Last modified: 2/22/2024 12:47:59 PM
 """
 
 #defaut setting for scientific caculation
@@ -31,12 +31,13 @@ class CLS_CONFIG:
         self.jumbo_flag = False 
         self.ldflg = False # True --> configuration done by DAQ, only taking data
         self.pwr_femb_ignore = False
-        self.FEMB_ver = 0x501
-        self.WIB_ver = 0x124
+        self.FEMB_ver = 0x407
+        self.WIB_ver = 0x120
         self.WIB_IPs = ["192.168.121.1", "192.168.121.2", "192.168.121.3", \
                         "192.168.121.4", "192.168.121.5", "192.168.121.6",] #WIB IPs connected to host-PC
         self.MBB_IP  = "192.168.121.11"
         self.act_fembs = {}
+        self.femb_sws = [0,0,0,0]
         self.UDP = CLS_UDP()
         self.UDP.MultiPort = True #enable MP mode
         self.UDP.jumbo_flag = self.jumbo_flag
@@ -154,6 +155,16 @@ class CLS_CONFIG:
         self.err_code += "#TIME" + stats["TIME"]
         for i in range(4):
              self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
+        fembs_found = [True, True, True, True]
+        if True: #Do not do FEMB Detection operation
+            for i in range(4):
+                if self.femb_sws[i] != 0:
+                    fembs_found[i] = True
+
+                else:
+                    fembs_found[i] = False
+            self.act_fembs[wib_ip] = fembs_found
+            return self.err_code
  
         if False:
             self.WIB_PWR_FEMB(wib_ip, femb_sws=[1,1,1,1])
@@ -235,7 +246,7 @@ class CLS_CONFIG:
                     self.UDP.read_reg_femb(i, 0x102)
                     ver_value = self.UDP.read_reg_femb(i, 0x101)
                     if (ver_value > 0 ):
-                        if (ver_value&0xFFFF != self.FEMB_ver):
+                        if (ver_value&0xFFF != self.FEMB_ver):
                             print ("FEMB%d FE version is %x, which is different from default (%x)!"%(i, ver_value, self.FEMB_ver))
                             fembs_found[i] = False
                             self.err_code +="-F7_FW"
@@ -371,7 +382,7 @@ class CLS_CONFIG:
             status_dict["FEMB%d_BIAS_I"%fembno ]  = ((vct[5]& 0x3FFF) * 19.075) * 0.000001 / 0.1
             status_dict["FEMB%d_AMV28_V"%fembno] = (((vc25&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
             status_dict["FEMB%d_AMV28_I"%fembno] = ((vc25& 0x3FFF) * 19.075) * 0.000001 / 0.01
-            status_dict["FEMB%d_AMV33_I"%fembno] -= status_dict["FEMB%d_AMV28_I"%fembno]
+            #status_dict["FEMB%d_AMV33_I"%fembno] -= status_dict["FEMB%d_AMV28_I"%fembno]
             status_dict["FEMB%d_PC"%fembno] =   status_dict["FEMB%d_FMV39_V"%fembno] * status_dict["FEMB%d_FMV39_I"%fembno] + \
                                                 status_dict["FEMB%d_FMV30_V"%fembno] * status_dict["FEMB%d_FMV30_I"%fembno] + \
                                                 status_dict["FEMB%d_FMV18_V"%fembno] * status_dict["FEMB%d_FMV18_I"%fembno] + \
@@ -755,6 +766,7 @@ class CLS_CONFIG:
                             runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
                             fn = self.savedir + "/" + "WIB" + cfg[0].replace(".", "_") + "_FEMB%d"%cfg[1] + "_%d_%02d"%(cfg[3], cfg[12]) + \
                                  "FE_%d%d%d%d%d%d%d%d%02d"%(cfg[13], cfg[14], cfg[15], cfg[16], cfg[17], cfg[18], cfg[27], cfg[28], cfg[29]) + "_Time" + runtime + ".bin"
+                            print (fn)
                             with open(fn, "wb") as fp:
                                 pickle.dump(tmp, fp)
                         break
