@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/7/2019 11:33:39 AM
+Last modified: 2/22/2024 10:54:08 AM
 """
 
 #defaut setting for scientific caculation
@@ -137,7 +137,6 @@ class CLS_CONFIG:
                 fembs_found[i] = True
             else:
                 fembs_found[i] = False
-        print (self.femb_sws, fembs_found)
         
         self.err_code += "#TIME" + stats["TIME"]
         for i in range(4):
@@ -145,7 +144,6 @@ class CLS_CONFIG:
                 continue
             self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
             for key in keys:
-                #print (key, stats[key] )
                 if key in "FEMB%d_LINK"%i:
                     if (stats[key] != 0xFF):
                         print ("FEMB%d LINK is broken!"%i)
