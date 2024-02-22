@@ -32,7 +32,7 @@ elif (PTBslotno>6 or PTBslotno<1):
 	sys.exit()
 wib_ip = "10.226.34."+str(crateno*10 + PTBslotno)
 cls = CLS_CONFIG() 
-cls.WIB_ver = 0x123
+cls.WIB_ver = 0x125
 stats = cls.WIB_STATUS(wib_ip)
 keys = list(stats.keys())
 
