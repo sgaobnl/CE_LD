@@ -687,9 +687,3 @@ class CLS_CONFIG:
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #disable HS data from this WIB to PC through UDP
         return tmp
 
-#    def FEMB_Flash_id_wr(self, wib_ip, femb_addr, id_type = 3, id_value = 0xFFFFFFFF):
-#            elif (id_type == 2):
-#                apa_loc_id_adr = 0x20020
-#
-#            self.UDP.UDP_IP = wib_ip
-#            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Enable HS data from the WIB to PC through UDP
