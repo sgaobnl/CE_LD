@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/3/2019 1:30:11 PM
+Last modified: 2/22/2024 10:37:48 AM
 """
 
 #defaut setting for scientific caculation
@@ -32,16 +32,16 @@ from shutil import copyfile
 class FEMB_QC:
     def __init__(self):
         self.jumbo_flag = False
-        self.userdir = "I:/SBND_QC/"
+        self.userdir = "D:/nEXO/FEMB_QC/"
         self.user_f = self.userdir + "FEMB_QCindex.csv"
-        self.databkdir = "I:/SBND_QC/FEMB_QC/"
+        self.databkdir = "D:/nEXO/FEMB_QC/"
         self.f_qcindex = self.databkdir + "FEMB_QCindex.csv"
         self.femb_qclist = []
         self.WIB_IPs = ["192.168.121.1"]
         self.pwr_n = 10
         self.CLS = CLS_CONFIG()
         self.CLS.WIB_IPs = self.WIB_IPs
-        self.CLS.FEMB_ver = 0x501
+        self.CLS.FEMB_ver = 0x407
         self.CLS.jumbo_flag = self.jumbo_flag 
         self.RAW_C = RAW_CONV()
         self.RAW_C.jumbo_flag = self.jumbo_flag 
@@ -72,8 +72,15 @@ class FEMB_QC:
         FEMBlist = self.FEMB_INDEX_LOAD()
         FEMB_infos = []
         env = self.env
-        #env = input("Test is performed at (RT or LN)? :")
-        for i in range(4):
+        while True:
+            try :
+                fembslotno = int(input("FEMB on WIB Slot# (1-4) :"))
+                if (1<= fembslotno) and (fembslotno <=4):
+                    self.CLS.femb_sws[fembslotno-1] = 1
+                    break
+            except OSError:
+                print ("Please input a number between 1 to 4 according to which WIB slot is attached with a FEMB")
+        for i in [fembslotno-1]:
             while (True):
                 print ("Please enter ID of FEMB in WIB slot%d (input \"OFF\" if no FEMB): "%i)
                 FEMB_id = input("Format: FM-AM (e.g. FC1-SAC1) >>")
@@ -81,15 +88,16 @@ class FEMB_QC:
                 if (cf == "Y"):
                     break
             c_ret = ""
-            if ("OFF" not in FEMB_id):
-                c_ret +="ToyTPC14_" + input("Toy TPC NO. for ASIC1-4 : ")
-                c_ret +="-ToyTPC58_" +input("Toy TPC NO. for ASIC5-8 : ") + "-"
-            if FEMB_id in FEMBlist:
-                print ("FEMB \"%s\" has been tested before, please input a short note for this retest"%FEMB_id)
-                c_ret += input("Reason for retest: ")
-                rerun_f = "Y"
-            else:
-                rerun_f = "N"
+            #if ("OFF" not in FEMB_id):
+            #    c_ret +="ToyTPC14_" + input("Toy TPC NO. for ASIC1-4 : ")
+            #    c_ret +="-ToyTPC58_" +input("Toy TPC NO. for ASIC5-8 : ") + "-"
+            #if FEMB_id in FEMBlist:
+            #    print ("FEMB \"%s\" has been tested before, please input a short note for this retest"%FEMB_id)
+            #    c_ret += input("Reason for retest: ")
+            #    rerun_f = "Y"
+            #else:
+            #    rerun_f = "N"
+            rerun_f = "N"
             FEMB_infos.append("SLOT%d"%i + "\n" + FEMB_id + "\n" + env + "\n" + rerun_f + "\n" + c_ret )
         return FEMB_infos
 

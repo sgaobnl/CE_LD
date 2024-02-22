@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 9/6/2019 9:39:44 AM
+Last modified: 2/22/2024 10:41:14 AM
 """
 
 #defaut setting for scientific caculation
@@ -28,8 +28,8 @@ import pickle
 class CLS_CONFIG:
     def __init__(self):
         self.jumbo_flag = False 
-        self.FEMB_ver = 0x501
-        self.WIB_ver = 0x109
+        self.FEMB_ver = 0x407
+        self.WIB_ver = 0x120
         self.WIB_IPs = ["192.168.121.1", "192.168.121.2", "192.168.121.3", \
                         "192.168.121.4", "192.168.121.5", "192.168.121.6",] #WIB IPs connected to host-PC
         self.MBB_IP  = "192.168.121.10"
@@ -41,7 +41,7 @@ class CLS_CONFIG:
         self.fecfg_f ="./fecfg.csv" 
         self.FEREG_MAP = FE_REG_MAPPING()
         self.DAQstream_en =  True
-        self.pwr_dly = 10 #delay(s) after power operation
+        self.pwr_dly = 5 #delay(s) after power operation
         self.sts_num = 1 #how many times statitics data are collected
         self.val = 100 #how many UDP HS package are collected per time
         self.f_save = False #if False, no raw data is saved, if True, no further data analysis 
@@ -50,6 +50,7 @@ class CLS_CONFIG:
         self.err_code = ""
         self.fecfg_loadflg = False
         self.fe_monflg = False
+        self.femb_sws = [0,0,0,0]
         self.REGS = []
         self.pwr_int_f = False #only set to "True" for FEMB screening test
 
@@ -122,18 +123,29 @@ class CLS_CONFIG:
                         pwr_status &= (~np.uint32(pwr_ctl[i]) | 0x00100000)
                     self.UDP.write_reg_wib_checked (0x8, pwr_status )
                     time.sleep(1)
+        print ("Wait 5s...")
         time.sleep(self.pwr_dly)
 
     def FEMB_DECTECT(self, wib_ip):
         self.UDP.UDP_IP = wib_ip
-        self.WIB_PWR_FEMB(wib_ip, femb_sws=[1,1,1,1])
+        self.WIB_PWR_FEMB(wib_ip, femb_sws=self.femb_sws)
         stats = self.WIB_STATUS(wib_ip)
         keys = list(stats.keys())
         fembs_found = [True, True, True, True]
+        for i in range(4):
+            if self.femb_sws[i] != 0:
+                fembs_found[i] = True
+            else:
+                fembs_found[i] = False
+        print (self.femb_sws, fembs_found)
+        
         self.err_code += "#TIME" + stats["TIME"]
         for i in range(4):
+            if fembs_found[i] == False:
+                continue
             self.err_code +="#IP" + wib_ip + "-SLOT%d"%i
             for key in keys:
+                #print (key, stats[key] )
                 if key in "FEMB%d_LINK"%i:
                     if (stats[key] != 0xFF):
                         print ("FEMB%d LINK is broken!"%i)
@@ -203,7 +215,7 @@ class CLS_CONFIG:
                 self.UDP.read_reg_femb(i, 0x102)
                 ver_value = self.UDP.read_reg_femb(i, 0x101)
                 if (ver_value > 0 ):
-                    if (ver_value&0xFFFF != self.FEMB_ver):
+                    if (ver_value&0xFFF != self.FEMB_ver):
                         print ("FEMB%d FE version is %x, which is different from default (%x)!"%(i, ver_value, self.FEMB_ver))
                         fembs_found[i] = False
                         self.err_code +="-F7_FW"
@@ -325,15 +337,16 @@ class CLS_CONFIG:
             status_dict["FEMB%d_AMV33_I"%fembno] = ((vct[3]& 0x3FFF) * 19.075) * 0.000001 / 0.01
             status_dict["FEMB%d_BIAS_V"%fembno ]  = (((vct[5]&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
             status_dict["FEMB%d_BIAS_I"%fembno ]  = ((vct[5]& 0x3FFF) * 19.075) * 0.000001 / 0.1
-            status_dict["FEMB%d_AMV28_V"%fembno] = (((vc25&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
-            status_dict["FEMB%d_AMV28_I"%fembno] = ((vc25& 0x3FFF) * 19.075) * 0.000001 / 0.01
-            status_dict["FEMB%d_AMV33_I"%fembno] -= status_dict["FEMB%d_AMV28_I"%fembno]
+            #status_dict["FEMB%d_AMV28_V"%fembno] = (((vc25&0x0FFFF0000) >> 16) & 0x3FFF) * 305.18 * 0.000001
+            #status_dict["FEMB%d_AMV28_I"%fembno] = ((vc25& 0x3FFF) * 19.075) * 0.000001 / 0.01
+            #status_dict["FEMB%d_AMV33_I"%fembno] -= status_dict["FEMB%d_AMV28_I"%fembno]
             status_dict["FEMB%d_PC"%fembno] =   status_dict["FEMB%d_FMV39_V"%fembno] * status_dict["FEMB%d_FMV39_I"%fembno] + \
                                                 status_dict["FEMB%d_FMV30_V"%fembno] * status_dict["FEMB%d_FMV30_I"%fembno] + \
                                                 status_dict["FEMB%d_FMV18_V"%fembno] * status_dict["FEMB%d_FMV18_I"%fembno] + \
                                                 status_dict["FEMB%d_AMV33_V"%fembno] * status_dict["FEMB%d_AMV33_I"%fembno] + \
-                                                status_dict["FEMB%d_BIAS_V"%fembno ] * status_dict["FEMB%d_BIAS_I"%fembno ] + \
-                                                status_dict["FEMB%d_AMV28_V"%fembno] * status_dict["FEMB%d_AMV28_I"%fembno] 
+                                                status_dict["FEMB%d_BIAS_V"%fembno ] * status_dict["FEMB%d_BIAS_I"%fembno ] 
+                                                #status_dict["FEMB%d_BIAS_V"%fembno ] * status_dict["FEMB%d_BIAS_I"%fembno ] + \
+                                                #status_dict["FEMB%d_AMV28_V"%fembno] * status_dict["FEMB%d_AMV28_I"%fembno] 
         return status_dict
 
 
