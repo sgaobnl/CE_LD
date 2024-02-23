@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 7/15/2016 11:47:39 AM
-Last modified: 4/8/2019 6:44:50 PM
+Last modified: Fri Feb 23 15:18:28 2024
 """
 
 #defaut setting for scientific caculation
@@ -122,6 +122,9 @@ class RAW_CONV():
     
     def raw_conv_peak(self, raw_data):
         chn_data, feed_loc = self.raw_conv_feedloc(raw_data)
+        if ( len(feed_loc)  ) <=2  :
+            for i in range(1, len(chn_data[0]),500):
+                feed_loc.append(i)
         if ( len(feed_loc)  ) > 2 :
             chn_peakp=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],]
             chn_peakn=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],]
