@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 2/22/2024 12:25:46 PM
+Last modified: 2/22/2024 2:10:51 PM
 """
 
 #defaut setting for scientific caculation
@@ -415,10 +415,13 @@ class FEMB_QC:
             for a_femb_data in self.raw_data:
                 qc_list = a_femb_data[0]
                 qc_pf = qc_list[0]
-                if "PASS" not in qc_pf:
-                    continue
+                #if "PASS" not in qc_pf:
+                #    continue
                 env = qc_list[1]
                 femb_id = qc_list[2]
+                if self.CLS.femb_sws[int(femb_id[-1])] == 0:
+                    continue
+
                 femb_rerun_f = qc_list[3]
                 femb_date = qc_list[4]
                 femb_errlog = qc_list[5]

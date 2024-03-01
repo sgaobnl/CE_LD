@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 2/22/2024 12:45:11 PM
+Last modified: 2/23/2024 12:20:02 PM
 """
 
 #defaut setting for scientific caculation
@@ -34,7 +34,10 @@ from setdatadir import savedir
 a = FEMB_QC()
 crateno = 1
 PTBslotno = 1
-a.env = "RT"
+#a.env = "RT"
+fembno_str = input("FEMB No:")
+a.env = input("RT or LN:")
+
 while True:
     try :
         fembslotno = int(input("FEMB on WIB Slot# (1-4) :"))
@@ -58,7 +61,7 @@ while True:
     except OSError:
         print ("Please input a number between 0 to 4 according to which WIB slot is attached with a FEMB")
 
-a.userdir = savedir + "/Mode%02d/"%modeno
+a.userdir = savedir + "/FEMB_" + fembno_str + "_" + a.env + "/Mode%02d/"%modeno
 a.databkdir = a.userdir 
 a.user_f = a.userdir + "tmp.csv"
 a.f_qcindex = a.databkdir + "tmp.csv"
@@ -84,7 +87,7 @@ FEMB_infos = a.FEMB_CHKOUT_Input(crateno, PTBslotno)
 a.WIB_IPs = ["192.168.121.1" ]
 a.CLS.UDP.MultiPort = False
 a.CLS.WIB_IPs = a.WIB_IPs
-a.CLS.val = 400 #data amount to take
+a.CLS.val = 200 #data amount to take
 
 if modeno == 0:
     for wib_ip in a.WIB_IPs:
@@ -112,7 +115,11 @@ elif modeno == 4:
         runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
         a.CLS.savedir = a.userdir  + "/LD_" + runtime + "/"
         if (os.path.exists(a.CLS.savedir)):
-            pass
+            ynstr = input ("Path exist, continue? (Y/N) " )
+            if "Y" in ynstr or "y" in ynstr:
+                pass
+            else:
+                exit()
         else:
             try:
                 os.makedirs(a.CLS.savedir)
