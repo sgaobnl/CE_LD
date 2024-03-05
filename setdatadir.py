@@ -21,3 +21,5 @@ savedir = "/scratch_local/SBND_Installation/data/commissioning/"+rundate+"/"
 #savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/No_bias_ramp_down/"
 #savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/No_bias_FCTB_up/"
 #savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/final_chilly_checkout/"
+#savedir = "/scratch_local/SBND_Installation/data/commissioning/sh_time_0_5_us/03_01_2024/"
+
