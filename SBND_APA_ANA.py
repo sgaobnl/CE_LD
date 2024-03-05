@@ -393,7 +393,8 @@ rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_09_13_41/"""
-#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
+#rawdir = """/scratch_local/SBND_Installation/data/commissioning/sh_time_0_5_us/03_01_2024/LD_2024_03_01_11_32_26/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
     with open(fr, 'rb') as f:
