@@ -1,0 +1,52 @@
+From: sbnd
+To: sbnd_cold_electronics-aaaamjjujebziez3xtqixfexxy@shortbaseline.slack.com
+Subject: CE Monitor plots
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="outer-boundary"
+
+This is a MIME-encoded message. If you are seeing this, your mail
+reader is old.
+--outer-boundary
+Content-Type: text/plain; charset=us-ascii
+
+CE Monitor plots
+
+--outer-boundary
+MIME-Version: 1.0
+Content-Type: multipart/related;
+  type="text/html"; start="<body@here>"; boundary="inner-boundary"
+
+--inner-boundary
+Content-Type: text/html; charset=us-ascii
+Content-Disposition: inline
+Content-ID: <body@here>
+
+<html>
+ <body>
+  ${filename}<br>
+
+  <img src="cid:rms@here" width="1000"><br>
+
+  <img src="cid:rmstime@here" width=1000">
+ </body>
+</html>
+
+--inner-boundary
+Content-Type: image/gif
+Content-Disposition: inline
+Content-Transfer-Encoding: base64
+Content-ID: <rms@here>
+
+${rms_base64}
+
+--inner-boundary
+Content-Type: image/gif
+Content-Disposition: inline
+Content-Transfer-Encoding: base64
+Content-ID: <rmstime@here>
+
+${rmstime_base64}
+
+--inner-boundary--
+
+--outer-boundary--
