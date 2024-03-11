@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Feb  9 23:55:19 2024
+Last modified: Sun Mar 10 20:59:36 2024
 """
 
 #defaut setting for scientific caculation
@@ -23,13 +23,13 @@ import time
 from datetime import datetime
 import struct
 import codecs
-from cls_config import CLS_CONFIG
+#from cls_config import CLS_CONFIG
 from raw_convertor import RAW_CONV
 import pickle
 from shutil import copyfile
 import operator
 from fft_chn import chn_rfft_psd
-
+from regs_process import FEMBREG_Process 
 
 
 def FEMB_CHK(fembdata, rms_f = False, fs="./"):
@@ -209,17 +209,60 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
                 #dec_chn[i].append((chn_wfs[decch]))
                 #dec_chn[i].append((chn_avgwfs[decch]))
          
-    with open(rn, 'wb') as f:
-        pickle.dump(dec_chn, f)
+    result=dec_chn
+    if len(result[0]) < 20:
+        rawdatapath = rawdir 
+        Dec_add_cfgs(rawdatapath, result, rn)
+        #fechnregs = []
+        #for cfgroot, cfgdirs, cfgfiles in os.walk(rawdatapath):
+        #    for cfn in cfgfiles:
+        #        if (".femb" in cfn[-5:]) and ("WIB_10_226_34_" in cfn) and ("FEMB_" in cfn):
+        #            fechnregs += FEMBREG_Process(rawdatapath + cfn)
+        #    break
+        #for xi in range(len(result)):
+        #    for ci in fechnregs:
+        #        if (ci[1] == int(result[xi][5])) and (ci[2] ==  int(result[xi][6])) and (ci[3] == int(result[xi][7])) and (ci[4] == int(result[xi][8])) : 
+        #            result[xi] +=  ci
+        #            fechnregs.remove(ci)
+        #            break
+
+        #with open(rn, 'wb') as f:
+        #    pickle.dump(result, f)
+
+    #with open(rn, 'wb') as f:
+    #    pickle.dump(dec_chn, f)
     #fr =rawdir + "test_results"+".csv" 
     #with open (fr, 'w') as fp:
     #    top_row = "APA,Crate,FEMB_SN,POSITION,WIB_CONNECTION,Crate_No,WIB_no,WIB_FEMB_LOC,FEMB_CH,Wire_type,Wire_No,,RMS Noise, Pedestal, Pulse_Pos_Peak, Pulse_Neg_Peak, RMS(filtered),"
     #    fp.write( top_row + "\n")
     #    for x in dec_chn:
     #        fp.write(",".join(str(i) for i in x[0:17]) +  "," + "\n")
-    return dec_chn
+    return result
 
 def d_dec_plt(dec_chn, n=1):
+    #n=63-11-46 "CFGINFO"
+    #n=63-11-17 sts
+    #n=63-11-17+1 snc
+    #n=63-11-17+2 sg0
+    #n=63-11-17+3 sg1
+    #n=63-11-17+4 st0
+    #n=63-11-17+5 st1
+    #n=63-11-17+7 sdc
+    #n=63-11-17+8 slkh
+    #n=63-11-17+8 slkh
+    #n=63-11-17+13 slk
+    #n=63-11-17+14 sdacsw1
+    #n=63-11-17+15 sdacsw2 
+    #n=63-11-17+16 asicdac
+    #n=63-11-31+0 fpgadac_v
+    #n=63-11-31+2 pls_period
+    #n=63-11-31+4 fpga_tp_en
+    #n=63-11-31+5 asic_tp_en
+    #n=63-11-31+9 femb_tst_sel
+    #n=63-11-41+0 femb_clk_sel
+    #n=63-11-41+1 femb_cmd_sel
+    #n=63-11-41+4 tst_wfm_gen_mode
+    
     euvals = []
     evvals = []
     eyvals = []
@@ -228,6 +271,10 @@ def d_dec_plt(dec_chn, n=1):
     wyvals = []
 
     for d in dec_chn:
+#        print (len(d))
+#        print (d[11+6])
+#        print (d[11+63-11-31+0])
+#        exit()
         wireno = int(d[10])
         if (len(d)>=16):
             wirev = d[11+n]
@@ -249,8 +296,116 @@ def d_dec_plt(dec_chn, n=1):
                 wyvals.append([wireno,wirev])
 
     return euvals, evvals, eyvals, wuvals, wvvals, wyvals
+
+def DIS_CFG_PLOT(dec_chn, fdir ) :
+    for i in range(len(dec_chn)):
+        if len(dec_chn[i]) > 20:
+            #fecfgs = dec_chn[i][-1]
+            fembcfgs = dec_chn[i][-5]
+            wibcfgs = dec_chn[i][-6]
+
+            sts = dec_chn[i][0-17]
+            snc = dec_chn[i][1-17]
+            sg0 = dec_chn[i][2-17]
+            sg1 = dec_chn[i][3-17]
+            st0 = dec_chn[i][4-17]
+            st1 = dec_chn[i][5-17]
+            smn = dec_chn[i][6-17]
+            sdf = dec_chn[i][7-17]
+            sdc = dec_chn[i][8-17]
+            slkh = dec_chn[i][9-17]
+            s16 = dec_chn[i][10-17]
+            stb = dec_chn[i][11-17]
+            stb1 = dec_chn[i][12-17]
+            slk = dec_chn[i][13-17]
+            sdacsw1 = dec_chn[i][14-17]
+            sdacsw2 = dec_chn[i][15-17]
+            sdac = dec_chn[i][16-17]
+
+            fpgadac_v = dec_chn[i][0-31]
+            pls_dly = dec_chn[i][1-31]
+            pls_period = dec_chn[i][2-31]
+            sys_clk_flg = dec_chn[i][3-31]
+            fpga_tp_en = dec_chn[i][4-31]
+            asic_tp_en = dec_chn[i][5-31]
+            dac_sel = dec_chn[i][6-31]
+            int_tp_en = dec_chn[i][7-31]
+            ext_tp_en  = dec_chn[i][8-31]
+            femb_tst_sel = dec_chn[i][9-31]
+            pls_width = dec_chn[i][10-31]
+
+            femb_clk_sel = dec_chn[i][0-41]
+            femb_cmd_sel = dec_chn[i][1-41]
+            femb_int_clk_sel = dec_chn[i][2-41]
+            pwr_en = dec_chn[i][3-41]
+            tst_wfm_gen_mode = dec_chn[i][4-41]
+            si5344_lol = dec_chn[i][5-41]
+            si5344_losxaxb = dec_chn[i][6-41]
+            udp_pkg_size = dec_chn[i][7-41]
+            link_sync_stat = dec_chn[i][8-41]
+            eq_los_rx = dec_chn[i][9-41]
+
+            #print (sdf, sdac, sg0, sg1, sts, pls_period, hex(pls_width), hex(udp_pkg_size))
+            #exit()
+
+            if sts == 1:
+                if (sdacsw1 == 1) and (fpga_tp_en == 1):
+                    calimode = "FPGADAC_0x%x"%fpgadac_v
+                elif (sdacsw2 == 1) and (asic_tp_en == 1):
+                    calimode = "ASICDAC_0x%x"%sdac
+                elif (sdacsw1 == 0) and (sdacsw2 == 0):
+                    calimode = "NoCali"
+                else:
+                    calimode = "Undef"
+            else:
+                calimode = "Noise"
+
+            if sg0 ==0 and sg1 == 0: 
+                gain = "4.7 mV/fC"
+            elif sg0 ==1 and sg1 == 0: 
+                gain = "7.8 mV/fC"
+            elif sg0 ==0 and sg1 == 1: 
+                gain = "14 mV/fC"
+            elif sg0 ==1 and sg1 == 1: 
+                gain = "25 mV/fC"
+
+            if st0 ==0 and st1 == 0: 
+                st = "1.0 $\mu$s"
+            elif st0 ==1 and st1 == 0: 
+                st = "0.5 $\mu$s"
+            elif st0 ==0 and st1 == 1: 
+                st = "3.0 $\mu$s"
+            elif st0 ==1 and st1 == 1: 
+                st = "2.0 $\mu$s"
+                
+            if femb_tst_sel == 0:
+                datamode = "Detector"
+            elif femb_tst_sel == 1:
+                datamode = "Test Pattern"
+            elif femb_tst_sel == 2:
+                datamode = "Fake Waveform"
+            elif femb_tst_sel == 3:
+                datamode = "Chn_Map"
+
+            if tst_wfm_gen_mode == 0:
+                wibdatamode = "FromFEMB"
+            elif tst_wfm_gen_mode == 1:
+                wibdatamode = "From_WIB_Sawtooth"
+            elif tst_wfm_gen_mode == 2:
+                wibdatamode = "From_WIB_CHN_MAP"
+            break
     
-def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,10], ylabel = "RMS / bit"):
+    fn = fdir.split("/")[-1]
+    if  (".ld" in fn[-3:]):
+        logdate=fn[3:3+19]
+        datex = datetime.strptime(logdate,'%Y_%m_%d_%H_%M_%S')
+        ttime = datex.timestamp()    
+
+    #print ( [ttime, wibdatamode, datamode, calimode, gain, st])
+    return [ttime, wibdatamode, datamode, calimode, gain, st]
+
+   
+def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5],  ylim=[-2,10], ylabel = "RMS / bit", note = ""):
     import matplotlib.pyplot as plt
     fig = plt.figure(figsize=(12,6))
     plt.rcParams.update({'font.size': 12})
@@ -258,17 +413,21 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
     ax2 = plt.subplot(212)
 
     ax1.vlines(1984, 0, 4000, linestyles='dashed',color='k')
-    ax1.text(1000, 0, "U", color='b')
-    ax1.text(3000, 0, "V", color='g')
-    ax1.text(5000, 0, "Y", color='r')
+    ax1.text(1000, -1, "U", color='b')
+    ax1.text(3000, -1, "V", color='g')
+    ax1.text(5000, -1, "Y", color='r')
+    if len(note) != 0:
+        ax1.text(100, ylim[1]*0.8, note )
+        ax2.text(100, ylim[1]*0.8, note )
     ax1.vlines(1984*2, 0, 4000, linestyles='dashed',color='k')
     ax2.vlines(1984, 0, 4000, linestyles='dashed',color='k')
     ax2.vlines(1984*2, 0, 4000, linestyles='dashed',color='k')
-    ax2.text(1000, 0, "U", color='b')
-    ax2.text(3000, 0, "V", color='g')
-    ax2.text(5000, 0, "Y", color='r')
+    ax2.text(1000, -1, "U", color='b')
+    ax2.text(3000, -1, "V", color='g')
+    ax2.text(5000, -1, "Y", color='r')
 
 
+    plot_info = DIS_CFG_PLOT(dec_chn, fdir ) 
     for n in ns:
         euvals, evvals, eyvals, wuvals, wvvals, wyvals = d_dec_plt(dec_chn, n=n)
 
@@ -289,24 +448,32 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
     ax1.set_ylim((ylim))
     ax1.set_xlim((0,6000))
     ax1.set_ylabel (ylabel)
-    ax1.set_xlabel ("Channel NO.")
-    ax1.set_title ("EAST APA: " + title)
+    ax1.set_xlabel ("Channel NO." + " (" + "Data_is_" + "_".join(plot_info[1:])+ ")")
+#    ax1.text(100, ylim[1]*0.8, "Data_is_" + "_".join(plot_info[1:]))
+    tstr = datetime.fromtimestamp(plot_info[0]).strftime("%Y-%m-%d %H:%M:%S")
+    ax1.set_title ("EAST APA: " + title + " (" + tstr + ")")
 #    ax1.legend()
     ax1.grid()
 
     ax2.set_ylim((ylim))
     ax2.set_xlim((0,6000))
     ax2.set_ylabel (ylabel)
-    ax2.set_xlabel ("Channel NO.")
-    ax2.set_title ("WEST APA: " + title)
+    ax2.set_xlabel ("Channel NO."+ " (" + "Data_is_" + "_".join(plot_info[1:])+ ")")
+#    ax2.text(100, ylim[1]*0.8, "Data_is_" + "_".join(plot_info[1:]))
+    ax2.set_title ("WEST APA: " + title + " (" + tstr + ")")
 #    ax2.legend()
     ax2.grid()
 
-
     ffig = fdir[0:-3] + fn 
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
-    plt.savefig(ffig)
-    print ("result saves at {}".format(ffig))
+    #if ("SBND_APA_CFG_") in fn:
+    #    fpos = ffig.find(ffig.split("/")[-1])
+    #    fnew = ffig[0:fpos)
+    #else:
+    plt.savefig(ffig[0:-4] + ".png")
+#    plt.savefig(ffig[0:-4] + ".svg")
+#    plt.savefig(ffig[0:-4] + ".eps")
+#    print ("result saves at {}".format(ffig))
     #plt.show()
     plt.close()
 
@@ -334,8 +501,6 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
             Plsnp = d[15]
             wfs = d[16]
             avgwfs = d[17]
-        #else:
-        #    print ("Channel without valid data...")
             import matplotlib.pyplot as plt
 
             fig = plt.figure(figsize=(8.5,8))
@@ -388,9 +553,47 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
             #plt.savefig(fn)
             plt.close()
 
+def Dec_add_cfgs(rawdatapath, result, rn):
+    fechnregs = []
+    for cfgroot, cfgdirs, cfgfiles in os.walk(rawdatapath):
+        for cfn in cfgfiles:
+            if (".femb" in cfn[-5:]) and ("WIB_10_226_34_" in cfn) and ("FEMB_" in cfn):
+                fechnregs += FEMBREG_Process(rawdatapath + cfn)
+        break
+    for xi in range(len(result)):
+        for ci in fechnregs:
+            if (ci[1] == int(result[xi][5])) and (ci[2] ==  int(result[xi][6])) and (ci[3] == int(result[xi][7])) and (ci[4] == int(result[xi][8])) : 
+                result[xi] +=  ci
+                fechnregs.remove(ci)
+                break
+    with open(rn, 'wb') as f:
+        pickle.dump(result, f)
 
 
-rawdir = """/scratch_local/SBND_Installation/data/commissioning/"""
+def DIS_PLOTs(result, rn):
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8])
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-10,1024], ylabel="Amplitude / bit")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FE TST (1:enable, 0:disable) distribution", fn = "SBND_APA_CFG_FE_TST_DIS.png", ns=[63-11-17], ylim=[-2,2], ylabel="FE_TST", note="1:EN, 0:DIS, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FE SNC (Baseline) distribution", fn = "SBND_APA_CFG_FE_BL_DIS.png", ns=[63-11-17+1], ylim=[-2,2], ylabel="FE_BL", note="1:200mV, 0:900mV, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FE SG0 (Gain0) distribution", fn = "SBND_APA_CFG_FE_SG0_DIS.png", ns=[63-11-17+2], ylim=[-2,2], ylabel="FE_Gain0", note="1:7.8 or 25, 0:4.7 or 14, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FE SG1 (Gain1) distribution", fn = "SBND_APA_CFG_FE_SG1_DIS.png", ns=[63-11-17+3], ylim=[-2,2], ylabel="FE_Gain1", note="1:14 or 25, 0:4.7 or 7.8, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FE ST0 (PeakTime0) distribution", fn = "SBND_APA_CFG_FE_ST0_DIS.png", ns=[63-11-17+4], ylim=[-2,2], ylabel="FE_ST0", note="1:0.5 or 2, 0:1 or 3, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FE ST1 (PeakTime0) distribution", fn = "SBND_APA_CFG_FE_ST1_DIS.png", ns=[63-11-17+5], ylim=[-2,2], ylabel="FE_ST1", note="1:2 or 3, 0:0.5 or 1, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FE SDF (Buf) distribution", fn = "SBND_APA_CFG_FE_SDF_DIS.png", ns=[63-11-17+7], ylim=[-2,2], ylabel="FE_BUF", note="1:ON, 0:OFF, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FE SDACSW1 distribution", fn = "SBND_APA_CFG_FE_SDACSW1_DIS.png", ns=[63-11-17+14], ylim=[-2,2], ylabel="FE_TST_Src", note="0:Ext_dis , 0: Ext_en, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FE SDACSW2 distribution", fn = "SBND_APA_CFG_FE_SDACSW1_DIS.png", ns=[63-11-17+15], ylim=[-2,2], ylabel="FE_TST_Src", note="0:Int_dis , 0: Int_en, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FE SDAC distribution", fn = "SBND_APA_CFG_FE_SDAC_DIS.png", ns=[63-11-17+16], ylim=[-2,78], ylabel="FE_DAC", note="0-3F: SDAC, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FPGA-DAC distribution", fn = "SBND_APA_CFG_FPGA_DAC_DIS.png", ns=[63-11-31+0], ylim=[-2,78], ylabel="FPGA_DAC", note="0-3F: FPGA-DAC, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "Pulse Period distribution", fn = "SBND_APA_CFG_PLS_Per_DIS.png", ns=[63-11-31+2], ylim=[-2,2000], ylabel="FPGA_Pls_Period", note=">0: Period, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FPGA_TP_EN distribution", fn = "SBND_APA_CFG_FPGA_TP_EN_DIS.png", ns=[63-11-31+4], ylim=[-2,2], ylabel="FPGA_TP_EN", note="1:en, 0:dis, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "ASIC_TP_EN distribution", fn = "SBND_APA_CFG_ASIC_TP_EN_DIS.png", ns=[63-11-31+5], ylim=[-2,2], ylabel="ASIC_TP_EN", note="1:en, 0:dis, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "FEMB data mode distribution", fn = "SBND_APA_CFG_FEMB_Data_Mode_DIS.png", ns=[63-11-31+9], ylim=[-2,6], ylabel="FEMB_Data_Mode", note="0:ADC, 1:TestPattern,2:Waveform, 3:CHN_Map, 4:Sawtooth, -1:Bad")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "WIB CLK distribution", fn = "SBND_APA_CFG_WIB_CLK_DIS.png", ns=[63-11-41+0], ylim=[-2,2], ylabel="WIB CLK SRC", note="0:OSC100MHz, 1:SI5344")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "WIB CMD distribution", fn = "SBND_APA_CFG_WIB_CMD_DIS.png", ns=[63-11-41+1], ylim=[-2,2], ylabel="WIB CMD SRC", note="0:WIB, 1:MBB")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "WIB TST WFM distribution", fn = "SBND_APA_CFG_WIB_TST_WFM_DIS.png", ns=[63-11-41+4], ylim=[-2,4], ylabel="WIB TST WFM Mode", note="0:from FEMB, 1:Sawtooth,2:CHN-Map, -1:Bad")
+
+
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD/"""
 
 result_dir = rawdir + "LD_result/"
 
@@ -405,21 +608,45 @@ for d1n in d1ns:
     for root, dirs, files in os.walk(d1n):
         for d2n in dirs:
             if ("LD_2024_" in d2n) :
+            #if ("03_10_15_29" in d2n) :
                 anadir = d1n + d2n + "/"
                 print (anadir)
                 rn = result_dir + "/" + d2n + ".ld"
                 if (os.path.isfile(rn)):
-                    continue
+                    #continue
                     with open(rn, 'rb') as f:
                         result = pickle.load(f)
-                    DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8])
+                        if len(result[0]) < 20:
+                            sub1dir = d2n[3:13]
+                            sub2dir = d2n 
+                            rawdatapath = result_dir + "/../" + sub1dir + "/" + sub2dir + "/"
+                            fechnregs = []
+                            Dec_add_cfgs(rawdatapath, result, rn)
+                            #for cfgroot, cfgdirs, cfgfiles in os.walk(rawdatapath):
+                            #    for cfn in cfgfiles:
+                            #        if (".femb" in cfn[-5:]) and ("WIB_10_226_34_" in cfn) and ("FEMB_" in cfn):
+                            #            fechnregs += FEMBREG_Process(rawdatapath + cfn)
+                            #    break
+                            #for xi in range(len(result)):
+                            #    for ci in fechnregs:
+                            #        if (ci[1] == int(result[xi][5])) and (ci[2] ==  int(result[xi][6])) and (ci[3] == int(result[xi][7])) and (ci[4] == int(result[xi][8])) : 
+                            #            result[xi] +=  ci
+                            #            fechnregs.remove(ci)
+                            #            break
+                            #with open(rn, 'wb') as f:
+                            #    pickle.dump(result, f)
+                        else:
+                            pass
+                            #continue
+                            DIS_PLOTs(result, rn)
                 else:
                     rms_f = False
                     result = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
                     if result == None:
                         continue
                     else:
-                        DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8])
+                        DIS_PLOTs(result, rn)
+
         break
 
 

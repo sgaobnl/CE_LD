@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Mar  8 14:17:14 2024
+Last modified: Sun Mar 10 17:30:27 2024
 """
 
 #defaut setting for scientific caculation
@@ -395,9 +395,9 @@ rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_00_13_
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_36/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_09_13_41/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_06_00_06_22/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_09_13_41/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_06_00_06_22/"""
 #rawdir = """/scratch_local/SBND_Installation/data/commissioning/sh_time_0_5_us/03_01_2024/LD_2024_03_01_11_32_26/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
@@ -413,7 +413,7 @@ else:
     result = SBND_ANA(rawdir, rms_f = rms_f)
 
 DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.svg", ns=[1], ylim=[-2,8])
-DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
+DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.svg", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
 
 while True:
     print ("Input a chnanel number following format (E/W)(U/V/Y)(Chn no.), e.g. EU0001")

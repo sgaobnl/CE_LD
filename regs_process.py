@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sat Mar  9 15:50:58 2024
+Last modified: Sun Mar 10 18:22:24 2024
 """
 
 #defaut setting for scientific caculation
@@ -90,8 +90,40 @@ def FEREGS_CHK(feregs, asicno, asicch):
 
 def FEMBREG_Process(fn):
     if (".femb" in fn[-5:]) and ("WIB_10_226_34_" in fn) and ("FEMB_" in fn):
+        wibregs = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+        rawdir = fn[0:fn.find("WIB_10_226_34_")]
+        for root, dirs, files in os.walk(rawdir):
+            for wibfn in files:
+                fnpos1 = fn.find("WIB_10_226_34_")
+                fnpos2 = fn.find("FEMB_")
+                if (".wib" in wibfn[-4:]) and ( fn[fnpos1:fnpos2+5] in wibfn):
+                    with open (rawdir + wibfn, "rb") as wfs:
+                        wregs = pickle.load(wfs)
+                        for wreg in wregs:
+                            if wreg[0] == 4:
+                                femb_clk_sel = wreg[1]&0x01
+                                femb_cmd_sel = (wreg[1]&0x02)>>1
+                                femb_int_clk_sel = (wreg[1]&0x0c)>>2
+                            if wreg[0] == 8:
+                                pwr_en = wreg[1]
+                            if wreg[0] == 9:
+                                tst_wfm_gen_mode = (wreg[1]&0xf0)>>4
+                            if wreg[0] == 0x0c:
+                                si5344_lol = (wreg[1]&0x10000)>>16
+                                si5344_losxaxb = (wreg[1]&0x20000)>>17
+                            if wreg[0] == 0x1f:
+                                udp_pkg_size= (wreg[1]&0x7ff)
+                            if wreg[0] == 0x21:
+                                link_sync_stat =  (wreg[1])
+                            if wreg[0] == 0x24:
+                                eq_los_rx =  (wreg[1]&0xffff)
+                        wibregs = [femb_clk_sel, femb_cmd_sel, femb_int_clk_sel, pwr_en, tst_wfm_gen_mode, si5344_lol, si5344_losxaxb, udp_pkg_size, link_sync_stat, eq_los_rx]
+                        break
+            break
+
+
         crateno = int(fn[fn.find("WIB_10_226_34_")+14])
-        wibno = int(fn[fn.find("WIB_10_226_34_")+15])-1
+        wibno = int(fn[fn.find("WIB_10_226_34_")+15])
         fembno = int(fn[fn.find("FEMB_")+5])
         with open (fn, "rb") as fs:
             regs = pickle.load(fs)
@@ -133,7 +165,7 @@ def FEMBREG_Process(fn):
             fechns = []
             for ch in range(128):
                 fechns.append([])
-                fechns[ch] = [crateno, wibno, fembno, ch, fpgadac_v, pls_dly, pls_period,  sys_clk_flg, fpga_tp_en, asic_tp_en, dac_sel, int_tp_en, ext_tp_en, femb_tst_sel, femb_tst_sel, pls_width] 
+                fechns[ch] = ["CFGINFO", crateno, wibno, fembno, ch] +  wibregs + [fpgadac_v, pls_dly, pls_period,  sys_clk_flg, fpga_tp_en, asic_tp_en, dac_sel, int_tp_en, ext_tp_en, femb_tst_sel,  pls_width] 
                 asicno = ch//16
                 asicch = ch%16
                 asicwrchreg, asicwrglb1, asicwrglb2 = FEREGS_CHK(fewrregs, asicno, asicch)
@@ -189,14 +221,17 @@ def FEMBREG_Process(fn):
                 sg0 = (asicrdchreg&0x20)>>5
                 snc = (asicrdchreg&0x40)>>6
                 sts = (asicrdchreg&0x80)>>7
-                fechns[ch].append([sts,snc,sg0,sg1,st0,st1,smn,sdf,sdc,slkh,s16,stb,stb1,slk,sdacsw1,sdacsw2,sdac])
+                fechns[ch] +=[sts,snc,sg0,sg1,st0,st1,smn,sdf,sdc,slkh,s16,stb,stb1,slk,sdacsw1,sdacsw2,sdac]
             return fechns
     else:
         return None
 
-fechns = FEMBREG_Process(fn)
-
-print (fechns[0])
+#fn = """/Users/shanshangao/Downloads/SBND_LD/LD/2024_02_16/LD_2024_02_16_12_42_33/WIB_10_226_34_46FEMB_1_Time2024_02_16_12_42_56.femb"""
+#fn = """/Users/shanshangao/Downloads/SBND_LD/LD/2024_03_10/LD_2024_03_10_15_29_26/WIB_10_226_34_11FEMB_0_Time2024_03_10_15_29_27.femb"""
+#fn = """/Users/shanshangao/Downloads/SBND_LD/LD/2024_03_10/LD_2024_03_10_10_27_24/WIB_10_226_34_25FEMB_3_Time2024_03_10_10_27_35.femb"""
+#fn = """/Users/shanshangao/Downloads/SBND_LD/LD/2024_03_10/LD_2024_03_10_10_27_24/WIB_10_226_34_24FEMB_0_Time2024_03_10_10_27_34.femb"""
+#fechns = FEMBREG_Process(fn)
+#print (fechns[0])
     
 #
 #
