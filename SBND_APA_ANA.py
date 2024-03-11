@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sun Mar 10 17:30:27 2024
+Last modified: Sun Mar 10 22:11:16 2024
 """
 
 #defaut setting for scientific caculation
@@ -412,8 +412,8 @@ else:
 
     result = SBND_ANA(rawdir, rms_f = rms_f)
 
-DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.svg", ns=[1], ylim=[-2,8])
-DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.svg", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
+DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,8])
+DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
 
 while True:
     print ("Input a chnanel number following format (E/W)(U/V/Y)(Chn no.), e.g. EU0001")

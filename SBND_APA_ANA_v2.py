@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sun Mar 10 20:59:36 2024
+Last modified: Sun Mar 10 22:11:42 2024
 """
 
 #defaut setting for scientific caculation
@@ -466,10 +466,6 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
 
     ffig = fdir[0:-3] + fn 
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
-    #if ("SBND_APA_CFG_") in fn:
-    #    fpos = ffig.find(ffig.split("/")[-1])
-    #    fnew = ffig[0:fpos)
-    #else:
     plt.savefig(ffig[0:-4] + ".png")
 #    plt.savefig(ffig[0:-4] + ".svg")
 #    plt.savefig(ffig[0:-4] + ".eps")
