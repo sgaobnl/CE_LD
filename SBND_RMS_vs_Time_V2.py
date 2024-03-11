@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sat Mar  9 21:51:25 2024
+Last modified: Sun Mar 10 21:01:23 2024
 """
 
 #defaut setting for scientific caculation
@@ -194,25 +194,6 @@ for root, dirs, files in os.walk(rawdir):
                     result = pickle.load(f)
             else:
                 continue
-
-            if len(result[0]) < 20:
-                sub1dir = fn[3:13]
-                sub2dir = fn[0:-3]
-                rawdatapath = rawdir + "../" + sub1dir + "/" + sub2dir + "/"
-                fechnregs = []
-                for cfgroot, cfgdirs, cfgfiles in os.walk(rawdatapath):
-                    for cfn in cfgfiles:
-                        if (".femb" in cfn[-5:]) and ("WIB_10_226_34_" in cfn) and ("FEMB_" in cfn):
-                            fechnregs += FEMBREG_Process(rawdatapath + cfn)
-                    break
-
-                for xi in range(len(result)):
-                    for ci in fechnregs:
-                        if (ci[0] == int(result[xi][5])) and (ci[1] ==  int(result[xi][6])) and (ci[2] == int(result[xi][7])) and (ci[3] == int(result[xi][8])) : 
-                            result[xi] +=  ci
-                            break
-                with open(rn, 'wb') as f:
-                    pickle.dump(result, f)
 
             res = RMS_ANA(dec_chn=result, ns=[5])
             rmsts.append([x,res])
