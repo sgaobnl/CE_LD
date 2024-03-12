@@ -24,7 +24,7 @@ Content-ID: <body@here>
 <html>
  <body>
   RMS_vs_Time.png<br>
-  <img src="cid:rmstime@here" width=1000">
+  <img src="cid:rmstime@here" width=1000"><br>
   ${filename1}<br>
   <img src="cid:file1@here" width="1000"><br>
   ${filename2}<br>
