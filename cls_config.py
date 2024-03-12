@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Mar  8 14:58:35 2024
+Last modified: Sat Mar  9 16:41:36 2024
 """
 
 #defaut setting for scientific caculation
@@ -694,6 +694,20 @@ class CLS_CONFIG:
             else:
                 self.UDP.write_reg_wib(0x1E, 0)
         time.sleep(1)
+        
+
+        while True:
+            wibtool_flg = False
+            for wib_ip in list(self.act_fembs.keys()):
+                self.UDP.UDP_IP = wib_ip
+                wibtool_v = self.UDP.read_reg_wib(0x06) #flag to indicate if wib tool is configurating CE
+                if wibtool_v != 0:
+                    wibtool_flg = True
+                    print ("WIB tool is configurating CE, wait 5 minutes...")
+                    time.sleep(60*5)
+                    break
+            if wibtool_flg != True:
+                break
 
         tpc_data = []
         for wib_ip in list(self.act_fembs.keys()):

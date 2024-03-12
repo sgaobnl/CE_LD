@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Thu Feb 15 12:09:31 2024
+Last modified: Sun Mar 10 22:11:16 2024
 """
 
 #defaut setting for scientific caculation
@@ -245,7 +245,7 @@ def d_dec_plt(dec_chn, n=1):
 
     return euvals, evvals, eyvals, wuvals, wvvals, wyvals
     
-def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,10], ylabel = "RMS / bit"):
+def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.svg", ns=[1], ylim=[-2,10], ylabel = "RMS / bit"):
     import matplotlib.pyplot as plt
     fig = plt.figure(figsize=(12,6))
     plt.rcParams.update({'font.size': 12})
@@ -302,6 +302,9 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
     #plt.savefig(ffig)
     print ("result saves at {}".format(ffig))
+    plt.savefig(ffig)
+    plt.savefig(ffig[0:-4] + ".eps")
+    plt.savefig(ffig[0:-4] + ".png")
     plt.show()
     plt.close()
 
@@ -392,8 +395,9 @@ rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_00_13_
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_36/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_09_13_41/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_09_13_41/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_06_00_06_22/"""
 #rawdir = """/scratch_local/SBND_Installation/data/commissioning/sh_time_0_5_us/03_01_2024/LD_2024_03_01_11_32_26/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):

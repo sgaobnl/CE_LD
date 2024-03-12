@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/28/2023 4:54:27 PM
+Last modified: Fri Mar  8 14:11:15 2024
 """
 
 #defaut setting for scientific caculation
@@ -239,8 +239,12 @@ class FEMB_QC:
             femb_env = fembs[2]
             femb_rerun_f = fembs[3]
             femb_c_ret = fembs[4]
-            femb_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
+            if "#TIME" is not in self.CLS.err_code:
+                femb_date = "01011999"
+            else:
+                femb_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 
             errs = self.CLS.err_code.split("SLOT")
+            femb_errlog = "" 
             for er in errs[1:]:
                 if( int(er[0]) == femb_addr ):
                     if (len(er) <=2 ):
@@ -512,6 +516,7 @@ class FEMB_QC:
                                           (d_sts["FEMB%d_FRAME_ERR_LINK0"%femb_addr], d_sts["FEMB%d_FRAME_ERR_LINK1"%femb_addr] ,
                                            d_sts["FEMB%d_FRAME_ERR_LINK2"%femb_addr], d_sts["FEMB%d_FRAME_ERR_LINK3"%femb_addr] ) )
                     fig.text(0.10, 0.75, "FEMB Power Consumption = " + "{0:.4f}".format(d_sts["FEMB%d_PC"%femb_addr]) + "W" )
+                    power_C = d_sts["FEMB%d_PC"%femb_addr]
                     if (pwr_int_f):
                         fig.text(0.55, 0.75, "Power 0.1s Interruption Enabled", color ='r' )
 
@@ -573,6 +578,7 @@ class FEMB_QC:
                 plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
                 plt.savefig(fn)
                 plt.close()
+                print (wib_ip, femb_id, "{0:.3f}".format(power_C))
 
     def QC_FEMB_BL_T_PLOT(self, FEMB_infos, pwr_int_f = False):
         self.CLS.pwr_int_f = pwr_int_f
