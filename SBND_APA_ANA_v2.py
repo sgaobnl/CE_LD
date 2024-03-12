@@ -188,6 +188,7 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
         with open (df[3], "rb") as fs:
             raw = pickle.load(fs)
         if len(raw) != 8:
+            print ("Invalid monitoring data,discard...")
             return None
         results = FEMB_CHK(raw, rms_f=False, fs=df[3])
         chn_rmss = results[2][0]
@@ -386,6 +387,8 @@ def DIS_CFG_PLOT(dec_chn, fdir ) :
                 datamode = "Fake Waveform"
             elif femb_tst_sel == 3:
                 datamode = "Chn_Map"
+            else:
+                datamode = "Undef"
 
             if tst_wfm_gen_mode == 0:
                 wibdatamode = "FromFEMB"
@@ -393,7 +396,15 @@ def DIS_CFG_PLOT(dec_chn, fdir ) :
                 wibdatamode = "From_WIB_Sawtooth"
             elif tst_wfm_gen_mode == 2:
                 wibdatamode = "From_WIB_CHN_MAP"
+            else:
+                wibdatamode = "Undef"
             break
+        else:
+            wibdatamode = "Invalid"
+            datamode = "Invalid"
+            calimode = "Invalid"
+            gain = "Unknown"
+            st = "Unknown"
     
     fn = fdir.split("/")[-1]
     if  (".ld" in fn[-3:]):
@@ -556,6 +567,9 @@ def Dec_add_cfgs(rawdatapath, result, rn):
             if (".femb" in cfn[-5:]) and ("WIB_10_226_34_" in cfn) and ("FEMB_" in cfn):
                 fechnregs += FEMBREG_Process(rawdatapath + cfn)
         break
+    if len(fechnregs) == 0:
+        print (rn, ">> No valid .femb file")
+        return None
     for xi in range(len(result)):
         for ci in fechnregs:
             if (ci[1] == int(result[xi][5])) and (ci[2] ==  int(result[xi][6])) and (ci[3] == int(result[xi][7])) and (ci[4] == int(result[xi][8])) : 
@@ -564,11 +578,12 @@ def Dec_add_cfgs(rawdatapath, result, rn):
                 break
     with open(rn, 'wb') as f:
         pickle.dump(result, f)
+    DIS_PLOTs(result, rn)
 
 
 def DIS_PLOTs(result, rn):
     DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8])
-    DIS_PLOT(dec_chn=result, fdir=rn, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-10,1024], ylabel="Amplitude / bit")
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
     DIS_PLOT(dec_chn=result, fdir=rn, title = "FE TST (1:enable, 0:disable) distribution", fn = "SBND_APA_CFG_FE_TST_DIS.png", ns=[63-11-17], ylim=[-2,2], ylabel="FE_TST", note="1:EN, 0:DIS, -1:Bad")
     DIS_PLOT(dec_chn=result, fdir=rn, title = "FE SNC (Baseline) distribution", fn = "SBND_APA_CFG_FE_BL_DIS.png", ns=[63-11-17+1], ylim=[-2,2], ylabel="FE_BL", note="1:200mV, 0:900mV, -1:Bad")
     DIS_PLOT(dec_chn=result, fdir=rn, title = "FE SG0 (Gain0) distribution", fn = "SBND_APA_CFG_FE_SG0_DIS.png", ns=[63-11-17+2], ylim=[-2,2], ylabel="FE_Gain0", note="1:7.8 or 25, 0:4.7 or 14, -1:Bad")
@@ -589,7 +604,10 @@ def DIS_PLOTs(result, rn):
     DIS_PLOT(dec_chn=result, fdir=rn, title = "WIB TST WFM distribution", fn = "SBND_APA_CFG_WIB_TST_WFM_DIS.png", ns=[63-11-41+4], ylim=[-2,4], ylabel="WIB TST WFM Mode", note="0:from FEMB, 1:Sawtooth,2:CHN-Map, -1:Bad")
 
 
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD/"""
+rawdir = """/scratch_local/SBND_Installation/data/commissioning/"""
+#rawdir = """/scratch_local/SBND_Installation/data/commissioning/Varuna_LD/"""
+
 
 result_dir = rawdir + "LD_result/"
 
@@ -604,37 +622,32 @@ for d1n in d1ns:
     for root, dirs, files in os.walk(d1n):
         for d2n in dirs:
             if ("LD_2024_" in d2n) :
-            #if ("03_10_15_29" in d2n) :
                 anadir = d1n + d2n + "/"
-                print (anadir)
                 rn = result_dir + "/" + d2n + ".ld"
+                pn = result_dir + "/" + d2n + "SBND_APA_CFG_FEMB_Data_Mode_DIS.png"
+                if (os.path.isfile(pn)):
+                    continue
                 if (os.path.isfile(rn)):
-                    #continue
+                    if (int(d2n[8:10]) == 2) and (int(d2n[11:13])<16): #before 02/16, .femb and .wib save wrong data, dischard
+                        continue 
                     with open(rn, 'rb') as f:
                         result = pickle.load(f)
-                        if len(result[0]) < 20:
+                        flg = True
+                        for x in result:
+                            if len(x) > 20:
+                                flg = False
+                                break
+                        if flg:
                             sub1dir = d2n[3:13]
                             sub2dir = d2n 
                             rawdatapath = result_dir + "/../" + sub1dir + "/" + sub2dir + "/"
                             fechnregs = []
                             Dec_add_cfgs(rawdatapath, result, rn)
-                            #for cfgroot, cfgdirs, cfgfiles in os.walk(rawdatapath):
-                            #    for cfn in cfgfiles:
-                            #        if (".femb" in cfn[-5:]) and ("WIB_10_226_34_" in cfn) and ("FEMB_" in cfn):
-                            #            fechnregs += FEMBREG_Process(rawdatapath + cfn)
-                            #    break
-                            #for xi in range(len(result)):
-                            #    for ci in fechnregs:
-                            #        if (ci[1] == int(result[xi][5])) and (ci[2] ==  int(result[xi][6])) and (ci[3] == int(result[xi][7])) and (ci[4] == int(result[xi][8])) : 
-                            #            result[xi] +=  ci
-                            #            fechnregs.remove(ci)
-                            #            break
-                            #with open(rn, 'wb') as f:
-                            #    pickle.dump(result, f)
                         else:
-                            pass
-                            #continue
-                            DIS_PLOTs(result, rn)
+                            print ("Invalid, discard")
+                            #pass
+                            #DIS_PLOTs(result, rn)
+                            continue
                 else:
                     rms_f = False
                     result = SBND_ANA(anadir, rms_f = rms_f, rn=rn)

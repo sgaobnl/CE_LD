@@ -89,15 +89,19 @@ def RMS_ANA(dec_chn, ns=[5]):
 
 
 def RMS_TS_ANA(rmsts, result_dir, rms_flg=True):
-    print (len(rmsts))
+    lrmsts = []
     for x in rmsts:
-        if x[4] != 0:
-            rmsts.remove(x)
+        if x[1] is None:
+            pass
+        elif x[4] != 0:
+            pass
         elif x[5] != 0:
-            rmsts.remove(x)
-        if rms_flg and (x[3] != 0):
-            rmsts.remove(x)
-    print (len(rmsts))
+            pass
+        elif rms_flg and (x[3] != 0):
+            pass
+        else:
+            lrmsts.append(x)
+    rmsts = lrmsts
     rmsts=sorted(rmsts, key=operator.itemgetter(0))
     ts = []
     eums = []
@@ -114,9 +118,9 @@ def RMS_TS_ANA(rmsts, result_dir, rms_flg=True):
     wyss = []
 
     for x in rmsts:
-        tstr = datetime.datetime.fromtimestamp(x[0]).strftime("%Y-%m-%d %H:%M:%S")
-        ts.append(tstr)
         if (x[1][0][2]>1000) and (x[1][1][2]>1000) and (x[1][2][2]>1000) and (x[1][3][2]>1000) and (x[1][4][2]>1000) and (x[1][5][2]>1000):
+            tstr = datetime.datetime.fromtimestamp(x[0]).strftime("%Y-%m-%d %H:%M:%S")
+            ts.append(tstr)
             eums.append(x[1][0][0])
             euss.append(x[1][0][1])
             wums.append(x[1][1][0])
@@ -189,7 +193,7 @@ def RMS_TS_ANA(rmsts, result_dir, rms_flg=True):
 
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_result/"""
 rawdir = """/scratch_local/SBND_Installation/data/commissioning/LD_result/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD/LD_result/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD/LD_result/"""
 
 result_dir = rawdir 
 
@@ -218,23 +222,34 @@ for root, dirs, files in os.walk(rawdir):
             datex = datetime.datetime.strptime(logdate,'%Y_%m_%d_%H_%M_%S')
             x = datex.timestamp()
             if (os.path.isfile(rn)):
-                with open(rn, 'rb') as f:
-                    result = pickle.load(f)
-                    dec_chn = result
-                    sts = 0
-                    femb_tst_sel = 0
-                    tst_wfm_gen_mode = 0
-                    for i in range(len(dec_chn)):
-                        if len(dec_chn[i]) > 20:
-                            sts = dec_chn[i][0-17]
-                            femb_tst_sel = dec_chn[i][9-31]
-                            tst_wfm_gen_mode = dec_chn[i][4-41]
-                            break
-                if (femb_tst_sel == 0 ) and (tst_wfm_gen_mode == 0):
-                    res = RMS_ANA(dec_chn=result, ns=[5])
-                    rmsts.append([x,res, rn, sts, femb_tst_sel, tst_wfm_gen_mode])
+                if (int(fn[8:10]) == 2) and (int(fn[11:13])<16): 
+                    with open(rn, 'rb') as f:
+                        result = pickle.load(f)
+                        res = RMS_ANA(dec_chn=result, ns=[5])
+                        rmsts.append([x,res, rn, 0, 0, 0])
                 else:
-                    rmsts.append([x,None, rn, sts, femb_tst_sel, tst_wfm_gen_mode])
+                    with open(rn, 'rb') as f:
+                        result = pickle.load(f)
+                        dec_chn = result
+                        sts = 0
+                        femb_tst_sel = 0
+                        tst_wfm_gen_mode = 0
+                        for i in range(len(dec_chn)):
+                            if len(dec_chn[i]) > 20:
+                                sts = dec_chn[i][0-17]
+                                sg0 = dec_chn[i][0-17+2]
+                                sg1 = dec_chn[i][0-17+3]
+                                st0 = dec_chn[i][0-17+4]
+                                st1 = dec_chn[i][0-17+5]
+                                femb_tst_sel = dec_chn[i][9-31]
+                                tst_wfm_gen_mode = dec_chn[i][4-41]
+                                break
+                
+                    if (femb_tst_sel == 0 ) and (tst_wfm_gen_mode == 0) and (sg0 == 0) and (sg1 == 1) and (st0 == 1) and (st1 == 1):
+                        res = RMS_ANA(dec_chn=result, ns=[5])
+                        rmsts.append([x,res, rn, sts, femb_tst_sel, tst_wfm_gen_mode])
+                    else:
+                        rmsts.append([x,None, rn, sts, femb_tst_sel, tst_wfm_gen_mode])
 
 with open (frmsts, "wb") as fs:
     pickle.dump(rmsts, fs)
