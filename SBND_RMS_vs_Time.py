@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue Feb 20 16:56:05 2024
+Last modified: Sun Mar 10 22:09:41 2024
 """
 
 #defaut setting for scientific caculation
@@ -88,7 +88,20 @@ def RMS_ANA(dec_chn, ns=[5]):
     return eu, wu, ev, wv, ey, wy
 
 
-def RMS_TS_ANA(rmsts, result_dir):
+def RMS_TS_ANA(rmsts, result_dir, rms_flg=True):
+    lrmsts = []
+    for x in rmsts:
+        if x[1] is None:
+            pass
+        elif x[4] != 0:
+            pass
+        elif x[5] != 0:
+            pass
+        elif rms_flg and (x[3] != 0):
+            pass
+        else:
+            lrmsts.append(x)
+    rmsts = lrmsts
     rmsts=sorted(rmsts, key=operator.itemgetter(0))
     ts = []
     eums = []
@@ -105,20 +118,23 @@ def RMS_TS_ANA(rmsts, result_dir):
     wyss = []
 
     for x in rmsts:
-        tstr = datetime.datetime.fromtimestamp(x[0]).strftime("%Y-%m-%d %H:%M:%S")
-        ts.append(tstr)
-        eums.append(x[1][0][0])
-        euss.append(x[1][0][1])
-        wums.append(x[1][1][0])
-        wuss.append(x[1][1][1])
-        evms.append(x[1][2][0])
-        evss.append(x[1][2][1])
-        wvms.append(x[1][3][0])
-        wvss.append(x[1][3][1])
-        eyms.append(x[1][4][0])
-        eyss.append(x[1][4][1])
-        wyms.append(x[1][5][0])
-        wyss.append(x[1][5][1])
+        if (x[1][0][2]>1000) and (x[1][1][2]>1000) and (x[1][2][2]>1000) and (x[1][3][2]>1000) and (x[1][4][2]>1000) and (x[1][5][2]>1000):
+            tstr = datetime.datetime.fromtimestamp(x[0]).strftime("%Y-%m-%d %H:%M:%S")
+            ts.append(tstr)
+            eums.append(x[1][0][0])
+            euss.append(x[1][0][1])
+            wums.append(x[1][1][0])
+            wuss.append(x[1][1][1])
+            evms.append(x[1][2][0])
+            evss.append(x[1][2][1])
+            wvms.append(x[1][3][0])
+            wvss.append(x[1][3][1])
+            eyms.append(x[1][4][0])
+            eyss.append(x[1][4][1])
+            wyms.append(x[1][5][0])
+            wyss.append(x[1][5][1])
+        else:
+            continue
     #t0 = int(ts[0]//(3600*24))*3600*24
     #t0 = int(ts[0])
     #t0str = datetime.datetime.fromtimestamp(t0).strftime("%Y-%m-%d %H:%M:%S")
@@ -169,30 +185,77 @@ def RMS_TS_ANA(rmsts, result_dir):
     plt.gcf().autofmt_xdate()
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
     #plt.show()
-    plt.savefig(result_dir + "RMS_vs_Time.png")
+    if rms_flg:
+        plt.savefig(result_dir + "RMS_vs_Time.png")
+    else:
+        plt.savefig(result_dir + "RMS_Cali_vs_Time.png")
     plt.close()
 
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_result/"""
 rawdir = """/scratch_local/SBND_Installation/data/commissioning/LD_result/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD/LD_result/"""
 
 result_dir = rawdir 
 
-rmsts = []
+frmsts = result_dir + "RMSvsTime.rms"
+if (os.path.isfile(frmsts)):
+    with open (frmsts, "rb") as fs:
+        rmsts = pickle.load(fs)
+else:
+    rmsts = []
+
 for root, dirs, files in os.walk(rawdir):
     #for fn in files[0:20]:
     for fn in files:
-        if ("LD_2024_" in fn) and (".png" not in fn):
+        if ("LD_2024_" in fn) and (".png" not in fn) and (".ld" in fn[-3:]):
             rn = rawdir + fn
+            if len(rmsts) != 0:
+                flg = False
+                for rmst in rmsts:
+                    if (rmst[2] == rn):
+                        flg = True
+                        break
+                if flg == True:
+                    continue
             print (rn)
             logdate=fn[3:3+19]
             datex = datetime.datetime.strptime(logdate,'%Y_%m_%d_%H_%M_%S')
             x = datex.timestamp()
             if (os.path.isfile(rn)):
-                with open(rn, 'rb') as f:
-                    result = pickle.load(f)
-                res = RMS_ANA(dec_chn=result, ns=[5])
-            rmsts.append([x,res])
+                if (int(fn[8:10]) == 2) and (int(fn[11:13])<16): 
+                    with open(rn, 'rb') as f:
+                        result = pickle.load(f)
+                        res = RMS_ANA(dec_chn=result, ns=[5])
+                        rmsts.append([x,res, rn, 0, 0, 0])
+                else:
+                    with open(rn, 'rb') as f:
+                        result = pickle.load(f)
+                        dec_chn = result
+                        sts = 0
+                        femb_tst_sel = 0
+                        tst_wfm_gen_mode = 0
+                        for i in range(len(dec_chn)):
+                            if len(dec_chn[i]) > 20:
+                                sts = dec_chn[i][0-17]
+                                sg0 = dec_chn[i][0-17+2]
+                                sg1 = dec_chn[i][0-17+3]
+                                st0 = dec_chn[i][0-17+4]
+                                st1 = dec_chn[i][0-17+5]
+                                femb_tst_sel = dec_chn[i][9-31]
+                                tst_wfm_gen_mode = dec_chn[i][4-41]
+                                break
+                
+                    if (femb_tst_sel == 0 ) and (tst_wfm_gen_mode == 0) and (sg0 == 0) and (sg1 == 1) and (st0 == 1) and (st1 == 1):
+                        res = RMS_ANA(dec_chn=result, ns=[5])
+                        rmsts.append([x,res, rn, sts, femb_tst_sel, tst_wfm_gen_mode])
+                    else:
+                        rmsts.append([x,None, rn, sts, femb_tst_sel, tst_wfm_gen_mode])
 
-RMS_TS_ANA(rmsts, result_dir)
+with open (frmsts, "wb") as fs:
+    pickle.dump(rmsts, fs)
+
+import copy
+RMS_TS_ANA(copy.deepcopy(rmsts), result_dir, rms_flg=True)
+RMS_TS_ANA(copy.deepcopy(rmsts), result_dir, rms_flg=False)
 
 
