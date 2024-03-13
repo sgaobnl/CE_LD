@@ -37,7 +37,7 @@ while True:
         if "Y" in onstr or "y" in onstr:
             cratenos.append(ci)
     print (" FEMBs on crate  ", cratenos, "will be turned off") 
-    ynstr = input ("Confirm? (Y/N)")
+    ynstr = input ("Confirm? (Y/N): ")
     if "Y" in onstr or "y" in ynstr:
         break
     
