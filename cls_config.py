@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sat Mar  9 16:41:36 2024
+Last modified: Wed Mar 13 01:10:21 2024
 """
 
 #defaut setting for scientific caculation
@@ -524,6 +524,22 @@ class CLS_CONFIG:
             print ("select system clock and CMD from MBB")
             self.WIB_PLL_cfg(wib_ip ) #select system clock and CMD from MBB
 
+    def CE_FPGADAC(self, fpgadac_v=0):
+        for wib_ip in list(self.act_fembs.keys()):
+            for femb_addr in range(4):
+                if self.act_fembs[wib_ip][femb_addr] == True:
+                    self.UDP.UDP_IP = wib_ip
+                    reg_5_value = self.UDP.read_reg_femb(femb_addr,  5)
+                    reg_5_value = (reg_5_value&0xFFFFFF00) + (fpgadac_v& 0xFF )
+                    self.UDP.write_reg_femb_checked (femb_addr,  5, reg_5_value)
+   def CE_PLSDLY(self, dly=0):
+        for wib_ip in list(self.act_fembs.keys()):
+            for femb_addr in range(4):
+                if self.act_fembs[wib_ip][femb_addr] == True:
+                    self.UDP.UDP_IP = wib_ip
+                    reg_5_value = self.UDP.read_reg_femb(femb_addr,  5)
+                    reg_5_value = (reg_5_value&0xFFFF00FF) + ((dly<<8)& 0xFF00 ))
+                    self.UDP.write_reg_femb_checked (femb_addr,  5, reg_5_value)
 
     def CE_CHK_CFG(self, \
                    pls_cs=0, dac_sel=0, fpgadac_en=0, asicdac_en=0, fpgadac_v=0, \
@@ -695,19 +711,18 @@ class CLS_CONFIG:
                 self.UDP.write_reg_wib(0x1E, 0)
         time.sleep(1)
         
-
-        while True:
-            wibtool_flg = False
-            for wib_ip in list(self.act_fembs.keys()):
-                self.UDP.UDP_IP = wib_ip
-                wibtool_v = self.UDP.read_reg_wib(0x06) #flag to indicate if wib tool is configurating CE
-                if wibtool_v != 0:
-                    wibtool_flg = True
-                    print ("WIB tool is configurating CE, wait 5 minutes...")
-                    time.sleep(60*5)
-                    break
-            if wibtool_flg != True:
-                break
+#        while True:
+#            wibtool_flg = False
+#            for wib_ip in list(self.act_fembs.keys()):
+#                self.UDP.UDP_IP = wib_ip
+#                wibtool_v = self.UDP.read_reg_wib(0x06) #flag to indicate if wib tool is configurating CE
+#                if wibtool_v != 0:
+#                    wibtool_flg = True
+#                    print ("WIB tool is configurating CE, wait 5 minutes...")
+#                    time.sleep(60*5)
+#                    break
+#            if wibtool_flg != True:
+#                break
 
         tpc_data = []
         for wib_ip in list(self.act_fembs.keys()):
