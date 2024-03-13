@@ -17,7 +17,7 @@ do
     export file${NUM_OF_FILE}=`base64 --wrap 0 $i`
     export filename${NUM_OF_FILE}=`basename $i`
     NUM_OF_FILE=$(( $NUM_OF_FILE+1 ))
-done < <(find /scratch_local/SBND_Installation/data/commissioning/LD_result/ -name "$filepattern*" -type f | sort -r)
+done < <(find /scratch_local/SBND_Installation/data/commissioning/LD_result/ -name "$filepattern*" -type f -printf "%T@ %p\n" | sort -n | cut -d' ' -f 2-)
 
 echo "Sending ${NUM_OF_FILE} images"
 
