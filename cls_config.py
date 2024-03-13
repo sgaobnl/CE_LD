@@ -696,18 +696,18 @@ class CLS_CONFIG:
         time.sleep(1)
         
 
-        while True:
-            wibtool_flg = False
-            for wib_ip in list(self.act_fembs.keys()):
-                self.UDP.UDP_IP = wib_ip
-                wibtool_v = self.UDP.read_reg_wib(0x06) #flag to indicate if wib tool is configurating CE
-                if wibtool_v != 0:
-                    wibtool_flg = True
-                    print ("WIB tool is configurating CE, wait 5 minutes...")
-                    time.sleep(60*5)
-                    break
-            if wibtool_flg != True:
-                break
+#        while True:
+#            wibtool_flg = False
+#            for wib_ip in list(self.act_fembs.keys()):
+#                self.UDP.UDP_IP = wib_ip
+#                wibtool_v = self.UDP.read_reg_wib(0x06) #flag to indicate if wib tool is configurating CE
+#                if wibtool_v != 0:
+#                    wibtool_flg = True
+#                    print ("WIB tool is configurating CE, wait 5 minutes...")
+#                    time.sleep(60*5)
+#                    break
+#            if wibtool_flg != True:
+#                break
 
         tpc_data = []
         for wib_ip in list(self.act_fembs.keys()):
