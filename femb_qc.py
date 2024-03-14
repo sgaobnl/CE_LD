@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Mar  8 14:11:15 2024
+Last modified: 3/13/2024 11:14:38 AM
 """
 
 #defaut setting for scientific caculation
@@ -239,7 +239,7 @@ class FEMB_QC:
             femb_env = fembs[2]
             femb_rerun_f = fembs[3]
             femb_c_ret = fembs[4]
-            if "#TIME" is not in self.CLS.err_code:
+            if "#TIME" not in self.CLS.err_code:
                 femb_date = "01011999"
             else:
                 femb_date = self.CLS.err_code[self.CLS.err_code.index("#TIME") +5: self.CLS.err_code.index("#IP")] 

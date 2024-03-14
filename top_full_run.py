@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-File Name: cls_femb_config.py
+File Name: LD_femb_config.py
 Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Mar 13 01:29:06 2024
+Last modified: 3/14/2024 7:27:00 AM
 """
 
 #defaut setting for scientific caculation
@@ -35,6 +35,7 @@ LD.val=200
 
 LD.ldflg=True
 LD.UDP.MultiPort = True
+#LD.UDP.MultiPort = False
 LD.WIB_IPs = [
               "10.226.34.11",
               "10.226.34.12",
@@ -61,6 +62,7 @@ LD.WIB_IPs = [
               "10.226.34.45",
               "10.226.34.46"
               ]
+#LD.WIB_IPs = ["192.168.121.1"]
 for wib_ip in LD.WIB_IPs:
     print (wib_ip)
     if ".16" in wib_ip:
@@ -78,10 +80,13 @@ for wib_ip in LD.WIB_IPs:
     else:
         LD.act_fembs[wib_ip] = [True, True, True, True]
 
+LD.act_fembs[wib_ip] = [True, False, False, False]
+savedir ="""/scratch_local/SBND_Installation/data/commissioning/full_run/""" 
+#savedir ="""D:/full_run/""" 
+
 def Create_Folder():
     runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
     print ("Test starts ", runtime)
-    savedir ="""/scratch_local/SBND_Installation/data/commissioning/full_run/""" 
     LD.savedir = savedir + "/LD_" + runtime + "/"
     if (os.path.exists(LD.savedir)):
         pass
@@ -94,123 +99,224 @@ def Create_Folder():
     print("Save data in "+LD.savedir)
 
 def DAQ(cfglog):
-    time.sleep(2)
+#    time.sleep(2)
     cfgfn = LD.savedir + "CE.CFG"
     with open(cfgfn, "wb") as fp:
         pickle.dump(cfglog, fp)
     LD.TPC_UDPACQ(cfglog)
 
 
+recfn = savedir + "record.txt"
+
+testno = int(sys.argv[1])
 print ("############################################################################################")
-print ("BL 200mv vs 900mV")
-#14mV/fC, 2.0us, 200mV, RMS 
-Create_Folder()
-cfglog = CLS.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1)
-DAQ(cfglog)
-
-#14mV/fC, 2.0us, 900mV, RMS 
-Create_Folder()
-cfglog = CLS.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=0)
-DAQ(cfglog)
-
-print ("Different Tps")
-#14mV/fC, 900mV, RMS 
-for i in range(4):
-    st0 = i%2
-    st1 = i//2
+if testno == 1:
+    textnote = "{}:".format(datetime.now())
+    textnote += "BL 200mv vs 900mV \n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+    #14mV/fC, 2.0us, 200mV, RMS 
+    #print ( datetime.now() )
     Create_Folder()
-    cfglog = CLS.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =st0, st1=st1, snc=0)
+    #print ( datetime.now() )
+    cfglog = LD.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1)
+    #print ( datetime.now() )
     DAQ(cfglog)
+    #print ( datetime.now() )
 
-print ("Different gains")
-#2.0us, 900mV, RMS 
-for i in range(4):
-    sg0 = i%2
-    sg1 = i//2
+    #14mV/fC, 2.0us, 900mV, RMS 
     Create_Folder()
-    cfglog = CLS.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=sg0, sg1=sg1, st0 =1, st1=1, snc=0)
+    cfglog = LD.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=0)
     DAQ(cfglog)
+    
+if testno == 2:
+    textnote = "{}:".format(datetime.now())
+    textnote += "Different Tps\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
 
-print ("Different Leak Currents")
-#14, 2.0us, 900mV, RMS 
-for i in range(4):
-    slk0 = i%2
-    slk1 = i//2
-    Create_Folder()
-    cfglog = CLS.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=0, slk0=slk0, slk1=slk1)
-    DAQ(cfglog)
+    #14mV/fC, 900mV, RMS 
+    for i in range(4):
+        st0 = i%2
+        st1 = i//2
+        Create_Folder()
+        cfglog = LD.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =st0, st1=st1, snc=0)
+        DAQ(cfglog)
+    
+if testno == 3:
+    textnote = "{}:".format(datetime.now())
+    textnote += "Different gains\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
 
-print ("FPGA-DAC") #20min
-#14mV/fC, 2.0us, 200mV, FPGA_DAC
-cfglog = CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
-for dacv in range(64):
-    CLS.CE_FPGADAC(fpgadac_v=dacv)
-    Create_Folder()
-    DAQ(cfglog)
+    #2.0us, 900mV, RMS 
+    for i in range(4):
+        sg0 = i%2
+        sg1 = i//2
+        Create_Folder()
+        cfglog = LD.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=sg0, sg1=sg1, st0 =1, st1=1, snc=0)
+        DAQ(cfglog)
+    
+if testno == 4:
+    textnote = "{}:".format(datetime.now())
+    textnote += "Different Leak Currents: #14, 2.0us, 900mV, RMS\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
 
-print ("FPGA-DAC-DLY-RUN")
-#14mV/fC, 2.0us, 200mV, FPGA_DAC 
-cfglog = CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
-for dly in range(50):
-    CLS.CE_PLSDLY(dly=dly)
-    Create_Folder()
-    DAQ(cfglog)
+    for i in range(4):
+        slk0 = i%2
+        slk1 = i//2
+        Create_Folder()
+        cfglog = LD.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=0, slk0=slk0, slk1=slk1)
+        DAQ(cfglog)
+    
+if testno == 5:
+    textnote = "{}:".format(datetime.now())
+    textnote += "FPGA-DAC: #14mV/fC, 2.0us, 200mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
 
-#7.8mV/fC, 2.0us, 200mV, FPGA_DAC 
-cfglog = CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=1, sg1=0, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
-for dacv in range(0,64,4):
-    CLS.CE_FPGADAC(fpgadac_v=dacv)
-    Create_Folder()
-    DAQ(cfglog)
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+    for dacv in range(32):
+        LD.CE_FPGADAC(fpgadac_v=dacv)
+        Create_Folder()
+        DAQ(cfglog)
+    
+if testno == 6:
+    textnote = "{}:".format(datetime.now())
+    textnote += "FPGA-DAC-DLY-RUN:#14mV/fC, 2.0us, 200mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+     
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+    for dly in range(50):
+        LD.CE_PLSDLY(dly=dly)
+        Create_Folder()
+        DAQ(cfglog)
+    
+if testno == 7:
+    textnote = "{}:".format(datetime.now())
+    textnote += " #7.8mV/fC, 2.0us, 200mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
 
-#14mV/fC, 2.0us, 900mV, FPGA_DAC
-cfglog = CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=0, swdac1=1, swdac2=0, data_cs=0)
-for dacv in range(0,32,4):
-    CLS.CE_FPGADAC(fpgadac_v=dacv)
-    Create_Folder()
-    DAQ(cfglog)
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=1, sg1=0, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+    for dacv in range(0,64,4):
+        LD.CE_FPGADAC(fpgadac_v=dacv)
+        Create_Folder()
+        DAQ(cfglog)
+    
+if testno == 8:
+    textnote = "{}:".format(datetime.now())
+    textnote += "#14mV/fC, 2.0us, 900mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
 
-#7.8mV/fC, 2.0us, 900mV, FPGA_DAC 
-cfglog = CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=1, sg1=0, st0 =1, st1=1, snc=0, swdac1=1, swdac2=0, data_cs=0)
-for dacv in range(0,64,4):
-    CLS.CE_FPGADAC(fpgadac_v=dacv)
-    Create_Folder()
-    DAQ(cfglog)
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=0, swdac1=1, swdac2=0, data_cs=0)
+    for dacv in range(0,32,4):
+        LD.CE_FPGADAC(fpgadac_v=dacv)
+        Create_Folder()
+        DAQ(cfglog)
+    
+if testno == 9:
+    textnote = "{}:".format(datetime.now())
+    textnote += "#7.8mV/fC, 2.0us, 900mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
 
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=1, sg1=0, st0 =1, st1=1, snc=0, swdac1=1, swdac2=0, data_cs=0)
+    for dacv in range(0,64,4):
+        LD.CE_FPGADAC(fpgadac_v=dacv)
+        Create_Folder()
+        DAQ(cfglog)
+    
+if testno == 10:
+    textnote = "{}:".format(datetime.now())
+    textnote += "0.5us: #14mV/fC, 0.5us, 200mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
 
-#14mV/fC, 0.5us, 200mV, FPGA_DAC
-cfglog = CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=0, snc=1, swdac1=1, swdac2=0, data_cs=0)
-for dacv in range(0,32,4):
-    CLS.CE_FPGADAC(fpgadac_v=dacv)
-    Create_Folder()
-    DAQ(cfglog)
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=0, snc=1, swdac1=1, swdac2=0, data_cs=0)
+    for dacv in range(0,32,4):
+        LD.CE_FPGADAC(fpgadac_v=dacv)
+        Create_Folder()
+        DAQ(cfglog)
+    
+if testno == 11:
+    textnote = "{}:".format(datetime.now())
+    textnote += "1.0us: #14mV/fC, 1.0us, 200mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
 
-#14mV/fC, 1.0us, 200mV, FPGA_DAC
-cfglog = CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =0, st1=0, snc=1, swdac1=1, swdac2=0, data_cs=0)
-for dacv in range(0,32,4):
-    CLS.CE_FPGADAC(fpgadac_v=dacv)
-    Create_Folder()
-    DAQ(cfglog)
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =0, st1=0, snc=1, swdac1=1, swdac2=0, data_cs=0)
+    for dacv in range(0,32,4):
+        LD.CE_FPGADAC(fpgadac_v=dacv)
+        Create_Folder()
+        DAQ(cfglog)
+    
+if testno == 12:
+    textnote = "{}:".format(datetime.now())
+    textnote += "2.0us: #14mV/fC, 2.0us, 200mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
 
-#14mV/fC, 2.0us, 200mV, FPGA_DAC
-cfglog = CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
-for dacv in range(0,32,4):
-    CLS.CE_FPGADAC(fpgadac_v=dacv)
-    Create_Folder()
-    DAQ(cfglog)
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+    for dacv in range(0,32,4):
+        LD.CE_FPGADAC(fpgadac_v=dacv)
+        Create_Folder()
+        DAQ(cfglog)
+    
+if testno == 13:
+    textnote = "{}:".format(datetime.now())
+    textnote += "3.0us TP: #14mV/fC, 3.0us, 200mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+    
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =0, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+    for dacv in range(0,32,4):
+        LD.CE_FPGADAC(fpgadac_v=dacv)
+        Create_Folder()
+        DAQ(cfglog)
+    
+if testno == 14:
+    textnote = "{}:".format(datetime.now())
+    textnote += "ASIC-DAC: #14mV/fC, 2.0us, 200mV, ASIC_DAC\n"
+    
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
 
-#14mV/fC, 3.0us, 200mV, FPGA_DAC
-cfglog = CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =0, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
-for dacv in range(0,32,4):
-    CLS.CE_FPGADAC(fpgadac_v=dacv)
-    Create_Folder()
-    DAQ(cfglog)
+    for dacv in range(0,63,4):
+        cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=0, swdac2=1, dac= dacv, data_cs=0)
+        Create_Folder()
+        DAQ(cfglog)
 
-#14mV/fC, 2.0us, 200mV, ASIC_DAC
-for dacv in range(0,63,4):
-    CLS.CE_CHK_CFG(pls_cs=1, dac_sel=1, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=0, swdac2=1, dac= dacv, data_cs=0)
-    Create_Folder()
-    DAQ(cfglog)
+if testno == 15:
+    textnote = "{}:".format(datetime.now())
+    textnote += "FPGA-DAC (Saturation): #14mV/fC, 2.0us, 200mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+    for dacv in range(32,64,4):
+        LD.CE_FPGADAC(fpgadac_v=dacv)
+        Create_Folder()
+        DAQ(cfglog)
+    
 
 print ("Done")
 

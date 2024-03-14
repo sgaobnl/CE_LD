@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/13/2024 1:17:55 PM
+Last modified: 3/13/2024 1:38:57 PM
 """
 
 #defaut setting for scientific caculation
@@ -168,9 +168,12 @@ def SBND_ANA(rawdir, rms_f=False):
     fns = []
     for root, dirs, files in os.walk(rawdir):
         for fn in files:
+            if "png" in fn:
+                return None
             if ("WIB_" in fn) and ("FEMB_" in fn) and (".bin" in fn):
                 wibloc = fn.find("FEMB_")
-                crateno = int(fn[wibloc-2])
+                #crateno = int(fn[wibloc-2])
+                crateno = 0
                 ptbno = int(fn[wibloc-1])
                 fembno = int(fn[wibloc+5])
                 fns.append([crateno, ptbno, fembno, rawdir + fn])
@@ -203,15 +206,15 @@ def SBND_ANA(rawdir, rms_f=False):
                 dec_chn[i].append((chn_wfs[decch]))
                 dec_chn[i].append((chn_avgwfs[decch]))
          
-    fr =rawdir + "test_results"+".result" 
-    with open(fr, 'wb') as f:
-        pickle.dump(dec_chn, f)
-    fr =rawdir + "test_results"+".csv" 
-    with open (fr, 'w') as fp:
-        top_row = "APA,Crate,FEMB_SN,POSITION,WIB_CONNECTION,Crate_No,WIB_no,WIB_FEMB_LOC,FEMB_CH,Wire_type,Wire_No,,RMS Noise, Pedestal, Pulse_Pos_Peak, Pulse_Neg_Peak"
-        fp.write( top_row + "\n")
-        for x in dec_chn:
-            fp.write(",".join(str(i) for i in x[0:16]) +  "," + "\n")
+    #fr =rawdir + "test_results"+".result" 
+    #with open(fr, 'wb') as f:
+    #    pickle.dump(dec_chn, f)
+    #fr =rawdir + "test_results"+".csv" 
+    #with open (fr, 'w') as fp:
+    #    top_row = "APA,Crate,FEMB_SN,POSITION,WIB_CONNECTION,Crate_No,WIB_no,WIB_FEMB_LOC,FEMB_CH,Wire_type,Wire_No,,RMS Noise, Pedestal, Pulse_Pos_Peak, Pulse_Neg_Peak"
+    #    fp.write( top_row + "\n")
+    #    for x in dec_chn:
+    #        fp.write(",".join(str(i) for i in x[0:16]) +  "," + "\n")
     return dec_chn
 
 def d_dec_plt(dec_chn, n=1):
@@ -385,33 +388,36 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
             #print ("result saves at {}".format(ffig))
             #plt.savefig(fn)
             plt.close()
+src = "D:/full_run/"
 
+for root, dirs, files in os.walk(src):
+    for onedir in dirs:
+        if "LD_2024" in onedir:
+            rawdir = root + onedir+"/"
+            print (rawdir)
+            SBND_ANA(rawdir, rms_f = False)
 
-
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_00_00_05/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_12_26_03/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_13_24_29/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_00_13_55/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_36/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
-#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_09_13_41/"""
-#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
-#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_06_00_06_22/"""
-#rawdir = """/scratch_local/SBND_Installation/data/commissioning/sh_time_0_5_us/03_01_2024/LD_2024_03_01_11_32_26/"""
-fr =rawdir + "test_results"+".result" 
-if (os.path.isfile(fr)):
-    with open(fr, 'rb') as f:
-        result = pickle.load(f)
-    pass
-else:
-    #if "RMS" in rawdir:
-    #    rms_f = True
-    #else:
-    rms_f = False
-
-    result = SBND_ANA(rawdir, rms_f = rms_f)
-
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_00_00_05/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_12_26_03/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_13_24_29/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_00_13_55/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_36/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
+##rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_09_13_41/"""
+##rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
+##rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_06_00_06_22/"""
+##rawdir = """/scratch_local/SBND_Installation/data/commissioning/sh_time_0_5_us/03_01_2024/LD_2024_03_01_11_32_26/"""
+#fr =rawdir + "test_results"+".result" 
+#if (os.path.isfile(fr)):
+#    with open(fr, 'rb') as f:
+#        result = pickle.load(f)
+#    pass
+#else:
+#    rms_f = False
+#
+#    result = SBND_ANA(rawdir, rms_f = rms_f)
+#
 #DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,8])
 #DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
 #

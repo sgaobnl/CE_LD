@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Mar 13 01:10:21 2024
+Last modified: 3/13/2024 11:53:28 AM
 """
 
 #defaut setting for scientific caculation
@@ -532,13 +532,14 @@ class CLS_CONFIG:
                     reg_5_value = self.UDP.read_reg_femb(femb_addr,  5)
                     reg_5_value = (reg_5_value&0xFFFFFF00) + (fpgadac_v& 0xFF )
                     self.UDP.write_reg_femb_checked (femb_addr,  5, reg_5_value)
-   def CE_PLSDLY(self, dly=0):
+
+    def CE_PLSDLY(self, dly=0):
         for wib_ip in list(self.act_fembs.keys()):
             for femb_addr in range(4):
                 if self.act_fembs[wib_ip][femb_addr] == True:
                     self.UDP.UDP_IP = wib_ip
                     reg_5_value = self.UDP.read_reg_femb(femb_addr,  5)
-                    reg_5_value = (reg_5_value&0xFFFF00FF) + ((dly<<8)& 0xFF00 ))
+                    reg_5_value = (reg_5_value&0xFFFF00FF) + ((dly<<8)& 0xFF00 )
                     self.UDP.write_reg_femb_checked (femb_addr,  5, reg_5_value)
 
     def CE_CHK_CFG(self, \
@@ -709,7 +710,8 @@ class CLS_CONFIG:
                 self.UDP.write_reg_wib(0x1E, 3)
             else:
                 self.UDP.write_reg_wib(0x1E, 0)
-        time.sleep(1)
+        print ("wait 3 seconds")
+        time.sleep(3)
         
 #        while True:
 #            wibtool_flg = False
@@ -755,6 +757,12 @@ class CLS_CONFIG:
             self.UDP.write_reg_wib_checked(0x01, 0x2) #Time Stamp Reset command encoded in 2MHz 
             self.UDP.write_reg_wib_checked(0x01, 0x0) 
             self.UDP.write_reg_wib_checked(18, 0x8000) #reset error counters
+        if (self.jumbo_flag):
+            if ((self.UDP.read_reg_wib(0x1F)&0xFFF) != 0xEFB): 
+                self.UDP.write_reg_wib_checked(0x1F, 0xEFB) #normal operation
+        else:
+            if ((self.UDP.read_reg_wib(0x1F)&0xFFF) != 0x1FB): 
+                self.UDP.write_reg_wib_checked(0x1F, 0x1FB) #normal operation
         #if (self.DAQstream_en):
         #    self.UDP.write_reg_wib_checked(20, 0x03) #disable data stream and synchronize to Nevis
         #    self.UDP.write_reg_wib_checked(20, 0x00) #enable data stream to Nevis
