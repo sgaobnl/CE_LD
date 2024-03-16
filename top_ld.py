@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Jan 31 21:29:19 2024
+Last modified: Sat Mar 16 16:28:09 2024
 """
 
 #defaut setting for scientific caculation
@@ -76,16 +76,14 @@ for wib_ip in LD.WIB_IPs:
     print (wib_ip)
     if ".16" in wib_ip:
         LD.act_fembs[wib_ip] = [True, True, False, False]
-#    elif ".14" in wib_ip:
-#        LD.act_fembs[wib_ip] = [True, True, False, False]
     elif ".26" in wib_ip:
         LD.act_fembs[wib_ip] = [True, True, False, False]
     elif ".36" in wib_ip:
         LD.act_fembs[wib_ip] = [True, True, False, False]
     elif ".46" in wib_ip:
         LD.act_fembs[wib_ip] = [True, True, False, False]
-#    elif ".34.34" in wib_ip:
-#        LD.act_fembs[wib_ip] = [False, True, True, True]
+    elif ".34.34" in wib_ip:
+        LD.act_fembs[wib_ip] = [False, True, True, True]
     else:
         LD.act_fembs[wib_ip] = [True, True, True, True]
 
