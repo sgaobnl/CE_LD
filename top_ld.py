@@ -84,8 +84,8 @@ for wib_ip in LD.WIB_IPs:
         LD.act_fembs[wib_ip] = [True, True, False, False]
     elif ".46" in wib_ip:
         LD.act_fembs[wib_ip] = [True, True, False, False]
-    elif ".34.34" in wib_ip:
-        LD.act_fembs[wib_ip] = [False, True, True, True]
+#    elif ".34.34" in wib_ip:
+#        LD.act_fembs[wib_ip] = [False, True, True, True]
     else:
         LD.act_fembs[wib_ip] = [True, True, True, True]
 

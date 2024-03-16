@@ -570,6 +570,8 @@ class CLS_CONFIG:
             reg_5_value = ((pls_gap<<16)&0xFFFF0000) + ((pls_dly<<8)&0xFF00) + ( 0x00 )
 
         for wib_ip in list(self.act_fembs.keys()):
+            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Disable HS data from the WIB to PC through UDP
+        for wib_ip in list(self.act_fembs.keys()):
             for femb_addr in range(4):
                 if self.act_fembs[wib_ip][femb_addr] == True:
                     self.UDP.UDP_IP = wib_ip

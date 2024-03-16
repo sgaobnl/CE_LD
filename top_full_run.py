@@ -80,8 +80,9 @@ for wib_ip in LD.WIB_IPs:
     else:
         LD.act_fembs[wib_ip] = [True, True, True, True]
 
-LD.act_fembs[wib_ip] = [True, False, False, False]
+#LD.act_fembs[wib_ip] = [True, False, False, False]
 savedir ="""/scratch_local/SBND_Installation/data/commissioning/full_run/""" 
+print (savedir)
 #savedir ="""D:/full_run/""" 
 
 def Create_Folder():
@@ -317,6 +318,130 @@ if testno == 15:
         Create_Folder()
         DAQ(cfglog)
     
+if testno == 16:
+    textnote = "{}:".format(datetime.now())
+    textnote += "FPGA-DAC: #7.8mV/fC, 2.0us, 200mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=0, sg0=1, sg1=1, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+    for dacv in range(32):
+        LD.CE_FPGADAC(fpgadac_v=dacv)
+        Create_Folder()
+        DAQ(cfglog)
+
+if testno == 17:
+    textnote = "{}:".format(datetime.now())
+    textnote += "Different gains @200mV\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+
+    #2.0us, 200mV, RMS 
+    for i in range(4):
+        sg0 = i%2
+        sg1 = i//2
+        Create_Folder()
+        cfglog = LD.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=sg0, sg1=sg1, st0 =1, st1=1, snc=1)
+        DAQ(cfglog)
+
+if testno == 18:
+    textnote = "{}:".format(datetime.now())
+    textnote += " #4.7mV/fC, 2.0us, 200mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=0, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+    for dacv in range(0,64,4):
+        LD.CE_FPGADAC(fpgadac_v=dacv)
+        Create_Folder()
+        DAQ(cfglog)
+ 
+if testno == 19:
+    textnote = "{}:".format(datetime.now())
+    textnote += " #25mV/fC, 2.0us, 200mV, FPGA_DAC\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+
+    cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, fpgadac_en=1, fpgadac_v=0x08, sts=1, sg0=0, sg1=0, st0 =1, st1=1, snc=1, swdac1=1, swdac2=0, data_cs=0)
+    for dacv in range(0,16,2):
+        LD.CE_FPGADAC(fpgadac_v=dacv)
+        Create_Folder()
+        DAQ(cfglog)
+ 
+if testno == 20:
+    textnote = "{}:".format(datetime.now())
+    textnote += "Different Tps 200mV\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+
+    #14mV/fC, 200mV, RMS 
+    for i in range(4):
+        st0 = i%2
+        st1 = i//2
+        Create_Folder()
+        cfglog = LD.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =st0, st1=st1, snc=1)
+        DAQ(cfglog)
+    
+if testno == 21:
+    textnote = "{}:".format(datetime.now())
+    textnote += "Different gains, 200mV\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+
+    #2.0us, 200mV, RMS 
+    for i in range(4):
+        sg0 = i%2
+        sg1 = i//2
+        Create_Folder()
+        cfglog = LD.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=sg0, sg1=sg1, st0 =1, st1=1, snc=1)
+        DAQ(cfglog)
+    
+if testno == 22:
+    textnote = "{}:".format(datetime.now())
+    textnote += "Different Leak Currents: #14, 2.0us, 200mV, RMS\n"
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+
+    for i in range(4):
+        slk0 = i%2
+        slk1 = i//2
+        Create_Folder()
+        cfglog = LD.CE_CHK_CFG(pls_cs=0, dac_sel=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1, slk0=slk0, slk1=slk1)
+        DAQ(cfglog)
+
+if testno == 23:
+    textnote = "{}:".format(datetime.now())
+    textnote += "ASIC-DAC: #14mV/fC, 2.0us, 200mV, ASIC_DAC\n"
+    
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+
+    for dacv in range(0,32,2):
+        cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, swdac1=0, swdac2=1, dac= dacv, data_cs=0)
+        Create_Folder()
+        DAQ(cfglog)
+
+if testno == 24:
+    textnote = "{}:".format(datetime.now())
+    textnote += "ASIC-DAC: #7.8mV/fC, 2.0us, 200mV, ASIC_DAC\n"
+    
+    with open(recfn, "a+") as rfp:
+        rfp.write(textnote)
+    print (textnote)
+
+    for dacv in range(0,64,8):
+        cfglog = LD.CE_CHK_CFG(pls_cs=1, dac_sel=1, asicdac_en=1, sts=1, sg0=1, sg1=0, st0 =1, st1=1, swdac1=0, swdac2=1, dac= dacv, data_cs=0)
+        Create_Folder()
+        DAQ(cfglog)
+
 
 print ("Done")
 
