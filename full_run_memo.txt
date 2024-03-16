@@ -1,0 +1,325 @@
+test 1
+2024-03-14 07:16:33.820279:BL 200mv vs 900mV
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:17 LD_2024_03_14_07_16_33
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:17 LD_2024_03_14_07_17_05
+
+test 2
+2024-03-14 07:17:36.770568:Different Tps
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:18 LD_2024_03_14_07_17_36
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:18 LD_2024_03_14_07_18_08
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:19 LD_2024_03_14_07_18_39
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:19 LD_2024_03_14_07_19_12
+
+test 3
+2024-03-14 07:19:44.279340:Different gains
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:20 LD_2024_03_14_07_19_44
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:20 LD_2024_03_14_07_20_15
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:21 LD_2024_03_14_07_20_46
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:21 LD_2024_03_14_07_21_18
+
+test 4
+2024-03-14 07:21:49.744807:Different Leak Currents: #14, 2.0us, 900mV, RMS
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:22 LD_2024_03_14_07_21_49
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:22 LD_2024_03_14_07_22_23
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:23 LD_2024_03_14_07_22_54
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:23 LD_2024_03_14_07_23_25
+
+
+test 5 - checked 
+2024-03-14 07:23:57.327330:FPGA-DAC: #14mV/fC, 2.0us, 200mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:24 LD_2024_03_14_07_24_03
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:24 LD_2024_03_14_07_24_28
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:25 LD_2024_03_14_07_24_56
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:25 LD_2024_03_14_07_25_24
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:26 LD_2024_03_14_07_25_51
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:26 LD_2024_03_14_07_26_17
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:27 LD_2024_03_14_07_26_44
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:27 LD_2024_03_14_07_27_10
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:28 LD_2024_03_14_07_27_36
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:28 LD_2024_03_14_07_28_01
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:28 LD_2024_03_14_07_28_29
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:29 LD_2024_03_14_07_28_56
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:29 LD_2024_03_14_07_29_22
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:30 LD_2024_03_14_07_29_50
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:30 LD_2024_03_14_07_30_15
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:31 LD_2024_03_14_07_30_41
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:31 LD_2024_03_14_07_31_09
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:32 LD_2024_03_14_07_31_34
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:32 LD_2024_03_14_07_32_00
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:32 LD_2024_03_14_07_32_25
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:33 LD_2024_03_14_07_32_51
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:33 LD_2024_03_14_07_33_16
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:34 LD_2024_03_14_07_33_42
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:34 LD_2024_03_14_07_34_08
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:35 LD_2024_03_14_07_34_33
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:35 LD_2024_03_14_07_35_03
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:35 LD_2024_03_14_07_35_28
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:36 LD_2024_03_14_07_35_58
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:36 LD_2024_03_14_07_36_24
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:37 LD_2024_03_14_07_36_49
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:37 LD_2024_03_14_07_37_17
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:38 LD_2024_03_14_07_37_47
+
+#bad run
+2024-03-14 07:38:15.025584:FPGA-DAC-DLY-RUN:#14mV/fC, 2.0us, 200mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:38 LD_2024_03_14_07_38_21
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:39 LD_2024_03_14_07_38_46
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:39 LD_2024_03_14_07_39_12
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:40 LD_2024_03_14_07_39_37
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:40 LD_2024_03_14_07_40_03
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:40 LD_2024_03_14_07_40_28
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:41 LD_2024_03_14_07_40_54
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:41 LD_2024_03_14_07_41_22
+drwxr-xr-x   2 sgao sbnd  4096 Mar 14 07:41 LD_2024_03_14_07_41_47
+
+#bad run
+2024-03-14 07:42:43.191161: #7.8mV/fC, 2.0us, 200mV, FPGA_DAC
+2024-03-14 07:42:57.682468:0.5us: #14mV/fC, 0.5us, 200mV, FPGA_DAC
+2024-03-14 07:42:58.414110:1.0us: #14mV/fC, 1.0us, 200mV, FPGA_DAC
+2024-03-14 07:42:59.182451:ASIC-DAC: #14mV/fC, 2.0us, 200mV, ASIC_DAC
+drwxr-xr-x   2 sgao sbnd    20 Mar 14 07:42 LD_2024_03_14_07_42_49
+
+test 6 - chekced 
+2024-03-14 07:44:20.384791:FPGA-DAC-DLY-RUN:#14mV/fC, 2.0us, 200mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:44 LD_2024_03_14_07_44_26
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:45 LD_2024_03_14_07_44_53
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:45 LD_2024_03_14_07_45_19
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:46 LD_2024_03_14_07_45_45
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:46 LD_2024_03_14_07_46_10
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:47 LD_2024_03_14_07_46_36
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:47 LD_2024_03_14_07_47_01
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:47 LD_2024_03_14_07_47_27
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:48 LD_2024_03_14_07_47_53
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:48 LD_2024_03_14_07_48_18
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:49 LD_2024_03_14_07_48_44
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:49 LD_2024_03_14_07_49_09
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:50 LD_2024_03_14_07_49_35
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:50 LD_2024_03_14_07_50_01
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:50 LD_2024_03_14_07_50_26
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:51 LD_2024_03_14_07_50_52
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:51 LD_2024_03_14_07_51_20
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:52 LD_2024_03_14_07_51_45
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:52 LD_2024_03_14_07_52_13
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:53 LD_2024_03_14_07_52_41
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:53 LD_2024_03_14_07_53_08
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:54 LD_2024_03_14_07_53_36
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:54 LD_2024_03_14_07_54_01
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:55 LD_2024_03_14_07_54_29
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:55 LD_2024_03_14_07_55_01
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:55 LD_2024_03_14_07_55_26
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:56 LD_2024_03_14_07_55_52
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:56 LD_2024_03_14_07_56_18
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:57 LD_2024_03_14_07_56_43
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:57 LD_2024_03_14_07_57_13
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:58 LD_2024_03_14_07_57_38
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:58 LD_2024_03_14_07_58_04
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:58 LD_2024_03_14_07_58_30
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:59 LD_2024_03_14_07_58_57
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 07:59 LD_2024_03_14_07_59_25
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:00 LD_2024_03_14_07_59_51
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:00 LD_2024_03_14_08_00_16
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:01 LD_2024_03_14_08_00_42
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:01 LD_2024_03_14_08_01_07
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:02 LD_2024_03_14_08_01_35
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:02 LD_2024_03_14_08_02_01
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:02 LD_2024_03_14_08_02_28
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:03 LD_2024_03_14_08_02_56
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:03 LD_2024_03_14_08_03_21
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:04 LD_2024_03_14_08_03_47
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:04 LD_2024_03_14_08_04_15
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:05 LD_2024_03_14_08_04_40
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:05 LD_2024_03_14_08_05_06
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:05 LD_2024_03_14_08_05_32
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:06 LD_2024_03_14_08_05_57
+
+#bad run
+2024-03-14 08:06:23.491917: #7.8mV/fC, 2.0us, 200mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:06 LD_2024_03_14_08_06_29
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:07 LD_2024_03_14_08_06_57
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:07 LD_2024_03_14_08_07_22
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:08 LD_2024_03_14_08_07_48
+drwxr-xr-x   2 sgao sbnd  8192 Mar 14 08:08 LD_2024_03_14_08_08_14
+
+
+test 8 -checked
+2024-03-14 08:09:13.290989:#14mV/fC, 2.0us, 900mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:09 LD_2024_03_14_08_09_19
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:10 LD_2024_03_14_08_09_46
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:10 LD_2024_03_14_08_10_12
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:11 LD_2024_03_14_08_10_40
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:11 LD_2024_03_14_08_11_07
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:12 LD_2024_03_14_08_11_33
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:12 LD_2024_03_14_08_12_01
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:12 LD_2024_03_14_08_12_26
+
+test 9
+2024-03-14 08:12:52.553539:#7.8mV/fC, 2.0us, 900mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:13 LD_2024_03_14_08_12_58
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:13 LD_2024_03_14_08_13_24
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:14 LD_2024_03_14_08_13_51
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:14 LD_2024_03_14_08_14_17
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:15 LD_2024_03_14_08_14_43
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:15 LD_2024_03_14_08_15_08
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:16 LD_2024_03_14_08_15_36
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:16 LD_2024_03_14_08_16_01
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:16 LD_2024_03_14_08_16_27
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:17 LD_2024_03_14_08_16_53
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:17 LD_2024_03_14_08_17_18
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:18 LD_2024_03_14_08_17_44
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:18 LD_2024_03_14_08_18_10
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:19 LD_2024_03_14_08_18_35
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:19 LD_2024_03_14_08_19_00
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:19 LD_2024_03_14_08_19_28
+
+test 10 
+2024-03-14 08:19:53.576496:0.5us: #14mV/fC, 0.5us, 200mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:20 LD_2024_03_14_08_19_59
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:20 LD_2024_03_14_08_20_27
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:21 LD_2024_03_14_08_20_52
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:21 LD_2024_03_14_08_21_20
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:22 LD_2024_03_14_08_21_46
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:22 LD_2024_03_14_08_22_11
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:23 LD_2024_03_14_08_22_37
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:23 LD_2024_03_14_08_23_03
+
+test 11
+2024-03-14 08:23:30.912176:1.0us: #14mV/fC, 1.0us, 200mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:24 LD_2024_03_14_08_23_36
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:24 LD_2024_03_14_08_24_02
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:24 LD_2024_03_14_08_24_28
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:25 LD_2024_03_14_08_24_53
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:25 LD_2024_03_14_08_25_19
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:26 LD_2024_03_14_08_25_44
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:26 LD_2024_03_14_08_26_10
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:27 LD_2024_03_14_08_26_36
+
+test 12
+2024-03-14 08:27:01.988976:2.0us: #14mV/fC, 2.0us, 200mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:27 LD_2024_03_14_08_27_08
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:28 LD_2024_03_14_08_27_35
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:28 LD_2024_03_14_08_28_01
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:28 LD_2024_03_14_08_28_29
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:29 LD_2024_03_14_08_28_58
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:29 LD_2024_03_14_08_29_26
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:30 LD_2024_03_14_08_29_52
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:30 LD_2024_03_14_08_30_19
+
+test 13
+2024-03-14 08:30:45.487826:3.0us TP: #14mV/fC, 3.0us, 200mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:31 LD_2024_03_14_08_30_51
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:31 LD_2024_03_14_08_31_17
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:32 LD_2024_03_14_08_31_44
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:32 LD_2024_03_14_08_32_10
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:33 LD_2024_03_14_08_32_36
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:33 LD_2024_03_14_08_33_03
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:33 LD_2024_03_14_08_33_29
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:34 LD_2024_03_14_08_33_56
+
+test 14
+2024-03-14 08:34:22.746935:ASIC-DAC: #14mV/fC, 2.0us, 200mV, ASIC_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:34 LD_2024_03_14_08_34_28
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:35 LD_2024_03_14_08_34_59
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:35 LD_2024_03_14_08_35_31
+drwxr-xr-x   2 sgao sbnd  8192 Mar 14 08:36 LD_2024_03_14_08_36_02
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:37 LD_2024_03_14_08_36_36
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:37 LD_2024_03_14_08_37_07
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:38 LD_2024_03_14_08_37_38
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:38 LD_2024_03_14_08_38_10
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:39 LD_2024_03_14_08_38_41
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:39 LD_2024_03_14_08_39_13
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:40 LD_2024_03_14_08_39_44
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:40 LD_2024_03_14_08_40_18
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:41 LD_2024_03_14_08_40_49
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:41 LD_2024_03_14_08_41_20
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:42 LD_2024_03_14_08_41_51
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:42 LD_2024_03_14_08_42_23
+
+
+test 15
+2024-03-14 08:42:50.995632:FPGA-DAC (Saturation): #14mV/fC, 2.0us, 200mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:43 LD_2024_03_14_08_42_57
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:43 LD_2024_03_14_08_43_22
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:44 LD_2024_03_14_08_43_50
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:44 LD_2024_03_14_08_44_17
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:45 LD_2024_03_14_08_44_45
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:45 LD_2024_03_14_08_45_11
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:46 LD_2024_03_14_08_45_36
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:46 LD_2024_03_14_08_46_04
+
+test 7
+2024-03-14 08:47:43.645588: #7.8mV/fC, 2.0us, 200mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:48 LD_2024_03_14_08_47_49
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:48 LD_2024_03_14_08_48_15
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:49 LD_2024_03_14_08_48_40
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:49 LD_2024_03_14_08_49_06
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:49 LD_2024_03_14_08_49_34
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:50 LD_2024_03_14_08_49_59
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:50 LD_2024_03_14_08_50_25
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:51 LD_2024_03_14_08_50_51
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:51 LD_2024_03_14_08_51_16
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:52 LD_2024_03_14_08_51_44
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:52 LD_2024_03_14_08_52_09
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:53 LD_2024_03_14_08_52_37
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:53 LD_2024_03_14_08_53_03
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:53 LD_2024_03_14_08_53_28
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:54 LD_2024_03_14_08_53_54
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:54 LD_2024_03_14_08_54_19
+
+2024-03-14 08:57:36.086200:FPGA-DAC: #7.8mV/fC, 2.0us, 200mV, FPGA_DAC
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:58 LD_2024_03_14_08_57_42
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:58 LD_2024_03_14_08_58_09
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:59 LD_2024_03_14_08_58_37
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:59 LD_2024_03_14_08_59_06
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 08:59 LD_2024_03_14_08_59_32
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:00 LD_2024_03_14_08_59_58
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:00 LD_2024_03_14_09_00_23
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:01 LD_2024_03_14_09_00_49
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:01 LD_2024_03_14_09_01_17
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:02 LD_2024_03_14_09_01_44
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:02 LD_2024_03_14_09_02_10
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:03 LD_2024_03_14_09_02_35
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:03 LD_2024_03_14_09_03_03
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:03 LD_2024_03_14_09_03_29
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:04 LD_2024_03_14_09_03_54
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:04 LD_2024_03_14_09_04_22
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:05 LD_2024_03_14_09_04_51
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:05 LD_2024_03_14_09_05_19
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:06 LD_2024_03_14_09_05_45
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:06 LD_2024_03_14_09_06_12
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:07 LD_2024_03_14_09_06_38
+drwxr-xr-x   2 sgao sbnd  4096 Mar 14 09:07 LD_2024_03_14_09_07_03
+
+
+
+2024-03-14 09:08:33.296885:Different gains @200mV
+2024-03-14 09:10:45.721548: #4.7mV/fC, 2.0us, 200mV, FPGA_DAC
+2024-03-14 09:17:59.160971: #25mV/fC, 2.0us, 200mV, FPGA_DAC
+2024-03-14 09:21:47.408593:Different Tps 200mV
+
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:09 LD_2024_03_14_09_08_33
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:09 LD_2024_03_14_09_09_04
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:10 LD_2024_03_14_09_09_38
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:10 LD_2024_03_14_09_10_09
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:11 LD_2024_03_14_09_10_51
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:11 LD_2024_03_14_09_11_17
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:12 LD_2024_03_14_09_11_44
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:12 LD_2024_03_14_09_12_10
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:13 LD_2024_03_14_09_12_38
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:13 LD_2024_03_14_09_13_03
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:13 LD_2024_03_14_09_13_29
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:14 LD_2024_03_14_09_13_55
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:14 LD_2024_03_14_09_14_22
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:15 LD_2024_03_14_09_14_48
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:15 LD_2024_03_14_09_15_13
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:16 LD_2024_03_14_09_15_39
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:16 LD_2024_03_14_09_16_05
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:16 LD_2024_03_14_09_16_32
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:17 LD_2024_03_14_09_16_58
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:17 LD_2024_03_14_09_17_23
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:18 LD_2024_03_14_09_18_05
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:18 LD_2024_03_14_09_18_30
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:19 LD_2024_03_14_09_18_56
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:19 LD_2024_03_14_09_19_22
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:20 LD_2024_03_14_09_19_49
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:20 LD_2024_03_14_09_20_15
+drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:21 LD_2024_03_14_09_20_40

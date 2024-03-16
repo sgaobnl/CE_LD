@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/13/2024 1:38:57 PM
+Last modified: Thu Mar 14 10:02:19 2024
 """
 
 #defaut setting for scientific caculation
@@ -18,6 +18,7 @@ import numpy as np
 
 import sys 
 import os
+import os.path
 import string
 import time
 from datetime import datetime
@@ -123,7 +124,7 @@ def FEMB_PLOT(results, fn="./"):
     chn_peds = results[2][1]
     chn_pkps = results[2][2]
     chn_pkns = results[2][3]
-    chn_wfs =  results[2][4]
+    chn_wfs =  results[2][5]
 
     import matplotlib.pyplot as plt
     ax1 = plt.subplot2grid((2, 2), (0, 0), colspan=1, rowspan=1)
@@ -140,7 +141,8 @@ def FEMB_PLOT(results, fn="./"):
         ts = 100 if (len(chn_wfs[chni]) > 100) else len(chn_wfs[chni])
         x = (np.arange(ts)) * 0.5
         y = chn_wfs[chni][0:ts]
-        FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
+        FEMB_SUB_PLOT(ax4, x[0:10], y[0:10], title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
+        break
 
  
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
@@ -168,9 +170,9 @@ def SBND_ANA(rawdir, rms_f=False):
     fns = []
     for root, dirs, files in os.walk(rawdir):
         for fn in files:
-            if "png" in fn:
-                return None
             if ("WIB_" in fn) and ("FEMB_" in fn) and (".bin" in fn):
+                if os.path.isfile(root + fn[0:-4] + ".png"):
+                    continue
                 wibloc = fn.find("FEMB_")
                 #crateno = int(fn[wibloc-2])
                 crateno = 0
@@ -388,7 +390,7 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
             #print ("result saves at {}".format(ffig))
             #plt.savefig(fn)
             plt.close()
-src = "D:/full_run/"
+src = "/Users/shanshangao/Downloads/SBND_LD/full_run/"
 
 for root, dirs, files in os.walk(src):
     for onedir in dirs:
