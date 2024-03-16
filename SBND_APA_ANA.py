@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Mar 15 23:14:09 2024
+Last modified: Fri Mar 15 23:47:16 2024
 """
 
 #defaut setting for scientific caculation
@@ -395,7 +395,7 @@ rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_00_13_
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_36/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/vrun/LD_2024_03_15_21_51_46/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/vrun/LD_2024_03_15_22_38_13/"""
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_09_13_41/"""
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_06_00_06_22/"""
