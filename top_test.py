@@ -79,8 +79,8 @@ for wib_ip in LD.WIB_IPs:
         LD.act_fembs[wib_ip] = [True, True, False, False]
     elif ".46" in wib_ip:
         LD.act_fembs[wib_ip] = [True, True, False, False]
-#    elif ".34.34" in wib_ip:
-#        LD.act_fembs[wib_ip] = [False, True, True, True]
+    elif ".34.34" in wib_ip:
+        LD.act_fembs[wib_ip] = [False, True, True, True]
     else:
         LD.act_fembs[wib_ip] = [True, True, True, True]
 
@@ -88,9 +88,8 @@ for wib_ip in LD.WIB_IPs:
     LD.UDP.UDP_IP = wib_ip
     LD.UDP.MultiPort = True
     val = LD.UDP.read_reg_wib(0xFF)
-    LD.UDP.write_reg_wib(0x07, 0x80000000)
+    print (wib_ip, "WIB", hex(val))
     continue
-    #print (wib_ip, "WIB", hex(val))
     for fembno in range(4):
         if LD.act_fembs[wib_ip][fembno]:
             if fembno == 5:
@@ -152,7 +151,6 @@ while True:
             if LD.act_fembs[wib_ip][fembno]:
                 LD.UDP.write_reg_femb_checked(fembno, 0x2A, (fembno<<4)+3)
 
-    print ("chn mapping")
  
     flg = False
     for wib_ip in LD.WIB_IPs:

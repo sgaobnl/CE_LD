@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Feb  7 09:48:37 2024
+Last modified: Wed Jan 31 21:29:19 2024
 """
 
 #defaut setting for scientific caculation
@@ -47,6 +47,7 @@ LD.WIB_IPs = [
               "10.226.34.13",
               "10.226.34.14",
               "10.226.34.15",
+#              "10.226.34.16" #delete later
               "10.226.34.16", 
               "10.226.34.21",
               "10.226.34.22",
@@ -67,7 +68,6 @@ LD.WIB_IPs = [
               "10.226.34.45",
               "10.226.34.46"
               ]
-
 for wib_ip in LD.WIB_IPs:
     print (wib_ip)
     if ".16" in wib_ip:
@@ -95,9 +95,7 @@ for wib_ip in LD.WIB_IPs:
             if fembno == 5:
                 LD.UDP.write_reg_femb_checked(fembno, 0x2A, (fembno<<4)+0)
             else:
-                #LD.UDP.write_reg_femb_checked(fembno, 0x2A, (fembno<<4)+0)
-                # raw data mode
-                LD.UDP.write_reg_femb_checked(fembno, 0x2A, 0)
+                LD.UDP.write_reg_femb_checked(fembno, 0x2A, (fembno<<4)+0)
             val = LD.UDP.read_reg_femb(fembno, 0x2A)
             print (wib_ip, fembno, hex(val))
             #if val >= 0:
@@ -136,10 +134,8 @@ while True:
         val = LD.UDP.read_reg_wib(0xFF)
         for fembno in range(4):
             if LD.act_fembs[wib_ip][fembno]:
-                # channel mapping mode
                 LD.UDP.write_reg_femb_checked(fembno, 0x2A, (fembno<<4)+3)
 
-# redo NEVIS sync
 #    for wib_ip in LD.WIB_IPs:
 #        LD.UDP.UDP_IP = wib_ip
 #        LD.UDP.write_reg_wib_checked(20, 0)
@@ -153,11 +149,10 @@ while True:
 #        LD.UDP.write_reg_wib_checked(20, 0)
 #    time.sleep(0.1)
 #    print ("chn mapping")
- 
+# 
     flg = False
     for wib_ip in LD.WIB_IPs:
         LD.UDP.UDP_IP = wib_ip
-        # check register 43
         val = LD.UDP.read_reg_wib(43)
         if (("16" in wib_ip) or ("26" in wib_ip) or ("36" in wib_ip) or ("46" in wib_ip) ) and ((val&0xff) != 0):
             print ("chn mapping error...", wib_ip, "WIB", hex(val))
@@ -167,15 +162,6 @@ while True:
             flg = True
         else:
             print ("chn mapping correct...", wib_ip, "WIB", hex(val))
-    for wib_ip in LD.WIB_IPs:
-        LD.UDP.UDP_IP = wib_ip
-        val = LD.UDP.read_reg_wib(0xFF)
-    #print (wib_ip, "WIB", hex(val))
-        for fembno in range(4):
-            if LD.act_fembs[wib_ip][fembno]:
-                # go back to raw data mode
-                LD.UDP.write_reg_femb_checked(fembno, 0x2A, 0)
-    print ("rawdata")
     if flg:
         exit()
 	
