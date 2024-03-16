@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: Wed Jan 31 21:24:22 2024
+Last modified: 3/13/2024 11:44:20 AM
 """
 
 #defaut setting for scientific caculation
@@ -118,14 +118,10 @@ class CLS_UDP:
     def write_reg_femb_checked (self, femb_addr, reg , data ):
         i = 0
         while (i < 10 ):
-            time.sleep(0.001)
             self.write_reg_femb(femb_addr, reg , data )
             self.femb_wr_cnt = self.femb_wr_cnt + 1
             time.sleep(0.001)
             rdata = self.read_reg_femb(femb_addr,  reg)
-            time.sleep(0.001)
-            rdata = self.read_reg_femb(femb_addr,  reg)
-            time.sleep(0.001)
             if (data == rdata ):
                 break
             else:

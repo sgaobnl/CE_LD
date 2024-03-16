@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Mar 15 22:48:24 2024
+Last modified: Sat Mar 16 16:33:04 2024
 """
 
 #defaut setting for scientific caculation
@@ -243,8 +243,9 @@ class CLS_CONFIG:
                         print ("I2C of FEMB%d is broken"%i)
                         fembs_found[i] = False
                         self.err_code +="-F4_I2C"
-        #if ( "10.226.34.34" in wib_ip):
-        #    self.act_fembs[wib_ip] = [True, True, True, True]
+#        if ( "10.226.34.34" in wib_ip):
+#            self.act_fembs[wib_ip] = [True, True, True, True]
+#        elif ( "10.226.34.16" in wib_ip):
         if ( "10.226.34.16" in wib_ip):
             self.act_fembs[wib_ip] = [True, True, False, False]
         elif ( "10.226.34.26" in wib_ip):
@@ -524,6 +525,23 @@ class CLS_CONFIG:
             print ("select system clock and CMD from MBB")
             self.WIB_PLL_cfg(wib_ip ) #select system clock and CMD from MBB
 
+    def CE_FPGADAC(self, fpgadac_v=0):
+        for wib_ip in list(self.act_fembs.keys()):
+            for femb_addr in range(4):
+                if self.act_fembs[wib_ip][femb_addr] == True:
+                    self.UDP.UDP_IP = wib_ip
+                    reg_5_value = self.UDP.read_reg_femb(femb_addr,  5)
+                    reg_5_value = (reg_5_value&0xFFFFFF00) + (fpgadac_v& 0xFF )
+                    self.UDP.write_reg_femb_checked (femb_addr,  5, reg_5_value)
+
+    def CE_PLSDLY(self, dly=0):
+        for wib_ip in list(self.act_fembs.keys()):
+            for femb_addr in range(4):
+                if self.act_fembs[wib_ip][femb_addr] == True:
+                    self.UDP.UDP_IP = wib_ip
+                    reg_5_value = self.UDP.read_reg_femb(femb_addr,  5)
+                    reg_5_value = (reg_5_value&0xFFFF00FF) + ((dly<<8)& 0xFF00 )
+                    self.UDP.write_reg_femb_checked (femb_addr,  5, reg_5_value)
 
     def CE_CHK_CFG(self, \
                    pls_cs=0, dac_sel=0, fpgadac_en=0, asicdac_en=0, fpgadac_v=0, \
@@ -552,6 +570,8 @@ class CLS_CONFIG:
         else:
             reg_5_value = ((pls_gap<<16)&0xFFFF0000) + ((pls_dly<<8)&0xFF00) + ( 0x00 )
 
+        for wib_ip in list(self.act_fembs.keys()):
+            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Disable HS data from the WIB to PC through UDP
         for wib_ip in list(self.act_fembs.keys()):
             for femb_addr in range(4):
                 if self.act_fembs[wib_ip][femb_addr] == True:
@@ -693,9 +713,9 @@ class CLS_CONFIG:
                 self.UDP.write_reg_wib(0x1E, 3)
             else:
                 self.UDP.write_reg_wib(0x1E, 0)
-        time.sleep(1)
+#        print ("wait 3 seconds")
+        time.sleep(3)
         
-
 #        while True:
 #            wibtool_flg = False
 #            for wib_ip in list(self.act_fembs.keys()):
@@ -740,6 +760,12 @@ class CLS_CONFIG:
             self.UDP.write_reg_wib_checked(0x01, 0x2) #Time Stamp Reset command encoded in 2MHz 
             self.UDP.write_reg_wib_checked(0x01, 0x0) 
             self.UDP.write_reg_wib_checked(18, 0x8000) #reset error counters
+        if (self.jumbo_flag):
+            if ((self.UDP.read_reg_wib(0x1F)&0xFFF) != 0xEFB): 
+                self.UDP.write_reg_wib_checked(0x1F, 0xEFB) #normal operation
+        else:
+            if ((self.UDP.read_reg_wib(0x1F)&0xFFF) != 0x1FB): 
+                self.UDP.write_reg_wib_checked(0x1F, 0x1FB) #normal operation
         #if (self.DAQstream_en):
         #    self.UDP.write_reg_wib_checked(20, 0x03) #disable data stream and synchronize to Nevis
         #    self.UDP.write_reg_wib_checked(20, 0x00) #enable data stream to Nevis

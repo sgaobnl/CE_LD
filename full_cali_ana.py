@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/13/2024 1:17:55 PM
+Last modified: Thu Mar 14 10:02:19 2024
 """
 
 #defaut setting for scientific caculation
@@ -18,6 +18,7 @@ import numpy as np
 
 import sys 
 import os
+import os.path
 import string
 import time
 from datetime import datetime
@@ -123,7 +124,7 @@ def FEMB_PLOT(results, fn="./"):
     chn_peds = results[2][1]
     chn_pkps = results[2][2]
     chn_pkns = results[2][3]
-    chn_wfs =  results[2][4]
+    chn_wfs =  results[2][5]
 
     import matplotlib.pyplot as plt
     ax1 = plt.subplot2grid((2, 2), (0, 0), colspan=1, rowspan=1)
@@ -140,7 +141,8 @@ def FEMB_PLOT(results, fn="./"):
         ts = 100 if (len(chn_wfs[chni]) > 100) else len(chn_wfs[chni])
         x = (np.arange(ts)) * 0.5
         y = chn_wfs[chni][0:ts]
-        FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
+        FEMB_SUB_PLOT(ax4, x[0:10], y[0:10], title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
+        break
 
  
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
@@ -169,8 +171,11 @@ def SBND_ANA(rawdir, rms_f=False):
     for root, dirs, files in os.walk(rawdir):
         for fn in files:
             if ("WIB_" in fn) and ("FEMB_" in fn) and (".bin" in fn):
+                if os.path.isfile(root + fn[0:-4] + ".png"):
+                    continue
                 wibloc = fn.find("FEMB_")
-                crateno = int(fn[wibloc-2])
+                #crateno = int(fn[wibloc-2])
+                crateno = 0
                 ptbno = int(fn[wibloc-1])
                 fembno = int(fn[wibloc+5])
                 fns.append([crateno, ptbno, fembno, rawdir + fn])
@@ -203,15 +208,15 @@ def SBND_ANA(rawdir, rms_f=False):
                 dec_chn[i].append((chn_wfs[decch]))
                 dec_chn[i].append((chn_avgwfs[decch]))
          
-    fr =rawdir + "test_results"+".result" 
-    with open(fr, 'wb') as f:
-        pickle.dump(dec_chn, f)
-    fr =rawdir + "test_results"+".csv" 
-    with open (fr, 'w') as fp:
-        top_row = "APA,Crate,FEMB_SN,POSITION,WIB_CONNECTION,Crate_No,WIB_no,WIB_FEMB_LOC,FEMB_CH,Wire_type,Wire_No,,RMS Noise, Pedestal, Pulse_Pos_Peak, Pulse_Neg_Peak"
-        fp.write( top_row + "\n")
-        for x in dec_chn:
-            fp.write(",".join(str(i) for i in x[0:16]) +  "," + "\n")
+    #fr =rawdir + "test_results"+".result" 
+    #with open(fr, 'wb') as f:
+    #    pickle.dump(dec_chn, f)
+    #fr =rawdir + "test_results"+".csv" 
+    #with open (fr, 'w') as fp:
+    #    top_row = "APA,Crate,FEMB_SN,POSITION,WIB_CONNECTION,Crate_No,WIB_no,WIB_FEMB_LOC,FEMB_CH,Wire_type,Wire_No,,RMS Noise, Pedestal, Pulse_Pos_Peak, Pulse_Neg_Peak"
+    #    fp.write( top_row + "\n")
+    #    for x in dec_chn:
+    #        fp.write(",".join(str(i) for i in x[0:16]) +  "," + "\n")
     return dec_chn
 
 def d_dec_plt(dec_chn, n=1):
@@ -385,33 +390,36 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
             #print ("result saves at {}".format(ffig))
             #plt.savefig(fn)
             plt.close()
+src = "/Users/shanshangao/Downloads/SBND_LD/full_run/"
 
+for root, dirs, files in os.walk(src):
+    for onedir in dirs:
+        if "LD_2024" in onedir:
+            rawdir = root + onedir+"/"
+            print (rawdir)
+            SBND_ANA(rawdir, rms_f = False)
 
-
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_00_00_05/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_12_26_03/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_13_24_29/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_00_13_55/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_36/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
-#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_09_13_41/"""
-#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
-#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_06_00_06_22/"""
-#rawdir = """/scratch_local/SBND_Installation/data/commissioning/sh_time_0_5_us/03_01_2024/LD_2024_03_01_11_32_26/"""
-fr =rawdir + "test_results"+".result" 
-if (os.path.isfile(fr)):
-    with open(fr, 'rb') as f:
-        result = pickle.load(f)
-    pass
-else:
-    #if "RMS" in rawdir:
-    #    rms_f = True
-    #else:
-    rms_f = False
-
-    result = SBND_ANA(rawdir, rms_f = rms_f)
-
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_00_00_05/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_12_26_03/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_06/LD_2024_02_06_13_24_29/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_00_13_55/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_07/LD_2024_02_07_13_06_36/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_08_01_51/"""
+#rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_55/"""
+##rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_09_13_41/"""
+##rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
+##rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_06_00_06_22/"""
+##rawdir = """/scratch_local/SBND_Installation/data/commissioning/sh_time_0_5_us/03_01_2024/LD_2024_03_01_11_32_26/"""
+#fr =rawdir + "test_results"+".result" 
+#if (os.path.isfile(fr)):
+#    with open(fr, 'rb') as f:
+#        result = pickle.load(f)
+#    pass
+#else:
+#    rms_f = False
+#
+#    result = SBND_ANA(rawdir, rms_f = rms_f)
+#
 #DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,8])
 #DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
 #
