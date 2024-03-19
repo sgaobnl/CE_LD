@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Mon Mar 18 22:38:37 2024
+Last modified: Tue Mar 19 00:41:08 2024
 """
 
 #defaut setting for scientific caculation
@@ -32,7 +32,7 @@ from fft_chn import chn_rfft_psd
 from regs_process import FEMBREG_Process 
 
 
-def FEMB_CHK(fembdata, rms_f = True, fs="./"):
+def FEMB_CHK(fembdata, rms_f = True, fs="./", rn=""):
     RAW_C = RAW_CONV()
     chn_rmss = []
     chn_rmss_filtered = []
@@ -41,10 +41,13 @@ def FEMB_CHK(fembdata, rms_f = True, fs="./"):
     chn_pkns = []
     chn_waves = []
     chn_avg_waves = []
+    plotfs = {}
 
+    chnno = -1
     for adata in fembdata:
         chn_data, feed_loc, chn_peakp, chn_peakn = RAW_C.raw_conv_peak(adata)
         for achn in range(len(chn_data)):
+            chnno +=1
             achn_ped = []
             if (rms_f) or (len(feed_loc) == 0):
                 achn_ped += chn_data[achn] 
@@ -72,6 +75,19 @@ def FEMB_CHK(fembdata, rms_f = True, fs="./"):
             if rms_f or (chn_peakp == None):
                 apeakp = np.max(achn_ped)
                 apeakn = np.min(achn_ped)
+                atmp = 1000
+                if ((apeakp - aped) >= atmp) :
+                    if maxloc > 50:
+                        plotfs["CH%03d"%chnno] = achn_ped[maxloc-50: maxloc+150]
+                    else:
+                        plotfs["CH%03d"%chnno] = achn_ped[0: 200]
+                elif ((aped - apeakn) >= atmp):
+                    if minloc > 50:
+                        plotfs["CH%03d"%chnno] = achn_ped[minloc-50: minloc+150]
+                    else:
+                        plotfs["CH%03d"%chnno] = achn_ped[0: 200]
+                elif (arms_2 > 10):
+                    plotfs["CH%03d"%chnno] = achn_ped[0: 200]
             else:
                 apeakp = int(np.mean(chn_peakp[achn]))
                 apeakn = int(np.mean(chn_peakn[achn]))
@@ -100,7 +116,13 @@ def FEMB_CHK(fembdata, rms_f = True, fs="./"):
         ped_thr= 30 
 
     result = (True, "pass-", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_rmss_filtered])
-#    FEMB_PLOT(result, fn=fs.replace(".bin", ".png"))
+    if len(plotfs) > 0:
+        rnp = rn.find("LD_result")
+        rn2 = rn[0:rnp+10]
+        ff =fs.split("/")[-1]
+        fn = rn2 + ff
+        fn = fn.replace(".bin", ".png")
+        ABFEMB_PLOT(result, plotfs, fn=fn)
     return result
 
 
@@ -119,6 +141,53 @@ def FEMB_SUB_PLOT(ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx
         ax2.set_ylim([int((y_min/16384.0)*2048), int((y_max/16384.0)*2048)])
     else:
         ax.plot(x,y, marker=marker, color=color)
+
+def ABFEMB_PLOT(results, plotfs, fn="./"):
+    chn_rmss = results[2][0]
+    chn_peds = results[2][1]
+    chn_pkps = results[2][2]
+    chn_pkns = results[2][3]
+    chn_wfs =  results[2][4]
+
+    import matplotlib.pyplot as plt
+    fig = plt.figure(figsize=(12,8))
+    ax1 = plt.subplot2grid((2, 2), (0, 0), colspan=1, rowspan=1)
+    ax2 = plt.subplot2grid((2, 2), (1, 0), colspan=1, rowspan=1)
+    ax3 = plt.subplot2grid((2, 2), (0, 1), colspan=1, rowspan=2)
+#    ax4 = plt.subplot2grid((2, 2), (1, 1), colspan=1, rowspan=1)
+    chns = range(len(chn_rmss))
+    FEMB_SUB_PLOT(ax1, chns, chn_rmss, title="RMS Noise", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
+    FEMB_SUB_PLOT(ax2, chns, chn_pkps, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
+    FEMB_SUB_PLOT(ax2, chns, chn_peds, title="Pedestal", xlabel="CH number", ylabel ="ADC / bin", color='b', marker='.')
+    FEMB_SUB_PLOT(ax2, chns, chn_pkns, title="Pulse Amplitude", xlabel="CH number", ylabel ="ADC / bin", color='g', marker='.')
+
+    kl = list(plotfs.keys())
+    for onekey in kl:
+        chnno = int(onekey[2:5]) 
+        markers = [".", "o", "s", "<", "d", ">", "*", "^"]
+        colors = ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8" ]
+        lss = ['-', '-.']
+        ts = len(plotfs[onekey])
+        x = (np.arange(ts)) * 0.5
+        y = plotfs[onekey]
+        ax3.plot(x,y, marker=markers[chnno//16], c=colors[chnno%8], ls=lss[chnno//64], label=onekey)
+
+    title="Waveform"
+    xlabel="Time / $\mu$s"
+    ylabel="ADC /bin"
+
+    ax3.set_title(title)
+    ax3.set_xlabel(xlabel)
+    ax3.set_ylabel(ylabel)
+    ax3.grid(True)
+    ax3.legend()
+ 
+    plt.suptitle(fn.split("/")[-1])
+    plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
+#    fn = rawdir +  
+    plt.savefig(fn)
+    #plt.show()
+    plt.close()
 
 def FEMB_PLOT(results, fn="./"):
     chn_rmss = results[2][0]
@@ -143,8 +212,6 @@ def FEMB_PLOT(results, fn="./"):
         x = (np.arange(ts)) * 0.5
         y = chn_wfs[chni][0:ts]
         FEMB_SUB_PLOT(ax4, x, y, title="Waveform Overlap", xlabel="Time / $\mu$s", ylabel="ADC /bin", color='C%d'%(chni%9))
-
- 
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
 #    fn = rawdir +  
     plt.savefig(fn)
@@ -190,7 +257,7 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
         if len(raw) != 8:
             print ("Invalid monitoring data,discard...")
             return None
-        results = FEMB_CHK(raw, rms_f=rms_f, fs=df[3])
+        results = FEMB_CHK(raw, rms_f=rms_f, fs=df[3], rn=rn)
         chn_rmss = results[2][0]
         chn_peds = results[2][1]
         chn_pkps = results[2][2]
@@ -604,7 +671,7 @@ def DIS_PLOTs(result, rn):
     DIS_PLOT(dec_chn=result, fdir=rn, title = "WIB TST WFM distribution", fn = "SBND_APA_CFG_WIB_TST_WFM_DIS.png", ns=[63-11-41+4], ylim=[-2,4], ylabel="WIB TST WFM Mode", note="0:from FEMB, 1:Sawtooth,2:CHN-Map, -1:Bad")
 
 
-#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/LDABC/"""
 rawdir = """/scratch_local/SBND_Installation/data/commissioning/"""
 #rawdir = """/scratch_local/SBND_Installation/data/commissioning/Varuna_LD/"""
 
