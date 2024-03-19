@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue Mar 19 00:45:20 2024
+Last modified: Tue Mar 19 00:55:27 2024
 """
 
 #defaut setting for scientific caculation
@@ -118,9 +118,9 @@ def FEMB_CHK(fembdata, rms_f = True, fs="./", rn=""):
     result = (True, "pass-", [chn_rmss, chn_peds, chn_pkps, chn_pkns, chn_rmss_filtered])
     if len(plotfs) > 0:
         rnp = rn.find("LD_result")
-        rn2 = rn[0:rnp+10]
+        rn2 = rn[0:rnp+33]
         ff =fs.split("/")[-1]
-        fn = rn2 + "LD_" + ff
+        fn = rn2 + "_" + ff
         fn = fn.replace(".bin", ".png")
         ABFEMB_PLOT(result, plotfs, fn=fn)
     return result
