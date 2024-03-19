@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/13/2024 1:17:55 PM
+Last modified: Mon Mar 18 22:25:21 2024
 """
 
 #defaut setting for scientific caculation
@@ -31,7 +31,7 @@ import operator
 from fft_chn import chn_rfft_psd
 
 
-def FEMB_CHK(fembdata, rms_f = False, fs="./"):
+def FEMB_CHK(fembdata, rms_f = True, fs="./"):
     RAW_C = RAW_CONV()
     chn_rmss = []
     chn_peds = []
@@ -45,6 +45,7 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
         for achn in range(len(chn_data)):
             achn_ped = []
             if (rms_f) or (len(feed_loc)==0):
+            #if True:
                 achn_ped += chn_data[achn] 
             else:
                 for af in range(len(feed_loc[0:-2])):
@@ -66,7 +67,8 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
 
             arms = np.std(achn_ped_sub2)
             aped = int(np.mean(achn_ped))
-            if chn_peakp == None:
+            #if chn_peakp == None:
+            if rms_f or (chn_peakp == None):
                 apeakp = int(np.max(achn_ped))
                 apeakn = int(np.min(achn_ped))
             else:
@@ -164,7 +166,7 @@ def SBND_MAP():
     dec_chn = dec_chn[1:]
     return dec_chn
 
-def SBND_ANA(rawdir, rms_f=False):
+def SBND_ANA(rawdir, rms_f=rms_f):
     fns = []
     for root, dirs, files in os.walk(rawdir):
         for fn in files:
@@ -185,7 +187,7 @@ def SBND_ANA(rawdir, rms_f=False):
         fembno  = df[2]
         with open (df[3], "rb") as fs:
             raw = pickle.load(fs)
-        results = FEMB_CHK(raw, rms_f=False, fs=df[3])
+        results = FEMB_CHK(raw, rms_f=rms_f, fs=df[3])
         chn_rmss = results[2][0]
         chn_peds = results[2][1]
         chn_pkps = results[2][2]
@@ -398,6 +400,9 @@ rawdir = """/Users/shanshangao/Downloads/SBND_LD/2024_02_09/LD_2024_02_09_20_19_
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_09_13_41/"""
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_02_14_08_43_19/"""
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_06_00_06_22/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_18_15_03_26/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_18_15_37_31/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_18_19_21_11/"""
 #rawdir = """/scratch_local/SBND_Installation/data/commissioning/sh_time_0_5_us/03_01_2024/LD_2024_03_01_11_32_26/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
@@ -408,27 +413,28 @@ else:
     #if "RMS" in rawdir:
     #    rms_f = True
     #else:
-    rms_f = False
+    #rms_f = False
+    rms_f = True
 
     result = SBND_ANA(rawdir, rms_f = rms_f)
 
-#DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,8])
-#DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
-#
-#while True:
-#    print ("Input a chnanel number following format (E/W)(U/V/Y)(Chn no.), e.g. EU0001")
-#    xstr = input ("Input a channel number  > ")
-#    if (len(xstr)>2) and (("E" in xstr[0]) or ("W" in xstr[0])) and (("U" in xstr[1]) or ("V" in xstr[1]) or ("Y" in xstr[1])):
-#        try:
-#            wno = int(xstr[2:])
-#            DIS_CHN_PLOT(dec_chn=result, chnstr=xstr)
-#        except ValueError:
-#            print ("Wrong number, please input again")
-#    else:
-#        yns = input ("Exit Y/N")
-#        if ("Y" in yns) or ("y" in yns):
-#            exit()
-#
+DIS_PLOT(dec_chn=result, fdir=rawdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[1], ylim=[-2,8])
+DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
+
+while True:
+    print ("Input a chnanel number following format (E/W)(U/V/Y)(Chn no.), e.g. EU0001")
+    xstr = input ("Input a channel number  > ")
+    if (len(xstr)>2) and (("E" in xstr[0]) or ("W" in xstr[0])) and (("U" in xstr[1]) or ("V" in xstr[1]) or ("Y" in xstr[1])):
+        try:
+            wno = int(xstr[2:])
+            DIS_CHN_PLOT(dec_chn=result, chnstr=xstr)
+        except ValueError:
+            print ("Wrong number, please input again")
+    else:
+        yns = input ("Exit Y/N")
+        if ("Y" in yns) or ("y" in yns):
+            exit()
+
     
 
 

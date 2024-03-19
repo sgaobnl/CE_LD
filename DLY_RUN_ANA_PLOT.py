@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sat Mar 16 23:43:29 2024
+Last modified: Sat Mar 16 23:52:12 2024
 """
 
 #defaut setting for scientific caculation
@@ -52,7 +52,7 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
             if (rms_f) or (len(feed_loc) == 0):
                 achn_ped += chn_data[achn] 
             else:
-                for af in range(len(feed_loc[1:-1])):
+                for af in range(len(feed_loc[0:-2])):
                     achn_ped += chn_data[achn][feed_loc[af]-200: feed_loc[af] ] 
             maxloc = np.where(achn_ped == np.max(achn_ped))[0][0]
             if maxloc < 50:
@@ -96,11 +96,10 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
             #chn_waves.append( chn_data[achn] )
             avg_cnt = len(feed_loc)-2
 
-            #avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[0] + 200]) 
-            avg_wave = np.array(chn_data[achn][feed_loc[1]-50: feed_loc[1]+150]) 
-            for i in range(2, avg_cnt,1):
+            avg_wave = np.array(chn_data[achn][feed_loc[0]: feed_loc[0] + 200]) 
+            for i in range(1, avg_cnt,1):
             #    #avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i+1]]) 
-                avg_wave += np.array(chn_data[achn][feed_loc[i]-50: feed_loc[i]+150]) 
+                avg_wave += np.array(chn_data[achn][feed_loc[i]: feed_loc[i]+200]) 
             avg_wave = avg_wave/avg_cnt
             chn_avg_waves.append(avg_wave)
     ana_err_code = ""
@@ -133,6 +132,24 @@ def FEMB_SUB_PLOT(ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx
         ax2.set_ylim([int((y_min/16384.0)*2048), int((y_max/16384.0)*2048)])
     else:
         ax.plot(x,y, marker=marker, color=color)
+
+def DLY_SUB_PLOT(ax, x, y, xlim, title, xlabel, ylabel, color='b', marker='.', atwinx=False, ylabel_twx = "", e=None):
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.grid(True)
+    ax.set_xlim(xlim)
+    ax.scatter(x,y, marker=marker, color=color)
+#    if (atwinx):
+#        ax.errorbar(x,y,e, marker=marker, color=color)
+#        y_min = int(np.min(y))-1000
+#        y_max = int(np.max(y))+1000
+#        ax.set_ylim([y_min, y_max])
+#        ax2 = ax.twinx()
+#        ax2.set_ylabel(ylabel_twx)
+#        ax2.set_ylim([int((y_min/16384.0)*2048), int((y_max/16384.0)*2048)])
+#    else:
+
 
 def FEMB_PLOT(results, fn="./"):
     chn_rmss = results[2][0]
@@ -498,6 +515,77 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
     #plt.show()
     plt.close()
 
+def DLY_RUN_CHN_PLOT(dly_run_rns, chnstr="U1"):
+    apa = chnstr[0]
+    wiretype = chnstr[1]
+    wireno = int(chnstr[2:])
+    import matplotlib.pyplot as plt
+    fig = plt.figure(figsize=(8.5,8))
+    ax1 = plt.subplot2grid((2, 2), (0, 0), colspan=2, rowspan=1)
+    ax2 = plt.subplot2grid((2, 2), (1, 0), colspan=1, rowspan=1)
+    ax3 = plt.subplot2grid((2, 2), (1, 1), colspan=1, rowspan=1)
+
+    #xs = []
+    #ys = []
+    dlys = []
+    for rn in dly_run_rns:
+        print (rn)
+        with open(rn, 'rb') as f:
+            dec_chn = pickle.load(f)
+
+            for d in dec_chn:
+                if (apa in d[0]) and (wiretype in d[9]) and (wireno == int(d[10])) and (len(d) >12):
+                    APA = d[0]
+                    Crate = d[1]
+                    FEMB_SN = d[2]
+                    POSITION = d[3]
+                    WIB_CONNECTION = d[4]
+                    Crate_No = d[5]
+                    WIB_no = d[6]
+                    WIB_FEMB_LOC = d[7]
+                    FEMB_CH = d[8]
+                    Wire_type = d[9]
+                    Wire_No = d[10]
+                    RMS = d[12]
+                    Pedmean = d[13]
+                    Plspp = d[14]
+                    Plsnp = d[15]
+                    #wfs = d[16]
+                    avgwfs = d[17]
+                    fpgadac_v = d[0-31]
+                    pls_dly = d[1-31]
+                    wlen = len(avgwfs)
+                    x = np.arange(wlen)*0.5 - 0.01*pls_dly
+                    y = avgwfs[0:wlen]
+                    dlys.append([0-pls_dly, x, y])
+                    #plt.scatter(x,y, marker='.', color="C%d"%(pls_dly%10))
+    tmp = sorted(dlys, key=lambda ts: ts[0])
+    ds,xs,ys = zip(*tmp)
+    print (ds)
+    dlyx = [val for tup in zip(*xs) for val in tup]
+    dlyy = [val for tup in zip(*ys) for val in tup]
+
+    for i in range(len(xs)):
+        DLY_SUB_PLOT(ax1, xs[i], ys[i], xlim=(0,np.max(xs[i])), title="Delay Run Waveform", xlabel="Time / $\mu$s", ylabel ="ADC / bin", marker='.', color="C%d"%(i%10))
+        DLY_SUB_PLOT(ax2, xs[i], ys[i], xlim=(xs[i][50-2],xs[i][50+18]), title="Delay Run Waveform", xlabel="Time / $\mu$s", ylabel ="ADC / bin", marker='.', color="C%d"%(i%10))
+        DLY_SUB_PLOT(ax3, xs[i], ys[i], xlim=(xs[i][100],xs[i][120]), title="Delay Run Waveform", xlabel="Time / $\mu$s", ylabel ="ADC / bin", marker='.', color="C%d"%(i%10))
+
+    #DLY_SUB_PLOT(ax1, xs[i], ys[i], xlim=(0,len(xs[i])), title="Delay Run Waveform", xlabel="Time / $\mu$s", ylabel ="ADC / bin", marker='.')
+    #ax1.plot(dlyx, dlyy)
+#    title="Delay Run Waveform"
+#    xlabel="Time / $\mu$s"
+#    ylabel="ADC /bin"
+#    plt.title(title)
+#    plt.xlabel(xlabel)
+#    plt.ylabel(ylabel)
+#    plt.grid(True)
+
+    plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
+    #plt.xlim((0,10))
+    plt.show()
+    #print ("result saves at {}".format(ffig))
+    #plt.savefig(fn)
+    plt.close()
 
 def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
     apa = chnstr[0]
@@ -633,46 +721,33 @@ for root, dirs, files in os.walk(rawdir):
             d1ns.append(rawdir + d1n + "/")
     break
 
+dly_run_rns = []
 for d1n in d1ns:
     for root, dirs, files in os.walk(d1n):
         for d2n in dirs:
             if ("LD_2024_" in d2n) :
                 anadir = d1n + d2n + "/"
                 rn = result_dir + "/" + d2n + ".ld"
-                pn = result_dir + "/" + d2n + "SBND_APA_CFG_FEMB_Data_Mode_DIS.png"
-                if (os.path.isfile(pn)):
-                    continue
                 if (os.path.isfile(rn)):
-                    if (int(d2n[8:10]) == 2) and (int(d2n[11:13])<16): #before 02/16, .femb and .wib save wrong data, dischard
-                        continue 
-                    with open(rn, 'rb') as f:
-                        result = pickle.load(f)
-                        flg = True
-                        for x in result:
-                            if len(x) > 20:
-                                flg = False
-                                break
-                        if flg:
-                            sub1dir = d2n[3:13]
-                            sub2dir = d2n 
-                            rawdatapath = result_dir + "/../" + sub1dir + "/" + sub2dir + "/"
-                            fechnregs = []
-                            Dec_add_cfgs(rawdatapath, result, rn)
-                        else:
-                            print ("Invalid, discard")
-                            #pass
-                            #DIS_PLOTs(result, rn)
-                            continue
-                else:
-                    rms_f = False
-                    result = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
-                    if result == None:
-                        continue
-                    else:
-                        DIS_PLOTs(result, rn)
-
+                    dly_run_rns.append(rn)
+#                    with open(rn, 'rb') as f:
+#                        result = pickle.load(f)
         break
 
+while True:
+    print ("Input a chnanel number following format (E/W)(U/V/Y)(Chn no.), e.g. EU0001")
+    xstr = input ("Input a channel number  > ")
+    if (len(xstr)>2) and (("E" in xstr[0]) or ("W" in xstr[0])) and (("U" in xstr[1]) or ("V" in xstr[1]) or ("Y" in xstr[1])):
+        try:
+            wno = int(xstr[2:])
+            #DIS_CHN_PLOT(dec_chn=result, chnstr=xstr)
+            DLY_RUN_CHN_PLOT(dly_run_rns=dly_run_rns, chnstr=xstr)
+        except ValueError:
+            print ("Wrong number, please input again")
+    else:
+        yns = input ("Exit Y/N")
+        if ("Y" in yns) or ("y" in yns):
+            exit()
 
 #DIS_PLOT(dec_chn=result, fdir=rawdir, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
 #

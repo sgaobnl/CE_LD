@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sun Mar 10 22:11:42 2024
+Last modified: Mon Mar 18 22:22:56 2024
 """
 
 #defaut setting for scientific caculation
@@ -69,7 +69,7 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
             arms = np.std(achn_ped)
             arms_2 = np.std(achn_ped_sub2)
             aped = int(np.mean(achn_ped))
-            if chn_peakp != None:
+            if rms_f or (chn_peakp != None):
                 apeakp = int(np.mean(chn_peakp[achn]))
                 apeakn = int(np.mean(chn_peakn[achn]))
             else:
@@ -190,7 +190,7 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
         if len(raw) != 8:
             print ("Invalid monitoring data,discard...")
             return None
-        results = FEMB_CHK(raw, rms_f=False, fs=df[3])
+        results = FEMB_CHK(raw, rms_f=rms_f, fs=df[3])
         chn_rmss = results[2][0]
         chn_peds = results[2][1]
         chn_pkps = results[2][2]
@@ -649,7 +649,8 @@ for d1n in d1ns:
                             #DIS_PLOTs(result, rn)
                             continue
                 else:
-                    rms_f = False
+                    #rms_f = False
+                    rms_f = True 
                     result = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
                     if result == None:
                         continue
