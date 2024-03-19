@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Mon Mar 18 22:25:21 2024
+Last modified: Mon Mar 18 22:36:52 2024
 """
 
 #defaut setting for scientific caculation
@@ -166,7 +166,7 @@ def SBND_MAP():
     dec_chn = dec_chn[1:]
     return dec_chn
 
-def SBND_ANA(rawdir, rms_f=rms_f):
+def SBND_ANA(rawdir, rms_f=True):
     fns = []
     for root, dirs, files in os.walk(rawdir):
         for fn in files:

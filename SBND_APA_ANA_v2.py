@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Mon Mar 18 22:22:56 2024
+Last modified: Mon Mar 18 22:38:37 2024
 """
 
 #defaut setting for scientific caculation
@@ -32,7 +32,7 @@ from fft_chn import chn_rfft_psd
 from regs_process import FEMBREG_Process 
 
 
-def FEMB_CHK(fembdata, rms_f = False, fs="./"):
+def FEMB_CHK(fembdata, rms_f = True, fs="./"):
     RAW_C = RAW_CONV()
     chn_rmss = []
     chn_rmss_filtered = []
@@ -69,12 +69,12 @@ def FEMB_CHK(fembdata, rms_f = False, fs="./"):
             arms = np.std(achn_ped)
             arms_2 = np.std(achn_ped_sub2)
             aped = int(np.mean(achn_ped))
-            if rms_f or (chn_peakp != None):
-                apeakp = int(np.mean(chn_peakp[achn]))
-                apeakn = int(np.mean(chn_peakn[achn]))
-            else:
+            if rms_f or (chn_peakp == None):
                 apeakp = np.max(achn_ped)
                 apeakn = np.min(achn_ped)
+            else:
+                apeakp = int(np.mean(chn_peakp[achn]))
+                apeakn = int(np.mean(chn_peakn[achn]))
             chn_rmss.append(arms)
             chn_rmss_filtered.append(arms_2)
             chn_peds.append(aped)
