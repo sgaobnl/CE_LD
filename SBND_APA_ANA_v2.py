@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue Mar 19 00:55:27 2024
+Last modified: Tue Mar 19 01:04:37 2024
 """
 
 #defaut setting for scientific caculation
@@ -180,7 +180,7 @@ def ABFEMB_PLOT(results, plotfs, fn="./"):
     ax3.set_xlabel(xlabel)
     ax3.set_ylabel(ylabel)
     ax3.grid(True)
-    ax3.legend()
+    ax3.legend( loc ='right')
  
     plt.suptitle(fn.split("/")[-1])
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
