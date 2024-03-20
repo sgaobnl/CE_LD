@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue Mar 19 01:04:37 2024
+Last modified: Tue Mar 19 15:39:17 2024
 """
 
 #defaut setting for scientific caculation
@@ -77,17 +77,17 @@ def FEMB_CHK(fembdata, rms_f = True, fs="./", rn=""):
                 apeakn = np.min(achn_ped)
                 atmp = 1000
                 if ((apeakp - aped) >= atmp) :
-                    if maxloc > 50:
-                        plotfs["CH%03d"%chnno] = achn_ped[maxloc-50: maxloc+150]
+                    if maxloc > 450:
+                        plotfs["CH%03d"%chnno] = achn_ped[maxloc-450: maxloc+550]
                     else:
-                        plotfs["CH%03d"%chnno] = achn_ped[0: 200]
+                        plotfs["CH%03d"%chnno] = achn_ped[0: 1000]
                 elif ((aped - apeakn) >= atmp):
-                    if minloc > 50:
-                        plotfs["CH%03d"%chnno] = achn_ped[minloc-50: minloc+150]
+                    if minloc > 450:
+                        plotfs["CH%03d"%chnno] = achn_ped[minloc-450: minloc+550]
                     else:
-                        plotfs["CH%03d"%chnno] = achn_ped[0: 200]
+                        plotfs["CH%03d"%chnno] = achn_ped[0: 1000]
                 elif (arms_2 > 10):
-                    plotfs["CH%03d"%chnno] = achn_ped[0: 200]
+                    plotfs["CH%03d"%chnno] = achn_ped[0: 1000]
             else:
                 apeakp = int(np.mean(chn_peakp[achn]))
                 apeakn = int(np.mean(chn_peakn[achn]))
@@ -153,7 +153,8 @@ def ABFEMB_PLOT(results, plotfs, fn="./"):
     fig = plt.figure(figsize=(12,8))
     ax1 = plt.subplot2grid((2, 2), (0, 0), colspan=1, rowspan=1)
     ax2 = plt.subplot2grid((2, 2), (1, 0), colspan=1, rowspan=1)
-    ax3 = plt.subplot2grid((2, 2), (0, 1), colspan=1, rowspan=2)
+    ax3 = plt.subplot2grid((2, 2), (0, 1), colspan=1, rowspan=1)
+    ax4 = plt.subplot2grid((2, 2), (1, 1), colspan=1, rowspan=1)
 #    ax4 = plt.subplot2grid((2, 2), (1, 1), colspan=1, rowspan=1)
     chns = range(len(chn_rmss))
     FEMB_SUB_PLOT(ax1, chns, chn_rmss, title="RMS Noise", xlabel="CH number", ylabel ="ADC / bin", color='r', marker='.')
@@ -171,6 +172,7 @@ def ABFEMB_PLOT(results, plotfs, fn="./"):
         x = (np.arange(ts)) * 0.5
         y = plotfs[onekey]
         ax3.plot(x,y, marker=markers[chnno//16], c=colors[chnno%8], ls=lss[chnno//64], label=onekey)
+        ax4.plot(x[400:600],y[400:600], marker=markers[chnno//16], c=colors[chnno%8], ls=lss[chnno//64], label=onekey)
 
     title="Waveform"
     xlabel="Time / $\mu$s"
@@ -181,9 +183,14 @@ def ABFEMB_PLOT(results, plotfs, fn="./"):
     ax3.set_ylabel(ylabel)
     ax3.grid(True)
     ax3.legend( loc ='right')
- 
-    plt.suptitle(fn.split("/")[-1])
+    ax4.set_title(title)
+    ax4.set_xlabel(xlabel)
+    ax4.set_ylabel(ylabel)
+    ax4.grid(True)
+    ax4.legend( loc ='right')
+
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
+    plt.suptitle(fn.split("/")[-1])
 #    fn = rawdir +  
     plt.savefig(fn)
     #plt.show()
@@ -671,8 +678,8 @@ def DIS_PLOTs(result, rn):
     DIS_PLOT(dec_chn=result, fdir=rn, title = "WIB TST WFM distribution", fn = "SBND_APA_CFG_WIB_TST_WFM_DIS.png", ns=[63-11-41+4], ylim=[-2,4], ylabel="WIB TST WFM Mode", note="0:from FEMB, 1:Sawtooth,2:CHN-Map, -1:Bad")
 
 
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/LDABC/"""
 rawdir = """/scratch_local/SBND_Installation/data/commissioning/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD10/"""
 #rawdir = """/scratch_local/SBND_Installation/data/commissioning/Varuna_LD/"""
 
 
