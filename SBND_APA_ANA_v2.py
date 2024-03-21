@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue Mar 19 15:39:17 2024
+Last modified: Tue Mar 19 23:58:29 2024
 """
 
 #defaut setting for scientific caculation
@@ -75,7 +75,7 @@ def FEMB_CHK(fembdata, rms_f = True, fs="./", rn=""):
             if rms_f or (chn_peakp == None):
                 apeakp = np.max(achn_ped)
                 apeakn = np.min(achn_ped)
-                atmp = 1000
+                atmp = 1500
                 if ((apeakp - aped) >= atmp) :
                     if maxloc > 450:
                         plotfs["CH%03d"%chnno] = achn_ped[maxloc-450: maxloc+550]
@@ -86,7 +86,7 @@ def FEMB_CHK(fembdata, rms_f = True, fs="./", rn=""):
                         plotfs["CH%03d"%chnno] = achn_ped[minloc-450: minloc+550]
                     else:
                         plotfs["CH%03d"%chnno] = achn_ped[0: 1000]
-                elif (arms_2 > 10):
+                elif (arms_2 > 10) and False:
                     plotfs["CH%03d"%chnno] = achn_ped[0: 1000]
             else:
                 apeakp = int(np.mean(chn_peakp[achn]))
@@ -190,10 +190,10 @@ def ABFEMB_PLOT(results, plotfs, fn="./"):
     ax4.legend( loc ='right')
 
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
+    #plt.tight_layout( )
     plt.suptitle(fn.split("/")[-1])
 #    fn = rawdir +  
     plt.savefig(fn)
-    #plt.show()
     plt.close()
 
 def FEMB_PLOT(results, fn="./"):
@@ -679,7 +679,7 @@ def DIS_PLOTs(result, rn):
 
 
 rawdir = """/scratch_local/SBND_Installation/data/commissioning/"""
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD10/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/rampup/"""
 #rawdir = """/scratch_local/SBND_Installation/data/commissioning/Varuna_LD/"""
 
 

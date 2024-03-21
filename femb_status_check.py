@@ -38,6 +38,9 @@ keys = list(stats.keys())
 
 print ("================== CHECKING FEMB STATUS =====================")
 
+for key in keys:
+    print (key, stats[key])
+
 for i in range(4):
    for key in keys:
       if key in "FEMB%d_AMV28_I"%i:
