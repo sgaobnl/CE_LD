@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sat Mar 16 16:33:04 2024
+Last modified: Fri Mar 22 00:53:19 2024
 """
 
 #defaut setting for scientific caculation
@@ -777,32 +777,9 @@ class CLS_CONFIG:
         self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True) #Enable HS data from the WIB to PC through UDP
         if self.act_fembs[wib_ip][femb_addr] == True:
             print ("Take data from WIB%s FEMB%d"%(wib_ip, femb_addr))
-            raw_asic = []
-            for asic in range(8):
-                self.FEMB_ASIC_CS(wib_ip, femb_addr, asic)
-                rawdata = self.UDP.get_rawdata_packets(self.val) 
-                if rawdata != None:
-                    raw_asic.append(rawdata )
-                else:
-                    self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True) #Enable HS data from the WIB to PC through UDP
-            if not self.ldflg:
-                for cfg in cfglog:
-                    tmp = [cfg]
-                    if (cfg[0] == wib_ip) and (cfg[1] == femb_addr):
-                        tmp += [raw_asic] + [d_sts]
-                        #if self.f_save :
-                        if True :
-                            runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
-                            fn = self.savedir + "/" + "WIB" + cfg[0].replace(".", "_") + "_FEMB%d"%cfg[1] + "_%d_%02d"%(cfg[3], cfg[12]) + \
-                                 "FE_%d%d%d%d%d%d%d%d%02d"%(cfg[13], cfg[14], cfg[15], cfg[16], cfg[17], cfg[18], cfg[27], cfg[28], cfg[29]) + "_Time" + runtime + ".bin"
-                            with open(fn, "wb") as fp:
-                                pickle.dump(tmp, fp)
-                        break
-            else:
+            if self.ldflg:
                 runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
                 fn = self.savedir + "/" + "WIB_" + wib_ip.replace(".","_") + "FEMB_" + str(femb_addr) + "_Time" + runtime + ".bin"
-                with open(fn, "wb") as fp:
-                    pickle.dump(raw_asic, fp)
                 tmp = None
                 wib_regs = []
                 if femb_addr == 1:
@@ -832,6 +809,35 @@ class CLS_CONFIG:
                     fembfn = fn[0:-4] + ".femb"
                     with open(fembfn, "wb") as fp:
                         pickle.dump(femb_regs, fp)
+
+            raw_asic = []
+            for asic in range(8):
+                self.FEMB_ASIC_CS(wib_ip, femb_addr, asic)
+                rawdata = self.UDP.get_rawdata_packets(self.val) 
+                if rawdata != None:
+                    raw_asic.append(rawdata )
+                else:
+                    self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = True) #Enable HS data from the WIB to PC through UDP
+
+
+            if not self.ldflg:
+                for cfg in cfglog:
+                    tmp = [cfg]
+                    if (cfg[0] == wib_ip) and (cfg[1] == femb_addr):
+                        tmp += [raw_asic] + [d_sts]
+                        #if self.f_save :
+                        if True :
+                            runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
+                            fn = self.savedir + "/" + "WIB" + cfg[0].replace(".", "_") + "_FEMB%d"%cfg[1] + "_%d_%02d"%(cfg[3], cfg[12]) + \
+                                 "FE_%d%d%d%d%d%d%d%d%02d"%(cfg[13], cfg[14], cfg[15], cfg[16], cfg[17], cfg[18], cfg[27], cfg[28], cfg[29]) + "_Time" + runtime + ".bin"
+                            with open(fn, "wb") as fp:
+                                pickle.dump(tmp, fp)
+                        break
+            else:
+                fn = self.savedir + "/" + "WIB_" + wib_ip.replace(".","_") + "FEMB_" + str(femb_addr) + "_Time" + runtime + ".bin"
+                with open(fn, "wb") as fp:
+                    pickle.dump(raw_asic, fp)
+
         else:
             pass
             tmp = None
