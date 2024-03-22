@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Mar 22 01:13:19 2024
+Last modified: Fri Mar 22 01:21:10 2024
 """
 
 #defaut setting for scientific caculation
@@ -131,10 +131,10 @@ for wib_ip in LD.WIB_IPs:
             fmoff = 0x4<<(4*fembno)
             val2 =(val2 | fmoff)
             print ("Turn off FEMB%d of WIB IP %s"%(fembno, wib_ip))
-#            LD.UDP.write_reg_wib_checked(0x08, val2)
+            LD.UDP.write_reg_wib_checked(0x08, val2)
             time.sleep(5)
             print ("Turn on FEMB%d on WIB IP %s"%(fembno, wib_ip))
-#            LD.UDP.write_reg_wib_checked(0x08, val)
+            LD.UDP.write_reg_wib_checked(0x08, val)
             time.sleep(1)
 
 print ("Done")
