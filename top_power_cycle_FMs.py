@@ -30,7 +30,7 @@ from shutil import copyfile
 
 LD = CLS_CONFIG()
 LD.val=200
-LD.savedir = "/scratch_local/SBND_Installation/data/commissioning/FM_Power_cycle/"
+LD.savedir = "/scratch_local/SBND_Installation/data/commissioning/FM_Power_cycle1/"
 if (os.path.exists(LD.savedir)):
     pass
 else:
