@@ -671,10 +671,8 @@ def DIS_PLOTs(result, rn):
     DIS_PLOT(dec_chn=result, fdir=rn, title = "WIB TST WFM distribution", fn = "SBND_APA_CFG_WIB_TST_WFM_DIS.png", ns=[63-11-41+4], ylim=[-2,4], ylabel="WIB TST WFM Mode", note="0:from FEMB, 1:Sawtooth,2:CHN-Map, -1:Bad")
 
 
-rawdir = """/Users/shanshangao/Downloads/SBND_LD/LDABC/"""
-rawdir = """/scratch_local/SBND_Installation/data/commissioning/"""
-#rawdir = """/scratch_local/SBND_Installation/data/commissioning/Varuna_LD/"""
-
+rawdir = "/scratch_local/SBND_Installation/data/commissioning/"
+#rawdir = "/scratch_local/SBND_Installation/data/commissioning/ce_rampup_tests/"
 
 result_dir = rawdir + "LD_result/"
 
