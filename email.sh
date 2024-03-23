@@ -2,9 +2,9 @@
 
 lastfilepath=`find /scratch_local/SBND_Installation/data/commissioning/LD_result/ -name 'LD*.png' -type f -printf "%T@ %p\n" | sort -n | cut -d' ' -f 2- | tail -n 1`
 lastfile=`basename $lastfilepath`
-#echo $lastfile
+echo $lastfile
 filepattern=`echo $lastfile | cut -d_ -f1-8`
-#echo $filepattern
+echo $filepattern
 
 rmstimefile=/scratch_local/SBND_Installation/data/commissioning/LD_result/RMS_vs_Time.png
 export rmstime_base64=`base64 --wrap 0 $rmstimefile`
@@ -22,3 +22,5 @@ done < <(find /scratch_local/SBND_Installation/data/commissioning/LD_result/ -na
 echo "Sending ${NUM_OF_FILE} images"
 
 envsubst < email.eml | sendmail -t
+
+python myemail.py
