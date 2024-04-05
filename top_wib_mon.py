@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Apr  5 01:27:15 2024
+Last modified: 4/5/2024 9:57:34 AM
 """
 
 #defaut setting for scientific caculation
@@ -34,11 +34,12 @@ LD.val=200
 
 
 LD.ldflg=True
-LD.UDP.MultiPort = True
+LD.UDP.MultiPort = False
 #LD.UDP.MultiPort = False
 LD.WIB_IPs = [
         #              "10.226.34.11",
-                      "10.226.34.12",
+                      "192.168.121.1",
+        #              "10.226.34.12",
         #              "10.226.34.13",
         #              "10.226.34.14",
         #              "10.226.34.15",
@@ -77,7 +78,8 @@ for wib_ip in LD.WIB_IPs:
         LD.act_fembs[wib_ip] = [True, True, True, True]
 
 #LD.act_fembs[wib_ip] = [True, False, False, False]
-savedir ="""/scratch_local/SBND_Installation/data/commissioning/mon_run/""" 
+#savedir ="""/scratch_local/SBND_Installation/data/commissioning/mon_run/""" 
+savedir ="""D:/SBND/mon_run/""" 
 print (savedir)
 #savedir ="""D:/full_run/""" 
 
@@ -105,9 +107,9 @@ if True:
         rfp.write(textnote)
     print (textnote)
     Create_Folder()
-    #cfglog = LD.CE_MON_CFG(pls_cs=0, dac_sel=0, mon_cs=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1, smnchn=0)
-    #cfglog = LD.CE_MON_CFG(pls_cs=0, dac_sel=0, mon_cs=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1, smnchn=0)
-    cfglog = LD.CE_MON_CFG(pls_cs=1, dac_sel=1, mon_cs=1, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1,swdac1=0, swdac2=1, dac=0x10, smnchn=0)
+    #cfglog = LD.CE_MON_CFG(pls_cs=0, dac_sel=0, mon_cs=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1, monchn=0)
+    #cfglog = LD.CE_MON_CFG(pls_cs=0, dac_sel=0, mon_cs=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1, monchn=0)
+    cfglog = LD.CE_MON_CFG(pls_cs=1, dac_sel=1, mon_cs=1, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=0, swdac2=1, dac=0x20, monchn=49)
 
 
 print ("Done")

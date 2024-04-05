@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Apr  5 01:21:21 2024
+Last modified: 4/5/2024 9:56:44 AM
 """
 
 #defaut setting for scientific caculation
@@ -575,9 +575,11 @@ class CLS_CONFIG:
         for wib_ip in list(self.act_fembs.keys()):
             self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Disable HS data from the WIB to PC through UDP
         for wib_ip in list(self.act_fembs.keys()):
-            for femb_addr in range(4):
+            #for femb_addr in range(4):
+            for femb_addr in [0]:
                 if self.act_fembs[wib_ip][femb_addr] == True:
                     self.UDP.UDP_IP = wib_ip
+                    print (self.UDP.UDP_IP )
                     self.UDP.write_reg_femb_checked (femb_addr,  5, reg_5_value)
                     self.UDP.write_reg_femb_checked (femb_addr, 16, tp_sel&0x0000ffff)
                     self.UDP.write_reg_femb_checked (femb_addr, 18, pls_cs_value)
@@ -591,8 +593,8 @@ class CLS_CONFIG:
                         self.FEREG_MAP.set_fe_board(sts, snc, sg0, sg1, st0, st1, smn, sdf,\
                                                     slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac)
                         chipn = monchn//16
-                        chipnchnn = monchn%16
-                        self.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn, snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=1, sdf=sdf )
+                        chipnchn = monchn%16
+                        self.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn, sts=sts, snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=1, sdf=sdf )
                         regs = self.FEREG_MAP.REGS
                     fe_regs = [0x00000000]*(8+1)*4
                     for chip in [0,2,4,6]:
