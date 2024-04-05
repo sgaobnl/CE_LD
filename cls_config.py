@@ -575,8 +575,8 @@ class CLS_CONFIG:
         for wib_ip in list(self.act_fembs.keys()):
             self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Disable HS data from the WIB to PC through UDP
         for wib_ip in list(self.act_fembs.keys()):
-            #for femb_addr in range(4):
-            for femb_addr in [0]:
+            for femb_addr in range(4):
+            #for femb_addr in [0]:
                 if self.act_fembs[wib_ip][femb_addr] == True:
                     self.UDP.UDP_IP = wib_ip
                     print (self.UDP.UDP_IP )
@@ -590,7 +590,8 @@ class CLS_CONFIG:
 
                     #FE configuration
                     if True:
-                        self.FEREG_MAP.set_fe_board(sts, snc, sg0, sg1, st0, st1, smn, sdf,\
+                        sts0 = 0
+                        self.FEREG_MAP.set_fe_board(sts0, snc, sg0, sg1, st0, st1, smn, sdf,\
                                                     slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac)
                         chipn = monchn//16
                         chipnchn = monchn%16

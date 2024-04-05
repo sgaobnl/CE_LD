@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/5/2024 9:57:34 AM
+Last modified: Fri Apr  5 12:18:10 2024
 """
 
 #defaut setting for scientific caculation
@@ -32,17 +32,15 @@ from shutil import copyfile
 LD = CLS_CONFIG()
 LD.val=200
 
-
 LD.ldflg=True
-LD.UDP.MultiPort = False
-#LD.UDP.MultiPort = False
+LD.UDP.MultiPort = True
 LD.WIB_IPs = [
-        #              "10.226.34.11",
-                      "192.168.121.1",
+#                      "10.226.34.11",
+#                      "192.168.121.1",
         #              "10.226.34.12",
         #              "10.226.34.13",
         #              "10.226.34.14",
-        #              "10.226.34.15",
+                      "10.226.34.15",
         #              "10.226.34.16", 
         #              "10.226.34.21",
         #              "10.226.34.22",
@@ -63,7 +61,6 @@ LD.WIB_IPs = [
         #              "10.226.34.45",
         #      "10.226.34.46"
               ]
-#LD.WIB_IPs = ["192.168.121.1"]
 for wib_ip in LD.WIB_IPs:
     print (wib_ip)
     if ".16" in wib_ip:
@@ -77,11 +74,9 @@ for wib_ip in LD.WIB_IPs:
     else:
         LD.act_fembs[wib_ip] = [True, True, True, True]
 
-#LD.act_fembs[wib_ip] = [True, False, False, False]
-#savedir ="""/scratch_local/SBND_Installation/data/commissioning/mon_run/""" 
-savedir ="""D:/SBND/mon_run/""" 
-print (savedir)
-#savedir ="""D:/full_run/""" 
+savedir ="""/scratch_local/SBND_Installation/data/commissioning/mon_run/""" 
+if (os.path.exists(LD.savedir)):
+    print (savedir)
 
 def Create_Folder():
     runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
@@ -98,18 +93,15 @@ def Create_Folder():
     print("Save data in "+LD.savedir)
 
 
-recfn = savedir + "record.txt"
-
 if True:
     textnote = "{}:".format(datetime.now())
     textnote += "Analog Monitoring \n"
-    with open(recfn, "a+") as rfp:
-        rfp.write(textnote)
-    print (textnote)
     Create_Folder()
+    cfglog = LD.CE_MON_CFG(pls_cs=0, dac_sel=0, mon_cs=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1, monchn=40)
+    #cfglog = LD.CE_MON_CFG(pls_cs=1, dac_sel=1, mon_cs=1, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=0, swdac1=0, swdac2=1, dac=0x20, monchn=40)
+    #cfglog = LD.CE_MON_CFG(pls_cs=1, dac_sel=1, mon_cs=0, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=0, swdac2=1, dac=0x10, monchn=10)
     #cfglog = LD.CE_MON_CFG(pls_cs=0, dac_sel=0, mon_cs=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1, monchn=0)
-    #cfglog = LD.CE_MON_CFG(pls_cs=0, dac_sel=0, mon_cs=1, sts=0, sg0=0, sg1=1, st0 =1, st1=1, snc=1, monchn=0)
-    cfglog = LD.CE_MON_CFG(pls_cs=1, dac_sel=1, mon_cs=1, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=0, swdac2=1, dac=0x20, monchn=49)
+#    cfglog = LD.CE_MON_CFG(pls_cs=1, dac_sel=1, mon_cs=1, asicdac_en=1, sts=1, sg0=0, sg1=1, st0 =1, st1=1, snc=1, swdac1=0, swdac2=1, dac=0x20, monchn=49)
 
 
 print ("Done")
