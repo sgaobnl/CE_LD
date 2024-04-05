@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sun Mar 10 22:09:41 2024
+Last modified: Wed Mar 27 23:49:05 2024
 """
 
 #defaut setting for scientific caculation
@@ -184,7 +184,7 @@ def RMS_TS_ANA(rmsts, result_dir, rms_flg=True):
     ax3.legend()
     plt.gcf().autofmt_xdate()
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
-    #plt.show()
+    plt.show()
     if rms_flg:
         plt.savefig(result_dir + "RMS_vs_Time.png")
     else:
@@ -193,7 +193,21 @@ def RMS_TS_ANA(rmsts, result_dir, rms_flg=True):
 
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_result/"""
 rawdir = """/scratch_local/SBND_Installation/data/commissioning/LD_result/"""
-#rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD/LD_result/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_LD/"""
+
+fn_map = rawdir + "./Top CE boards RTD.csv"
+temps = []
+with open (fn_map, 'r') as fp:
+    for cl in fp:
+        if "\n" in cl:
+            cl = cl.replace("\n", "")
+        tmp = cl.split(",")
+        x = []
+        for i in tmp:
+            x.append(i.replace(" ", ""))
+        temps.append([x[0],x[1]])
+print (temps[-1])
+exit()
 
 result_dir = rawdir 
 
@@ -203,6 +217,8 @@ if (os.path.isfile(frmsts)):
         rmsts = pickle.load(fs)
 else:
     rmsts = []
+
+
 
 for root, dirs, files in os.walk(rawdir):
     #for fn in files[0:20]:
