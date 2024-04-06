@@ -9,12 +9,12 @@ from email.mime.image import MIMEImage
 # Define these once; use them twice!
 strFrom = 'sbnd'
 #strTo = 'aaaaf37do5cye5svsdg3jj2rkm@shortbaseline.slack.com'
-strTo = 'sbnd_cold_electronics-aaaamjjujebziez3xtqixfexxy@shortbaseline.slack.com'
+recipients = 'sbnd_cold_electronics-aaaamjjujebziez3xtqixfexxy@shortbaseline.slack.com'
 
 # Create the root message and fill in the from, to, and subject headers
 msgRoot = MIMEMultipart('related')
 msgRoot['From'] = strFrom
-msgRoot['To'] = strTo
+#msgRoot['To'] = strTo
 msgRoot.preamble = 'This is a multi-part message in MIME format.'
 
 # Encapsulate the plain and HTML versions of the message body in an
@@ -45,9 +45,12 @@ for i in range(len(list_of_files)):
     msgRoot.attach(msgImage)
 
 msgRoot['Subject'] = '%d noisy channels' % len(list_of_files)
+if len(list_of_files) > 2:
+    recipients = 'sbnd_cold_electronics-aaaamjjujebziez3xtqixfexxy@shortbaseline.slack.com,tjyang@fnal.gov,sgao@bnl.gov,meddage@ksu.edu,dmendezme@bnl.gov,mworcest@gmail.com,etw@bnl.gov'
 
 # Send the email (this example assumes SMTP authentication is required)
+msgRoot['To'] = recipients
 import smtplib
 smtp = smtplib.SMTP('localhost')
-smtp.sendmail(strFrom, strTo, msgRoot.as_string())
+smtp.sendmail(strFrom, recipients.split(','), msgRoot.as_string())
 smtp.quit()
