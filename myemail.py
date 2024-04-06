@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 
 # Define these once; use them twice!
-strFrom = 'sbnd'
+strFrom = 'sbndwib'
 #strTo = 'aaaaf37do5cye5svsdg3jj2rkm@shortbaseline.slack.com'
 recipients = 'sbnd_cold_electronics-aaaamjjujebziez3xtqixfexxy@shortbaseline.slack.com'
 
