@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue Apr  9 13:13:44 2024
+Last modified: Tue Apr  9 13:20:36 2024
 """
 
 #defaut setting for scientific caculation
@@ -537,7 +537,7 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
         vals = np.array(vals)*195
         ax2.plot(np.array(chns)+1984*2, vals, color="C%d"%(n+1), marker='.', mfc='r', mec='r',  label = "Y" )
     ax1.set_ylim((ylim))
-    ax1.set_xlim((0,5632))
+    ax1.set_xlim((-10,5640))
     ax1.set_ylabel (ylabel)
     ax1.set_xlabel ("Channel NO." + " (" + "Data_is_" + "_".join(plot_info[1:])+ ")")
 #    ax1.text(100, ylim[1]*0.8, "Data_is_" + "_".join(plot_info[1:]))
@@ -547,7 +547,7 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
     ax1.grid()
 
     ax2.set_ylim((ylim))
-    ax2.set_xlim((0,5832))
+    ax2.set_xlim((-10,5640))
     ax2.set_ylabel (ylabel)
     ax2.set_xlabel ("Channel NO."+ " (" + "Data_is_" + "_".join(plot_info[1:])+ ")")
 #    ax2.text(100, ylim[1]*0.8, "Data_is_" + "_".join(plot_info[1:]))
