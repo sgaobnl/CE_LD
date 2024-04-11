@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Fri Apr  5 12:24:56 2024
+Last modified: Thu Apr 11 11:05:49 2024
 """
 
 #defaut setting for scientific caculation
@@ -589,12 +589,34 @@ class CLS_CONFIG:
                         self.UDP.write_reg_femb_checked (femb_addr, 42, 0)
 
                     #FE configuration
+                    if monchn > 0 :
+                        chipn = monchn//16
+                        chipnchn = monchn%16
+                    else:
+                        if ("34.11" in wib_ip) and (femb_addr==3): 
+                            tmpchn = 69
+                        elif ("34.12" in wib_ip) and (femb_addr==2): 
+                            tmpchn = 15
+                        elif ("34.13" in wib_ip) and (femb_addr==3): 
+                            tmpchn = 62
+                        elif ("34.15" in wib_ip) and (femb_addr==0): 
+                            tmpchn = 40
+                        elif ("34.16" in wib_ip) and (femb_addr==1): 
+                            tmpchn = 103
+                        elif ("34.21" in wib_ip) and (femb_addr==0): 
+                            tmpchn = 50
+                        elif ("34.24" in wib_ip) and (femb_addr==1): 
+                            tmpchn = 35
+                        elif ("34.24" in wib_ip) and (femb_addr==3): 
+                            tmpchn = 106
+                        elif ("34.44" in wib_ip) and (femb_addr==1): 
+                            tmpchn = 44
+                        chipn = tmpchn//16
+                        chipnchn = tmpchn%16
                     if True:
                         sts0 = 0
                         self.FEREG_MAP.set_fe_board(sts0, snc, sg0, sg1, st0, st1, smn, sdf,\
                                                     slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac)
-                        chipn = monchn//16
-                        chipnchn = monchn%16
                         self.FEREG_MAP.set_fechn_reg(chip=chipn, chn=chipnchn, sts=sts, snc=snc, sg0=sg0, sg1=sg1, st0=st0, st1=st1, smn=1, sdf=sdf )
                         regs = self.FEREG_MAP.REGS
                     fe_regs = [0x00000000]*(8+1)*4
