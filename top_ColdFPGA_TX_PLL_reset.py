@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Apr 10 09:56:36 2024
+Last modified: Wed Apr 10 13:34:17 2024
 """
 
 #defaut setting for scientific caculation
@@ -123,20 +123,21 @@ for wib_ip in LD.WIB_IPs:
 
     keys = list(stats.keys())
     for key in keys:
-        if ("_CHK_ERR_LINK" in key) and (stats[key] != 0) :
+        #if ("_CHK_ERR_LINK" in key) and (stats[key] != 0) :
+        if "34.11" in wib_ip :
             fembno = int(key[4])
             print ("WIB IP %s: Set to output fake data"%( wib_ip))
             #set the WIB output fake data (channel mapping)
             LD.UDP.write_reg_wib_checked(0x09, 0x20)
 
-            print ("FEMB%d of WIB IP %s: Set to reset ColdFPGA transceiver PLL"%(fembno, wib_ip))
-            LD.UDP.write_reg_femb_checked(fembno, 0x14,0x01f80001)
-            time.sleep(1)
-            LD.UDP.write_reg_femb_checked(fembno, 0x14,0x01f80000)
-            time.sleep(1)
-            #set the WIB output normal data
-            print ("WIB IP %s: Set to output normal data"%( wib_ip))
-            LD.UDP.write_reg_wib_checked(0x09, 0x0)
+            #print ("FEMB%d of WIB IP %s: Set to reset ColdFPGA transceiver PLL"%(fembno, wib_ip))
+            #LD.UDP.write_reg_femb_checked(fembno, 0x14,0x01f80001)
+            #time.sleep(1)
+            #LD.UDP.write_reg_femb_checked(fembno, 0x14,0x01f80000)
+            #time.sleep(1)
+            ##set the WIB output normal data
+            #print ("WIB IP %s: Set to output normal data"%( wib_ip))
+            #LD.UDP.write_reg_wib_checked(0x09, 0x0)
 
 print ("Done")
 
