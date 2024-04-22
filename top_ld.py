@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Sat Mar 16 21:20:36 2024
+Last modified: Mon Apr 22 17:28:58 2024
 """
 
 #defaut setting for scientific caculation
@@ -86,6 +86,14 @@ for wib_ip in LD.WIB_IPs:
 #        LD.act_fembs[wib_ip] = [False, True, True, True]
     else:
         LD.act_fembs[wib_ip] = [True, True, True, True]
+
+
+    stats = LD.WIB_STATUS(wib_ip)
+    runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    femb_addr = 0
+    fn = LD.savedir + "/" + "STAS_" + "WIB_" + wib_ip.replace(".","_") + "FEMB_" + str(femb_addr) +  "_Time" + runtime + ".sts"
+    with open(fn, "wb") as fp:
+        pickle.dump(stats, fp)
 
 cfglog = ""
 LD.TPC_UDPACQ(cfglog)
