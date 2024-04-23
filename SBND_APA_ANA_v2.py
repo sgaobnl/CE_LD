@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue Mar 19 01:04:37 2024
+Last modified: Tue Apr 23 01:01:56 2024
 """
 
 #defaut setting for scientific caculation
@@ -237,6 +237,31 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
     fns = []
     for root, dirs, files in os.walk(rawdir):
         for fn in files:
+            if ("WIB_" in fn) and ("FEMB_" in fn) and (".sts" in fn):
+                wibloc = fn.find("FEMB_")
+                crateno = int(fn[wibloc-2])
+                ptbno = int(fn[wibloc-1])
+                fembno = int(fn[wibloc+5])
+                fns.append([crateno, ptbno, fembno, rawdir + fn])
+        break
+
+    link_errs = []
+    for df in fns:
+        crateno = df[0]
+        wibno   = df[1]
+        with open (df[3], "rb") as fs:
+            print (df[3])
+            stats = pickle.load(fs)
+            keys = list(stats.keys())
+            for key in keys:
+                if ("_CHK_ERR_LINK" in key) and (stats[key] != 0) :            
+                    link_errs.append([crateno, wibno, key, stats[key]])
+                if ("FRAME_ERR_LINK" in key) and (stats[key] != 0) :            
+                    link_errs.append([crateno, wibno, key, stats[key]])
+
+    fns = []
+    for root, dirs, files in os.walk(rawdir):
+        for fn in files:
             if ("WIB_" in fn) and ("FEMB_" in fn) and (".bin" in fn):
                 wibloc = fn.find("FEMB_")
                 crateno = int(fn[wibloc-2])
@@ -305,7 +330,7 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
     #    fp.write( top_row + "\n")
     #    for x in dec_chn:
     #        fp.write(",".join(str(i) for i in x[0:17]) +  "," + "\n")
-    return result
+    return result, link_errs
 
 def d_dec_plt(dec_chn, n=1):
     #n=63-11-46 "CFGINFO"
@@ -494,9 +519,18 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
     ax1.text(1000, -1, "U", color='b')
     ax1.text(3000, -1, "V", color='g')
     ax1.text(5000, -1, "Y", color='r')
-    if len(note) != 0:
-        ax1.text(100, ylim[1]*0.8, note )
-        ax2.text(100, ylim[1]*0.8, note )
+    if note !=  None:
+    	if len(note) != 0:
+            if type(note) == str:
+                ax1.text(100, ylim[1]*0.8, note )
+                ax2.text(100, ylim[1]*0.8, note )
+            else:
+                for i in range(len(link_errs)):
+                    crateno = link_errs[i][0]
+                    wibno = link_errs[i][1]
+                    key = link_errs[i][2]
+                    stats = link_errs[i][3]
+                    ax1.text(100, ylim[1]*0.1*i, "Crate{}_WIB{}_{}_{}".format(crateno, wibno, key, stats))
     ax1.vlines(1984*2, 0, 4000, linestyles='dashed',color='k')
     ax2.vlines(1984, 0, 4000, linestyles='dashed',color='k')
     ax2.vlines(1984*2, 0, 4000, linestyles='dashed',color='k')
@@ -648,8 +682,8 @@ def Dec_add_cfgs(rawdatapath, result, rn):
     DIS_PLOTs(result, rn)
 
 
-def DIS_PLOTs(result, rn):
-    DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8])
+def DIS_PLOTs(result, rn, link_errs=None):
+    DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8],note=link_errs)
     DIS_PLOT(dec_chn=result, fdir=rn, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
     DIS_PLOT(dec_chn=result, fdir=rn, title = "FE TST (1:enable, 0:disable) distribution", fn = "SBND_APA_CFG_FE_TST_DIS.png", ns=[63-11-17], ylim=[-2,2], ylabel="FE_TST", note="1:EN, 0:DIS, -1:Bad")
     DIS_PLOT(dec_chn=result, fdir=rn, title = "FE SNC (Baseline) distribution", fn = "SBND_APA_CFG_FE_BL_DIS.png", ns=[63-11-17+1], ylim=[-2,2], ylabel="FE_BL", note="1:200mV, 0:900mV, -1:Bad")
@@ -673,6 +707,7 @@ def DIS_PLOTs(result, rn):
 
 rawdir = "/scratch_local/SBND_Installation/data/commissioning/"
 #rawdir = "/scratch_local/SBND_Installation/data/commissioning/ce_rampup_tests/"
+rawdir = "/scratch_local/SBND_Installation/data/sgao/newplot/"
 
 result_dir = rawdir + "LD_result/"
 
@@ -716,11 +751,11 @@ for d1n in d1ns:
                 else:
                     #rms_f = False
                     rms_f = True 
-                    result = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
+                    result,link_errs = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
                     if result == None:
                         continue
                     else:
-                        DIS_PLOTs(result, rn)
+                        DIS_PLOTs(result, rn, link_errs)
 
         break
 
