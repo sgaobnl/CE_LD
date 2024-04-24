@@ -281,7 +281,7 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
             raw = pickle.load(fs)
         if len(raw) != 8:
             print ("Invalid monitoring data,discard...")
-            return None
+            return None, None
         results = FEMB_CHK(raw, rms_f=rms_f, fs=df[3], rn=rn)
         chn_rmss = results[2][0]
         chn_peds = results[2][1]
@@ -707,7 +707,7 @@ def DIS_PLOTs(result, rn, link_errs=None):
 
 rawdir = "/scratch_local/SBND_Installation/data/commissioning/"
 #rawdir = "/scratch_local/SBND_Installation/data/commissioning/ce_rampup_tests/"
-rawdir = "/scratch_local/SBND_Installation/data/sgao/newplot/"
+#rawdir = "/scratch_local/SBND_Installation/data/sgao/newplot/"
 
 result_dir = rawdir + "LD_result/"
 
