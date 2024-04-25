@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Thu Apr 11 11:05:49 2024
+Last modified: Wed Apr 24 09:38:34 2024
 """
 
 #defaut setting for scientific caculation
@@ -261,6 +261,58 @@ class CLS_CONFIG:
         #self.WIB_PWR_FEMB(wib_ip, femb_sws=[0,0,0,0])
         return self.err_code
 
+    def WIB_LINK_STATUS(self):
+        runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
+        status_dict = {}
+        status_dict["TIME"] = runtime
+
+        if False: #reset error
+#        if True: #reset error
+#        self.UDP.write_reg_wib_checked(0x4, 0x8) #Internal clock is selected
+#        self.UDP.write_reg_wib_checked(0x12, 0x8000)
+            tmp = self.UDP.read_reg_wib(0x12)
+            tmp = self.UDP.read_reg_wib(0x12)
+            print (hex(self.UDP.read_reg_wib(0x12)))
+            self.UDP.write_reg_wib_checked(0x12, 0x8000)
+            #time.sleep(0.05)
+        self.UDP.write_reg_wib_checked(0x12, 0x100)
+        time.sleep(0.02)
+
+        #stat= self.UDP.read_reg_wib(32) #reg32 is for ProtoDUNE, reserved but not used
+        #adc_errcnt =(stat&0x0FFFF0000) >> 16  
+        #header_errcnt =(stat&0x0FFFF)   
+        for i in range(2):
+            link_status = self.UDP.read_reg_wib(0x21)
+            eq_status   = self.UDP.read_reg_wib(0x24)
+            time.sleep(0.001)
+
+        status_dict["FEMB0_LINK"] = link_status&0xFF
+        status_dict["FEMB0_EQ"  ] = eq_status&0x0F 
+        status_dict["FEMB1_LINK"] = (link_status&0xFF00)>>8
+        status_dict["FEMB1_EQ"  ] = (eq_status&0xF0)>>4 
+        status_dict["FEMB2_LINK"] = (link_status&0xFF0000)>>16
+        status_dict["FEMB2_EQ"  ] = (eq_status&0xF00)>>8 
+        status_dict["FEMB3_LINK"] = (link_status&0xFF000000)>>24
+        status_dict["FEMB3_EQ"  ] = (eq_status&0xF000)>>12 
+                       
+        self.UDP.write_reg_wib_checked(0x12, 0x000)
+        for i in range(4):
+            for j in range(4):
+                self.UDP.write_reg_wib_checked(0x12, (i<<2) + j)
+                reg34 = self.UDP.read_reg_wib(0x22)
+                femb_ts_cnt = (reg34&0xFFFF0000)>>16
+                chkerr_cnt = (reg34&0xFFFF)
+                reg35 = self.UDP.read_reg_wib(0x25)
+                frameerr_cnt =(reg35&0xFFFF) 
+                ts_err_cnt = (reg35&0xFFFF0000)>>16
+                status_dict["FEMB%d_TS_LINK%d"%(i, j)       ] = femb_ts_cnt 
+                status_dict["FEMB%d_CHK_ERR_LINK%d"%(i, j)  ] = chkerr_cnt 
+                status_dict["FEMB%d_FRAME_ERR_LINK%d"%(i, j)] = frameerr_cnt 
+                status_dict["FEMB%d_TS_ERR_LINK%d"%(i, j)] = ts_err_cnt 
+
+        return status_dict
+
+
     def WIB_STATUS(self, wib_ip):
         runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
         self.UDP.UDP_IP = wib_ip
@@ -298,9 +350,11 @@ class CLS_CONFIG:
                 chkerr_cnt = (reg34&0xFFFF)
                 reg35 = self.UDP.read_reg_wib(0x25)
                 frameerr_cnt =(reg35&0xFFFF) 
+                ts_err_cnt = (reg35&0xFFFF0000)>>16
                 status_dict["FEMB%d_TS_LINK%d"%(i, j)       ] = femb_ts_cnt 
                 status_dict["FEMB%d_CHK_ERR_LINK%d"%(i, j)  ] = chkerr_cnt 
                 status_dict["FEMB%d_FRAME_ERR_LINK%d"%(i, j)] = frameerr_cnt 
+                status_dict["FEMB%d_TS_ERR_LINK%d"%(i, j)] = ts_err_cnt 
 
         for j in range(3):
             for k in range(5):
@@ -874,6 +928,29 @@ class CLS_CONFIG:
         self.UDP.write_reg_wib_checked ( 7, wib_asic | 0x80000000)
         self.UDP.write_reg_wib_checked ( 7, wib_asic)
 
+    def TPC_LINK_STATS(self, cfglog):
+        for wib_ip in list(self.act_fembs.keys()):
+            self.UDP.UDP_IP = wib_ip
+            if self.UDP.MultiPort :
+                self.UDP.write_reg_wib(0x1E, 3)
+            else:
+                self.UDP.write_reg_wib(0x1E, 0)
+            runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
+            stats = self.WIB_LINK_STATUS()
+            keys = list(stats.keys())
+            for key in keys:
+                if ("_CHK_ERR_LINK" in key) and (stats[key] != 0) :            
+                    print ([wib_ip, key, stats[key]])
+                if ("FRAME_ERR_LINK" in key) and (stats[key] != 0) :            
+                    print ([wib_ip, key, stats[key]])
+                if ("TS_ERR_LINK" in key) and (stats[key] != 0) :            
+                    print ([wib_ip, key, stats[key]])
+            femb_addr = 0
+            fn = self.savedir +"/" + "STAS_" + "WIB_" + wib_ip.replace(".","_") + "FEMB_" + str(femb_addr) +  "_Time" + runtime + ".sts" 
+            with open(fn, "wb") as fp:
+                pickle.dump(stats, fp)
+
+
     def TPC_UDPACQ(self, cfglog):
         for wib_ip in list(self.act_fembs.keys()):
             self.UDP.UDP_IP = wib_ip
@@ -881,6 +958,13 @@ class CLS_CONFIG:
                 self.UDP.write_reg_wib(0x1E, 3)
             else:
                 self.UDP.write_reg_wib(0x1E, 0)
+            stats = self.WIB_LINK_STATUS()
+            femb_addr = 0
+            runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
+            fn = self.savedir +"/" + "STAS_" + "WIB_" + wib_ip.replace(".","_") + "FEMB_" + str(femb_addr) +  "_Time" + runtime + ".sts" 
+            with open(fn, "wb") as fp:
+                pickle.dump(stats, fp)
+
 #        print ("wait 3 seconds")
         time.sleep(3)
         

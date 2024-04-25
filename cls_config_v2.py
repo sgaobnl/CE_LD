@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Apr 24 14:44:09 2024
+Last modified: Wed Apr 24 21:50:44 2024
 """
 
 #defaut setting for scientific caculation
@@ -650,7 +650,7 @@ class CLS_CONFIG:
                             tmpchn = 103
                         elif ("34.21" in wib_ip) and (femb_addr==0): 
                             tmpchn = 49
-                        elif ("34.23" in wib_ip) and (femb_addr==0): 
+                        elif ("34.23" in wib_ip) and (femb_addr==1): 
                             tmpchn = 86 
 
 #                        if ("34.11" in wib_ip) and (femb_addr==3): 
@@ -942,8 +942,6 @@ class CLS_CONFIG:
             else:
                 self.UDP.write_reg_wib(0x1E, 0)
             stats = self.WIB_LINK_STATUS()
-            femb_addr = 0
-            runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
             fn = self.savedir +"/" + "STAS_" + "WIB_" + wib_ip.replace(".","_") + "FEMB_" + str(femb_addr) +  "_Time" + runtime + ".sts" 
             with open(fn, "wb") as fp:
                 pickle.dump(stats, fp)
