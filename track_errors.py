@@ -64,6 +64,6 @@ for wib in wiblist:
     xfmt = md.DateFormatter('%H:%M')
     ax.xaxis.set_major_formatter(xfmt)
     plt.title("CHECKSUM errors for WIB"+str(wib)+" on "+date)
-    plt.savefig("errhist_wib"+str(wib)+".png")
+    plt.savefig("errhist_"+date+"_wib"+str(wib)+".png")
     plt.close()
 
