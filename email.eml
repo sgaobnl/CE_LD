@@ -23,45 +23,45 @@ Content-ID: <body@here>
 
 <html>
  <body>
-  RMS_vs_Time.png<br>
+  {filename0}<br>
   <img src="cid:rmstime@here" width=1000"><br>
-  ${filename1}<br>
+  {filename1}<br>
   <img src="cid:file1@here" width="1000"><br>
-  ${filename2}<br>
+  {filename2}<br>
   <img src="cid:file2@here" width="1000"><br>
-  ${filename3}<br>
+  {filename3}<br>
   <img src="cid:file3@here" width="1000"><br>
-  ${filename4}<br>
+  {filename4}<br>
   <img src="cid:file4@here" width="1000"><br>
-  ${filename5}<br>
+  {filename5}<br>
   <img src="cid:file5@here" width="1000"><br>
-  ${filename6}<br>
+  {filename6}<br>
   <img src="cid:file6@here" width="1000"><br>
-  ${filename7}<br>
+  {filename7}<br>
   <img src="cid:file7@here" width="1000"><br>
-  ${filename8}<br>
+  {filename8}<br>
   <img src="cid:file8@here" width="1000"><br>
-  ${filename9}<br>
+  {filename9}<br>
   <img src="cid:file9@here" width="1000"><br>
-  ${filename10}<br>
+  {filename10}<br>
   <img src="cid:file10@here" width="1000"><br>
-  ${filename11}<br>
+  {filename11}<br>
   <img src="cid:file11@here" width="1000"><br>
-  ${filename12}<br>
+  {filename12}<br>
   <img src="cid:file12@here" width="1000"><br>
-  ${filename13}<br>
+  {filename13}<br>
   <img src="cid:file13@here" width="1000"><br>
-  ${filename14}<br>
+  {filename14}<br>
   <img src="cid:file14@here" width="1000"><br>
-  ${filename15}<br>
+  {filename15}<br>
   <img src="cid:file15@here" width="1000"><br>
-  ${filename16}<br>
+  {filename16}<br>
   <img src="cid:file16@here" width="1000"><br>
-  ${filename17}<br>
+  {filename17}<br>
   <img src="cid:file17@here" width="1000"><br>
-  ${filename18}<br>
+  {filename18}<br>
   <img src="cid:file18@here" width="1000"><br>
-  ${filename19}<br>
+  {filename19}<br>
   <img src="cid:file19@here" width="1000"><br>
 
  </body>
@@ -73,7 +73,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <rmstime@here>
 
-${rmstime_base64}
+{file0}
 
 --inner-boundary
 Content-Type: image/png
@@ -81,7 +81,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file1@here>
 
-${file1}
+{file1}
 
 --inner-boundary
 Content-Type: image/png
@@ -89,7 +89,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file2@here>
 
-${file2}
+{file2}
 
 --inner-boundary
 Content-Type: image/png
@@ -97,7 +97,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file3@here>
 
-${file3}
+{file3}
 
 --inner-boundary
 Content-Type: image/png
@@ -105,7 +105,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file4@here>
 
-${file4}
+{file4}
 
 --inner-boundary
 Content-Type: image/png
@@ -113,7 +113,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file5@here>
 
-${file5}
+{file5}
 
 --inner-boundary
 Content-Type: image/png
@@ -121,7 +121,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file6@here>
 
-${file6}
+{file6}
 
 --inner-boundary
 Content-Type: image/png
@@ -129,7 +129,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file7@here>
 
-${file7}
+{file7}
 
 --inner-boundary
 Content-Type: image/png
@@ -137,7 +137,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file8@here>
 
-${file8}
+{file8}
 
 --inner-boundary
 Content-Type: image/png
@@ -145,7 +145,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file9@here>
 
-${file9}
+{file9}
 
 --inner-boundary
 Content-Type: image/png
@@ -153,7 +153,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file10@here>
 
-${file10}
+{file10}
 
 --inner-boundary
 Content-Type: image/png
@@ -161,7 +161,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file11@here>
 
-${file11}
+{file11}
 
 --inner-boundary
 Content-Type: image/png
@@ -169,7 +169,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file12@here>
 
-${file12}
+{file12}
 
 --inner-boundary
 Content-Type: image/png
@@ -177,7 +177,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file13@here>
 
-${file13}
+{file13}
 
 --inner-boundary
 Content-Type: image/png
@@ -185,7 +185,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file14@here>
 
-${file14}
+{file14}
 
 --inner-boundary
 Content-Type: image/png
@@ -193,7 +193,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file15@here>
 
-${file15}
+{file15}
 
 --inner-boundary
 Content-Type: image/png
@@ -201,7 +201,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file16@here>
 
-${file16}
+{file16}
 
 --inner-boundary
 Content-Type: image/png
@@ -209,7 +209,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file17@here>
 
-${file17}
+{file17}
 
 --inner-boundary
 Content-Type: image/png
@@ -217,7 +217,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file18@here>
 
-${file18}
+{file18}
 
 --inner-boundary
 Content-Type: image/png
@@ -225,7 +225,7 @@ Content-Disposition: inline
 Content-Transfer-Encoding: base64
 Content-ID: <file19@here>
 
-${file19}
+{file19}
 
 --inner-boundary--
 
