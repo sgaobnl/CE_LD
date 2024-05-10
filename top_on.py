@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/10/2024 10:56:28 AM
+Last modified: 5/10/2024 11:01:53 AM
 """
 
 #defaut setting for scientific caculation
@@ -53,6 +53,7 @@ print ("Mode 1: Turn FEMB on")
 print ("Mode 2: Configure FEMB for normal operation")
 print ("Mode 3: Configure FEMB into checkout operation")
 print ("Mode 4: Local diagnostics mode (no configuration, just data taking)")
+print ("Mode 5: Analog Monitoring")
 while True:
     try :
         modeno = int(input("FEMB on WIB Slot# (0-4) :"))
@@ -127,7 +128,7 @@ elif modeno == 4:
                 print ("Error to create folder %s"%a.CLS.savedir)
                 sys.exit()
         a.CLS.TPC_UDPACQ(cfglog)
-elif modeno == 4:
+elif modeno == 5:
     monchnno = int(input("input a channel number (0-127) for monitoring>> "))
     a.CLS.CE_MON_CFG(pls_cs=0, dac_sel=0, mon_cs=1, sts=0, sg0=0, sg1=0, st0 =1, st1=1, snc=0, monchn=monchnno)
 
