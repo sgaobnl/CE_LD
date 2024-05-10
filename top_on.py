@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 2/23/2024 12:20:02 PM
+Last modified: 5/10/2024 10:56:28 AM
 """
 
 #defaut setting for scientific caculation
@@ -127,6 +127,11 @@ elif modeno == 4:
                 print ("Error to create folder %s"%a.CLS.savedir)
                 sys.exit()
         a.CLS.TPC_UDPACQ(cfglog)
+elif modeno == 4:
+    monchnno = int(input("input a channel number (0-127) for monitoring>> "))
+    a.CLS.CE_MON_CFG(pls_cs=0, dac_sel=0, mon_cs=1, sts=0, sg0=0, sg1=0, st0 =1, st1=1, snc=0, monchn=monchnno)
+
+
 print ("Data save at :", a.userdir)
 print ("Well Done")
 
