@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Wed Apr 24 09:38:34 2024
+Last modified: Wed May 22 00:40:47 2024
 """
 
 #defaut setting for scientific caculation
@@ -60,6 +60,14 @@ class CLS_CONFIG:
 
     def WIB_UDP_CTL(self, wib_ip, WIB_UDP_EN = False):
         self.UDP.UDP_IP = wib_ip
+        while True: 
+            time.sleep(0.001)
+            wib_reg_7_value0 = self.UDP.read_reg_wib (7) 
+            time.sleep(0.001)
+            wib_reg_7_value1 = self.UDP.read_reg_wib (7) 
+            if wib_reg_7_value0 == wib_reg_7_value1: 
+                wib_reg_7_value = wib_reg_7_value0 
+                break 
         wib_reg_7_value = self.UDP.read_reg_wib (7)
         if (WIB_UDP_EN): #enable UDP output
             wib_reg_7_value = wib_reg_7_value & 0x00000000 #bit31 of reg7 for disable wib udp control
@@ -958,6 +966,7 @@ class CLS_CONFIG:
                 self.UDP.write_reg_wib(0x1E, 3)
             else:
                 self.UDP.write_reg_wib(0x1E, 0)
+            self.WIB_UDP_CTL(wib_ip, WIB_UDP_EN = False) #Disable HS data from the WIB to PC through UDP
             stats = self.WIB_LINK_STATUS()
             femb_addr = 0
             runtime =  datetime.now().strftime('%Y_%m_%d_%H_%M_%S') 
