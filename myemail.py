@@ -31,7 +31,9 @@ basename = os.path.basename(latest_file)
 substr = basename[:basename.find("10_226_34")]
 list_of_files = glob.glob('/scratch_local/SBND_Installation/data/commissioning/LD_result/'+substr+'*png')
 
-for i in range(len(list_of_files)):
+print("Found %d noisy channels." % len(list_of_files))
+
+for i in range(min(len(list_of_files),10)):
     # We reference the image in the IMG SRC attribute by the ID we give it below
     msgText = MIMEText('<img src="cid:image%d" width=1000><br>' % i, 'html')
     msgAlternative.attach(msgText)
@@ -45,8 +47,8 @@ for i in range(len(list_of_files)):
     msgRoot.attach(msgImage)
 
 msgRoot['Subject'] = '%d noisy channels' % len(list_of_files)
-if len(list_of_files) > 2:
-    recipients = 'sbnd_cold_electronics-aaaamjjujebziez3xtqixfexxy@shortbaseline.slack.com,tjyang@fnal.gov,sgao@bnl.gov,meddage@ksu.edu,dmendezme@bnl.gov,mworcest@gmail.com,etw@bnl.gov'
+#if len(list_of_files) > 2:
+    #recipients = 'sbnd_cold_electronics-aaaamjjujebziez3xtqixfexxy@shortbaseline.slack.com,tjyang@fnal.gov,sgao@bnl.gov,meddage@ksu.edu,dmendezme@bnl.gov,mworcest@gmail.com,etw@bnl.gov'
 
 # Send the email (this example assumes SMTP authentication is required)
 msgRoot['To'] = recipients

@@ -30,6 +30,7 @@ for run in runs:
                 time = s1[-19:]
                 wibaddr = s1[9:21]
                 nerr = data[key]
+                if (nerr == 65534): nerr = -1
                 #print("here: ", time, wibaddr)
                 #print(key, " = ", data[key])
                 info = [wibaddr, key, time, nerr]

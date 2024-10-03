@@ -8,7 +8,8 @@ do
 #    ./email.sh
     python myemail.py
     python myemail2.py
-    echo "Done, wait for 60 minutes for antoher data taking or terminate it."
-    #sleep 1800 # run every 30 minutes
-    sleep 3600 #change to 30*60 for 30 minutes
+    echo "Done, wait for 15 minutes for antoher data taking or terminate it."
+    sleep 900 # run every 15 minutes
+    #sleep 3600 #change to 60*60 for 60 minutes
+    #sleep 300
 done

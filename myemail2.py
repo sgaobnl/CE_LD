@@ -1,10 +1,12 @@
 import os
+import time
 import glob
 import base64
 import subprocess
 
 list_of_files = glob.glob('/scratch_local/SBND_Installation/data/commissioning/LD_result/LD*_APA_CFG_*png')
 latest_file = max(list_of_files, key=os.path.getmtime)
+ts = os.path.getmtime(latest_file)
 basename = os.path.basename(latest_file)
 #print(basename)
 substr = basename[:basename.find("SBND_APA_")]
@@ -24,6 +26,8 @@ for i in range(len(list_of_files)):
     data = data.replace("{file%d}"%i, convert.decode('utf-8'))
 #    os.environ['file%d'%i] = convert.decode('utf-8')
 #    os.environ['filename%d'%i] = os.path.basename(list_of_files[i])
+
+data = data.replace("TimeStamp", time.ctime(ts)+", dt = %.1f hrs" % ((time.time() - ts)/3600))
 
 with open(r'finalemail.eml', 'w') as file: 
   
