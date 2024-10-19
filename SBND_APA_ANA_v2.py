@@ -725,7 +725,10 @@ for d1n in d1ns:
                 anadir = d1n + d2n + "/"
                 rn = result_dir + "/" + d2n + ".ld"
                 pn = result_dir + "/" + d2n + "SBND_APA_CFG_FEMB_Data_Mode_DIS.png"
+                skip = result_dir + "/" + d2n + ".skip"
                 if (os.path.isfile(pn)):
+                    continue
+                if (os.path.isfile(skip)):
                     continue
                 if (os.path.isfile(rn)):
                     if (int(d2n[8:10]) == 2) and (int(d2n[11:13])<16): #before 02/16, .femb and .wib save wrong data, dischard
@@ -747,12 +750,14 @@ for d1n in d1ns:
                             print ("Invalid, discard")
                             #pass
                             #DIS_PLOTs(result, rn)
+                            open(skip, 'a').close()
                             continue
                 else:
                     #rms_f = False
                     rms_f = True 
                     result,link_errs = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
                     if result == None:
+                        open(skip, 'a').close()
                         continue
                     else:
                         DIS_PLOTs(result, rn, link_errs)
