@@ -367,22 +367,6 @@ drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:36 LD_2024_03_14_09_36_33
 drwxr-xr-x   2 sgao sbnd 12288 Mar 14 09:37 LD_2024_03_14_09_37_04
 
 2024-03-14 09:38:47.395513:ASIC-DAC: #14mV/fC, 2.0us, 200mV, ASIC_DAC
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:39 LD_2024_03_14_09_38_53
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:39 LD_2024_03_14_09_39_24
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:40 LD_2024_03_14_09_39_55
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:40 LD_2024_03_14_09_40_27
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:41 LD_2024_03_14_09_41_00
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:41 LD_2024_03_14_09_41_34
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:42 LD_2024_03_14_09_42_05
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:43 LD_2024_03_14_09_42_36
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:43 LD_2024_03_14_09_43_08
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:44 LD_2024_03_14_09_43_41
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:44 LD_2024_03_14_09_44_13
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:45 LD_2024_03_14_09_44_46
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:45 LD_2024_03_14_09_45_17
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:46 LD_2024_03_14_09_45_53
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:46 LD_2024_03_14_09_46_26
-drwxr-xr-x   2 sgao sbnd 16384 Mar 14 09:47 LD_2024_03_14_09_46_58
 
 
 2024-03-14 09:47:56.681897:BL 200mv vs 900mV

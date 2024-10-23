@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Thu Mar 14 10:02:19 2024
+Last modified: Thu Oct 17 15:07:47 2024
 """
 
 #defaut setting for scientific caculation
@@ -394,7 +394,7 @@ src = "/Users/shanshangao/Downloads/SBND_LD/full_run/"
 
 for root, dirs, files in os.walk(src):
     for onedir in dirs:
-        if "LD_2024" in onedir:
+        if "LD_2024_03_14_08_39" in onedir:
             rawdir = root + onedir+"/"
             print (rawdir)
             SBND_ANA(rawdir, rms_f = False)
