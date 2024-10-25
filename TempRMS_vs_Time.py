@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Thu Mar 28 23:52:10 2024
+Last modified: Thu Oct 24 13:57:05 2024
 """
 
 #defaut setting for scientific caculation
@@ -121,6 +121,7 @@ def RMS_TS_ANA(rmsts, result_dir, rms_flg=True):
         if (x[1][0][2]>1000) and (x[1][1][2]>1000) and (x[1][2][2]>1000) and (x[1][3][2]>1000) and (x[1][4][2]>1000) and (x[1][5][2]>1000):
 
             tstr = datetime.datetime.fromtimestamp(x[0]).strftime("%Y-%m-%d %H:%M:%S")
+            #tstr = datetime.datetime.fromtimestamp(x[0]).strftime("%b %d")
             ts.append(tstr)
             eums.append(x[1][0][0])
             euss.append(x[1][0][1])
@@ -316,11 +317,16 @@ def TempRMS_TS_ANA(rmsts, result_dir, temps, rms_flg=True):
 #    ax2 = plt.subplot(312)
 #    ax3 = plt.subplot(313)
     ax3 = plt.subplot(111)
+    #print (ts)
     tsplot = pd.to_datetime(ts)
+#    tsplot = pd.to_datetime(datetime.strftime(ts, format="%b %d"))
 
 
-    eyms = np.array(eyms)*195
-    eyss = np.array(eyss)*195
+#    eyms = np.array(eyms)*195
+#    eyss = np.array(eyss)*195
+    eyms = np.array(eyms)
+    eyss = np.array(eyss)
+
 #    ax1.errorbar(ts, eums, euss, marker='o', color='C1', label="EAST APA U")
 #    ax1.errorbar(ts, wums, wuss, marker='o', color='C4', label="WEST APA U")
 #    ax2.errorbar(ts, evms, evss, marker='s', color='C2', label="EAST APA V")
@@ -332,13 +338,15 @@ def TempRMS_TS_ANA(rmsts, result_dir, temps, rms_flg=True):
     #    ax1.vlines(x, 0, 5, linestyles='dashed',color='k')
     #    ax2.vlines(x, 0, 5, linestyles='dashed',color='k')
     #    ax3.vlines(x, 0, 5, linestyles='dashed',color='k')
-    ax3.set_ylim((200,1000))
+    #ax3.set_ylim((200,1000))
+    ax3.set_ylim((1.5,4))
     #ax2.set_ylim((0,5))
     #ax3.set_ylim((0,5))
     #ax1.set_ylabel ("RMS noise / bit")
     #ax2.set_ylabel ("RMS noise / bit")
-    #ax3.set_ylabel ("RMS noise / bit")
-    ax3.set_ylabel ("ENC /e$^-$")
+    ax3.set_ylabel ("RMS noise [ADC]")
+    #ax3.set_ylabel ("ENC /e$^-$")
+    #ax3.set_ylabel ("ENC /e$^-$")
     #ax3.set_xlabel ("Time / hour")
     #ax1.text(0,4.5,t0str)
     #ax2.text(0,4.5,t0str)
@@ -353,6 +361,11 @@ def TempRMS_TS_ANA(rmsts, result_dir, temps, rms_flg=True):
     #ax.set_ylim([y_min, y_max])
     ax3t = ax3.twinx()
     labels = ["Temperature at Top CE Board RTD", "Temperature at Middle CE Board RTD", "Temperature at Bottom CE Board RTD"]
+    colors = ['dodgerblue','royalblue', 'blue', 'mediumblue']
+
+    import matplotlib.dates as mdates
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b %d'))
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
 
     for i in range(0,len(tempss)):
         txs_ns= []
@@ -367,47 +380,58 @@ def TempRMS_TS_ANA(rmsts, result_dir, temps, rms_flg=True):
                 tys.append(tx[1])
                 tyss.append(tx[2])
         txsplot = pd.to_datetime(txs)
-        ax3t.errorbar(txsplot, tys, tyss, marker='.', color='C%d'%i, label=labels[i])
-        break
-    ax3t.set_ylabel("Temperature / K")
+        #ax3t.errorbar(txsplot, tys, tyss, marker='.', color='C%d'%i, label=labels[i])
+        #ax3t.errorbar(txsplot, tys, tyss, marker='.', color=colors[i], label=labels[i])
+        ax3t.plot(txsplot, tys,  marker='.', color=colors[i], label=labels[i])
+        #break
+    ax3t.set_ylabel("Temperature [K]")
     ax3t.set_ylim([00, 350])
     #ax1.legend()
     #ax2.legend()
-    ax3.legend(loc="lower right")
+    ax3.legend(loc="upper left")
     ax3t.legend(loc="upper right")
-    plt.gcf().autofmt_xdate(rotation=45)
-    plt.title("ENC/Temperature vs. Time Distribution")
+    ax3.set_xlabel("Date in 2024")
+    xp = "2024_02_28_00_00_00"
+    datex = datetime.datetime.strptime(xp,'%Y_%m_%d_%H_%M_%S')
+
+    ax3t.text(datex,220, "SBND \n Work In Progress Data", fontweight='bold', ha='center') 
+
+    #from matplotlib.dates import DateFormatter, DayLocator, HourLocator, drange
+    #ax3.fmt_xdata = DateFormatter ("%b %d")
+    #plt.gcf().autofmt_xdate(rotation=45)
+    plt.gcf().autofmt_xdate(rotation=0)
+    plt.title("TPC noise, Temperature Vs. Time ")
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
     #plt.show()
-    if rms_flg:
-        plt.savefig(result_dir + "RMS_vs_Time.png")
+    #if rms_flg:
+    plt.savefig(result_dir + "RMS_vs_Time.png")
     #else:
     #    plt.savefig(result_dir + "RMS_Cali_vs_Time.png")
     plt.close()
 
-    import matplotlib.pyplot as plt
-    fig = plt.figure(figsize=(10,6))
-    plt.rcParams.update({'font.size': 14})
-
-    tens = []
-    for i in range(len(ts_ns)):
-        for j in range(len(txs)):
-            #if (tmp-txs[i]>0) and (tmp-ts[i]<1800):
-            if (txs_ns[j]-ts_ns[i]>0) :
-                tens.append(tys[j])
-                break
-    #plt.plot(tens, eyms)
-    plt.errorbar(tens, eyms, eyss, marker='.', color='r', label=labels[0])
-    plt.gca().invert_xaxis()
-    plt.xlabel("Temperature measured at Top CE Board RTD / K")
-    plt.title("ENC vs. Temperature")
-    plt.ylabel("ENC /e$^-$")
-    plt.grid()
-    #plt.legend()
-    plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
-   # plt.show()
-    plt.savefig(result_dir + "RMS_vs_Temp.png")
-    plt.close()
+#    import matplotlib.pyplot as plt
+#    fig = plt.figure(figsize=(10,6))
+#    plt.rcParams.update({'font.size': 14})
+#
+#    tens = []
+#    for i in range(len(ts_ns)):
+#        for j in range(len(txs)):
+#            #if (tmp-txs[i]>0) and (tmp-ts[i]<1800):
+#            if (txs_ns[j]-ts_ns[i]>0) :
+#                tens.append(tys[j])
+#                break
+#    #plt.plot(tens, eyms)
+#    plt.errorbar(tens, eyms, eyss, marker='.', color='r', label=labels[0])
+#    plt.gca().invert_xaxis()
+#    plt.xlabel("Temperature measured at Top CE Board RTD / K")
+#    plt.title("ENC vs. Temperature")
+#    plt.ylabel("ENC /e$^-$")
+#    plt.grid()
+#    #plt.legend()
+#    plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
+#   # plt.show()
+#    plt.savefig(result_dir + "RMS_vs_Temp.png")
+#    plt.close()
         
 
 
@@ -417,8 +441,8 @@ rawdir = """/scratch_local/SBND_Installation/data/commissioning/LD_result/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/Cooldown/"""
 
 tempss =[]
-if False: # to deal with raw temperature data
-#if True: # to deal with raw temperature data
+#if False: # to deal with raw temperature data
+if True: # to deal with raw temperature data
     fn_map = rawdir + "./Top CE boards RTD.csv"
     temps = []
     datex = datetime.datetime.strptime("2024-02-05T00:00:00",'%Y-%m-%dT%H:%M:%S')

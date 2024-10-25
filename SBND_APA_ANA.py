@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: Tue Mar 19 12:09:03 2024
+Last modified: Wed Oct 23 16:46:06 2024
 """
 
 #defaut setting for scientific caculation
@@ -404,6 +404,8 @@ rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_18_15_03_26/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_18_15_37_31/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_2024_03_18_19_21_11/"""
 rawdir = """/Users/shanshangao/Downloads/SBND_LD/LDCCC/2024_03_19/LD_2024_03_19_10_59_42/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_data/LD_2024_10_23_14_11_11/"""
+rawdir = """/Users/shanshangao/Downloads/SBND_data/LD_2024_10_23_14_07_46/"""
 #rawdir = """/scratch_local/SBND_Installation/data/commissioning/sh_time_0_5_us/03_01_2024/LD_2024_03_01_11_32_26/"""
 fr =rawdir + "test_results"+".result" 
 if (os.path.isfile(fr)):
