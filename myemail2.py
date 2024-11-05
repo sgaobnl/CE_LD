@@ -11,6 +11,7 @@ basename = os.path.basename(latest_file)
 #print(basename)
 substr = basename[:basename.find("SBND_APA_")]
 list_of_files = glob.glob('/scratch_local/SBND_Installation/data/commissioning/LD_result/'+substr+'*SBND_APA_'+'*png')
+list_of_files.sort(reverse=True)
 
 list_of_files.insert(0, "/scratch_local/SBND_Installation/data/commissioning/LD_result/RMS_vs_Time.png")
 
@@ -29,13 +30,8 @@ for i in range(len(list_of_files)):
 
 data = data.replace("TimeStamp", time.ctime(ts)+", dt = %.1f hrs" % ((time.time() - ts)/3600))
 
-with open(r'finalemail.eml', 'w') as file: 
-  
-    # Writing the replaced data in our 
-    # text file 
-    file.write(data) 
-
-#subprocess.Popen('echo "Geeks 4 Geeks"', shell=True)
-#subprocess.Popen("envsubst < email.eml > test" , shell=True)
-subprocess.Popen("sendmail -t < finalemail.eml", shell=True)
+with open(r'finalemail.eml', 'w') as file:
+    file.write(data)
+process = subprocess.Popen("sendmail -t < finalemail.eml", shell=True)
+exit_code = process.wait()
 subprocess.Popen("rm -f finalemail.eml", shell=True)
