@@ -4,16 +4,23 @@ import sys
 
 nap_time = 900  # in second 
 # nap_time = 120  # in seconds, uncomment if you want to use 120 seconds instead
-
+#nap_time = 100  # in seconds, uncomment if you want to use 120 seconds instead
+nskip = 3 # skip making rms plots
 def main():
+    iskip = 0
     try:
         while True:
-            print("Running top_ld.py")
-            subprocess.run(["python", "top_ld.py"])
-            subprocess.run(["python", "SBND_APA_ANA_v2.py"])
-            subprocess.run(["python", "SBND_RMS_vs_Time.py"])
-            subprocess.run(["python", "myemail.py"])
-            subprocess.run(["python", "myemail2.py"])
+            if not iskip:
+                print("Running top_ld.py")
+                subprocess.run(["python", "top_ld.py"])
+                subprocess.run(["python", "SBND_APA_ANA_v2.py"])
+                subprocess.run(["python", "SBND_RMS_vs_Time.py"])
+                subprocess.run(["python", "myemail.py"])
+                subprocess.run(["python", "myemail2.py"])
+                iskip = nskip
+            else:
+                print(f"Run top_ld.py after {iskip*nap_time/60} minutes")
+                iskip = iskip - 1
             print("Sending femb status to EPICS")
             for crate in range(1, 5):
                 for slot in range(1, 7):
