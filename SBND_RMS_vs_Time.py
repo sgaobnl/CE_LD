@@ -144,6 +144,8 @@ def RMS_TS_ANA(rmsts, result_dir, rms_flg=True):
     #t0 = datex.timestamp()
     #ts = (np.array(ts)-t0)/3600.0
 
+    import matplotlib
+    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     fig = plt.figure(figsize=(12,9))
     plt.rcParams.update({'font.size': 12})
