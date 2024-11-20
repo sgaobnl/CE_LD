@@ -149,7 +149,10 @@ def ABFEMB_PLOT(results, plotfs, fn="./"):
     chn_pkns = results[2][3]
     chn_wfs =  results[2][4]
 
+    import matplotlib
+    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
+
     fig = plt.figure(figsize=(12,8))
     ax1 = plt.subplot2grid((2, 2), (0, 0), colspan=1, rowspan=1)
     ax2 = plt.subplot2grid((2, 2), (1, 0), colspan=1, rowspan=1)
@@ -754,14 +757,18 @@ for d1n in d1ns:
                             continue
                 else:
                     #rms_f = False
-                    rms_f = True 
-                    result,link_errs = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
-                    if result == None:
+                    rms_f = True
+                    try:
+                        result,link_errs = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
+                        if result == None:
+                            open(skip, 'a').close()
+                            continue
+                        else:
+                            DIS_PLOTs(result, rn, link_errs)
+                    except EOFError:
+                        print("EOFError, check disk space")
                         open(skip, 'a').close()
                         continue
-                    else:
-                        DIS_PLOTs(result, rn, link_errs)
-
         break
 
 
