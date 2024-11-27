@@ -24,6 +24,9 @@ import pickle
 from shutil import copyfile
 import operator
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 def d_dec_plt(dec_chn, n=1):
     euvals = []
@@ -144,9 +147,6 @@ def RMS_TS_ANA(rmsts, result_dir, rms_flg=True):
     #t0 = datex.timestamp()
     #ts = (np.array(ts)-t0)/3600.0
 
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
     fig = plt.figure(figsize=(12,9))
     plt.rcParams.update({'font.size': 12})
     ax1 = plt.subplot(311)

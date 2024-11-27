@@ -30,6 +30,9 @@ from shutil import copyfile
 import operator
 from fft_chn import chn_rfft_psd
 from regs_process import FEMBREG_Process 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 
 def FEMB_CHK(fembdata, rms_f = True, fs="./", rn=""):
@@ -149,9 +152,9 @@ def ABFEMB_PLOT(results, plotfs, fn="./"):
     chn_pkns = results[2][3]
     chn_wfs =  results[2][4]
 
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
+#    import matplotlib
+#    matplotlib.use('Agg')
+#    import matplotlib.pyplot as plt
 
     fig = plt.figure(figsize=(12,8))
     ax1 = plt.subplot2grid((2, 2), (0, 0), colspan=1, rowspan=1)
@@ -199,7 +202,7 @@ def FEMB_PLOT(results, fn="./"):
     chn_pkns = results[2][3]
     chn_wfs =  results[2][4]
 
-    import matplotlib.pyplot as plt
+#    import matplotlib.pyplot as plt
     ax1 = plt.subplot2grid((2, 2), (0, 0), colspan=1, rowspan=1)
     ax2 = plt.subplot2grid((2, 2), (1, 0), colspan=1, rowspan=1)
     ax3 = plt.subplot2grid((2, 2), (0, 1), colspan=1, rowspan=1)
@@ -510,9 +513,9 @@ def DIS_CFG_PLOT(dec_chn, fdir ) :
     #print ( [ttime, wibdatamode, datamode, calimode, gain, st])
     return [ttime, wibdatamode, datamode, calimode, gain, st]
 
-   
+    
 def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5],  ylim=[-2,10], ylabel = "RMS / bit", note = ""):
-    import matplotlib.pyplot as plt
+#    import matplotlib.pyplot as plt
     fig = plt.figure(figsize=(12,6))
     plt.rcParams.update({'font.size': 12})
     ax1 = plt.subplot(211)
@@ -612,7 +615,7 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
             Plsnp = d[15]
             wfs = d[16]
             avgwfs = d[17]
-            import matplotlib.pyplot as plt
+#            import matplotlib.pyplot as plt
 
             fig = plt.figure(figsize=(8.5,8))
             fig.suptitle("Test Result of %s"%chnstr, weight ="bold", fontsize = 12)
