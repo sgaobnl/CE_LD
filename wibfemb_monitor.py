@@ -2,11 +2,14 @@ import time
 import subprocess
 import sys
 
+# uncomment the next two lines during stable operation, it will make the monitoring plots once an hour
 nap_time = 900  # in second 
-# nap_time = 120  # in seconds, uncomment if you want to use 120 seconds instead
-#nap_time = 100  # in seconds, uncomment if you want to use 120 seconds instead
 nskip = 3 # skip making rms plots
+
+# uncomment the next two lines during ramp-up, it will make the monitoring plots once every 8 minutes
+#nap_time = 120  # in seconds, uncomment if you want to use 120 seconds instead
 #nskip = 0 # skip making rms plots
+
 def main():
     iskip = 0
     try:
