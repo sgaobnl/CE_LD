@@ -72,8 +72,32 @@ def FEMB_CHK(fembdata, rms_f = True, fs="./", rn=""):
             else:
                 achn_ped_sub2 = achn_ped_sub[0:maxloc-50] + achn_ped_sub[maxloc+50:] 
 
+            # T.Yang remove signals
+            # Calculate median and +-1 sigma values
+            adc_low, adc_median, adc_high = 0, 0, 0
+            if achn_ped:
+                adc_low, adc_median, adc_high = np.percentile(achn_ped, [15.87, 50, 84.13])
+            # Calculate mean and standard deviation
+            #mean = np.mean(achn_ped)
+            #std_dev = np.std(achn_ped)
+
+            # Identify outliers and their surrounding indices
+            outliers = set()
+            for i, x in enumerate(achn_ped):
+                #if x < mean - 3 * std_dev or x > mean + 3 * std_dev:
+                if x - adc_median < -3 * (adc_median - adc_low) or \
+                   x - adc_median >  3 * (adc_high - adc_median):
+                    outliers.update(range(max(0, i - 50), min(len(achn_ped), i + 51)))
+
+            # Remove outliers and surrounding elements
+            filtered_data = [achn_ped[i] for i in range(len(achn_ped)) if i not in outliers]
+            # rare case all elements are removed
+            if not filtered_data:
+                filtered_data = achn_ped
             arms = np.std(achn_ped)
-            arms_2 = np.std(achn_ped_sub2)
+            # Calculate standard deviation of filtered data
+            #arms_2 = np.std(achn_ped_sub2)
+            arms_2 = np.std(filtered_data)
             aped = int(np.mean(achn_ped))
             if rms_f or (chn_peakp == None):
                 apeakp = np.max(achn_ped)
