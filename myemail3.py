@@ -25,7 +25,7 @@ usage = psutil.disk_usage(partition)
 percent_used = usage.percent
 
 # Send email if the partition is full
-if percent_used > threshold:
+if percent_used >= threshold:
     # Create the email content
     message = MIMEMultipart()
     message['From'] = strFrom
