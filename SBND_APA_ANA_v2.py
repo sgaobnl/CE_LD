@@ -98,10 +98,15 @@ def FEMB_CHK(fembdata, rms_f = True, fs="./", rn=""):
             # Calculate standard deviation of filtered data
             #arms_2 = np.std(achn_ped_sub2)
             arms_2 = np.std(filtered_data)
-            aped = int(np.mean(achn_ped))
+            # T.Yang changed to use filtered data
+            #aped = int(np.mean(achn_ped))
+            aped = int(np.mean(filtered_data))
             if rms_f or (chn_peakp == None):
-                apeakp = np.max(achn_ped)
-                apeakn = np.min(achn_ped)
+                # T.Yang changed to use filtered data
+                #apeakp = np.max(achn_ped)
+                #apeakn = np.min(achn_ped)
+                apeakp = np.max(filtered_data)
+                apeakn = np.min(filtered_data)
                 atmp = 1000
                 if ((apeakp - aped) >= atmp) :
                     if maxloc > 50:
