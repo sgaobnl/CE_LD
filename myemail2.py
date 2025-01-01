@@ -3,14 +3,17 @@ import time
 import glob
 import base64
 import subprocess
+from datetime import datetime
 
-list_of_files = glob.glob('/scratch_local/SBND_Installation/data/commissioning/LD_result/LD*_APA_CFG_*png')
+current_year = str(datetime.now().year)
+
+list_of_files = glob.glob('/scratch_local/SBND_Installation/data/commissioning/LD_result/'+current_year+'/'+'LD*_APA_CFG_*png')
 latest_file = max(list_of_files, key=os.path.getmtime)
 ts = os.path.getmtime(latest_file)
 basename = os.path.basename(latest_file)
 #print(basename)
 substr = basename[:basename.find("SBND_APA_")]
-list_of_files = glob.glob('/scratch_local/SBND_Installation/data/commissioning/LD_result/'+substr+'*SBND_APA_'+'*png')
+list_of_files = glob.glob('/scratch_local/SBND_Installation/data/commissioning/LD_result/'+current_year+'/'+substr+'*SBND_APA_'+'*png')
 list_of_files.sort(reverse=True)
 
 list_of_files.insert(0, "/scratch_local/SBND_Installation/data/commissioning/LD_result/RMS_vs_Time.png")

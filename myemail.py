@@ -5,6 +5,7 @@ import glob
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
+from datetime import datetime
 
 # Define these once; use them twice!
 strFrom = 'sbndwib'
@@ -25,11 +26,13 @@ msgRoot.attach(msgAlternative)
 msgText = MIMEText('Noisy channels')
 msgAlternative.attach(msgText)
 
-list_of_files = glob.glob('/scratch_local/SBND_Installation/data/commissioning/LD_result/LD*WIB*FEMB*png')
+current_year = str(datetime.now().year)
+
+list_of_files = glob.glob('/scratch_local/SBND_Installation/data/commissioning/LD_result/'+current_year+'/'+'LD*WIB*FEMB*png')
 latest_file = max(list_of_files, key=os.path.getmtime)
 basename = os.path.basename(latest_file)
 substr = basename[:basename.find("10_226_34")]
-list_of_files = glob.glob('/scratch_local/SBND_Installation/data/commissioning/LD_result/'+substr+'*png')
+list_of_files = glob.glob('/scratch_local/SBND_Installation/data/commissioning/LD_result/'+current_year+'/'+substr+'*png')
 
 print("Found %d noisy channels." % len(list_of_files))
 

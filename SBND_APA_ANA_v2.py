@@ -842,20 +842,24 @@ def DIS_PLOTs(result, rn, link_errs=None):
 rawdir = "/scratch_local/SBND_Installation/data/commissioning/"
 #rawdir = "/scratch_local/SBND_Installation/data/commissioning/ce_rampup_tests/"
 #rawdir = "/scratch_local/SBND_Installation/data/sgao/newplot/"
+current_year = str(datetime.now().year)
 
-result_dir = rawdir + "LD_result/"
+result_dir = rawdir + "LD_result/" + current_year + "/"
+if not os.path.exists(result_dir):
+    os.makedirs(result_dir)
 
 d1ns = []
 for root, dirs, files in os.walk(rawdir):
     for d1n in dirs:
-        if ("2024_" in d1n) :
+        #if ("2024_" in d1n) :
+        if (current_year in d1n) :
             d1ns.append(rawdir + d1n + "/")
     break
 
 for d1n in d1ns:
     for root, dirs, files in os.walk(d1n):
         for d2n in dirs:
-            if ("LD_2024_" in d2n) :
+            if ("LD_"+current_year in d2n) :
                 anadir = d1n + d2n + "/"
                 rn = result_dir + "/" + d2n + ".ld"
                 pn = result_dir + "/" + d2n + "SBND_APA_CFG_FEMB_Data_Mode_DIS.png"

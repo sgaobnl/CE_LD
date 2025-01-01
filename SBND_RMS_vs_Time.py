@@ -194,7 +194,7 @@ def RMS_TS_ANA(rmsts, result_dir, rms_flg=True):
     plt.close()
 
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_result/"""
-rawdir = """/scratch_local/SBND_Installation/data/commissioning/LD_result/"""
+rawdir = """/scratch_local/SBND_Installation/data/commissioning/LD_result"""
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD/LD_result/"""
 
 result_dir = rawdir 
@@ -209,8 +209,9 @@ else:
 for root, dirs, files in os.walk(rawdir):
     #for fn in files[0:20]:
     for fn in files:
-        if ("LD_2024_" in fn) and (".png" not in fn) and (".ld" in fn[-3:]):
-            rn = rawdir + fn
+        #print(root,dirs,fn)
+        if ("LD_" in fn) and (".png" not in fn) and (".ld" in fn[-3:]):
+            rn = root + '/' + fn
             if len(rmsts) != 0:
                 flg = False
                 for rmst in rmsts:
