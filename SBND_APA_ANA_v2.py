@@ -15,6 +15,7 @@ Last modified: Tue Apr 23 01:01:56 2024
 import numpy as np
 #import scipy as sp
 #import pylab as pl
+import math
 
 import sys 
 import os
@@ -267,6 +268,23 @@ def SBND_MAP():
             dec_chn.append(x)
     dec_chn = dec_chn[1:]
     return dec_chn
+
+# Get wire length for each channel, using txt file from SBN-Doc-35006
+def SBND_Wire_Length():
+    lengthfile = "./sbndwireends.txt"
+    lengthmap = {}
+    with open(lengthfile, 'r') as file: 
+        for line in file: 
+            elements = list(map(float, line.split()))
+            x0 = elements[5]
+            y0 = elements[6]
+            z0 = elements[7]
+            x1 = elements[8]
+            y1 = elements[9]
+            z1 = elements[10]
+            length = math.sqrt((x0-x1)**2+(y0-y1)**2+(z0-z1)**2)
+            lengthmap[int(elements[0])] = length
+    return lengthmap
 
 def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
     fns = []
@@ -620,6 +638,87 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
     #plt.show()
     plt.close()
 
+def Plot_RMS_Length(dec_chn, fdir):
+    wirelength = SBND_Wire_Length()
+
+    length_eu = []
+    length_ev = []
+    length_ey = []
+    rms_eu = []
+    rms_ev = []
+    rms_ey = []
+    length_wu = []
+    length_wv = []
+    length_wy = []
+    rms_wu = []
+    rms_wv = []
+    rms_wy = []
+
+    for i in dec_chn:
+        ch = int(i[10])
+        if 'W' in i[0]:
+            ch += 5632
+        if 'V' in i[9]:
+            ch += 1984
+        if 'Y' in i[9]:
+            ch += 1984*2
+        this_length = wirelength[ch-1]
+        this_rms = min(max(i[16],0.1),100)
+
+        if 'E' in i[0] and 'U' in i[9]:
+            length_eu.append(this_length)
+            rms_eu.append(this_rms)
+        elif 'E' in i[0] and 'V' in i[9]:
+            length_ev.append(this_length)
+            rms_ev.append(this_rms)
+        elif 'E' in i[0] and 'Y' in i[9]:
+            length_ey.append(this_length)
+            rms_ey.append(this_rms)
+        elif 'W' in i[0] and 'U' in i[9]:
+            length_wu.append(this_length)
+            rms_wu.append(this_rms)
+        elif 'W' in i[0] and 'V' in i[9]:
+            length_wv.append(this_length)
+            rms_wv.append(this_rms)
+        elif 'W' in i[0] and 'Y' in i[9]:
+            length_wy.append(this_length)
+            rms_wy.append(this_rms)
+
+    plot_info = DIS_CFG_PLOT(dec_chn, fdir ) 
+    tstr = datetime.fromtimestamp(plot_info[0]).strftime("%Y-%m-%d %H:%M:%S")
+
+    fig = plt.figure(figsize=(12,6))
+    plt.rcParams.update({'font.size': 12})
+    ax1 = plt.subplot(121)
+    ax2 = plt.subplot(122)
+
+    ax1.scatter(length_eu, rms_eu, marker='.', color='b', label='East U')
+    ax1.scatter(length_ev, rms_ev, marker='.', color='g', label='East V')
+    ax1.scatter(length_ey, rms_ey, marker='.', color='r', label='East Y')
+    ax1.set_yscale('log')
+    ax1.set_title("EAST APA (" + tstr + ")")
+    ax1.set_xlabel('Wire length (cm)')
+    ax1.set_ylabel('RMS/bit')
+    ax1.set_ylim(0.1,100)
+    ax1.grid(True)
+    ax1.legend()
+    
+    ax2.scatter(length_wu, rms_wu, marker='.', color='b', label='West U')
+    ax2.scatter(length_wv, rms_wv, marker='.', color='g', label='West V')
+    ax2.scatter(length_wy, rms_wy, marker='.', color='r', label='West Y')
+    ax2.set_yscale('log')
+    ax2.set_title("West APA (" + tstr + ")")
+    ax2.set_xlabel('Wire length (cm)')
+    ax2.set_ylabel('RMS/bit')
+    ax2.set_ylim(0.1,100)
+    ax2.grid(True)
+    ax2.legend()
+
+    fn = "SBND_APA_RMS_Length_DIS.png"
+    ffig = fdir[0:-3] + fn 
+    plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
+    plt.savefig(ffig[0:-4] + ".png")
+    plt.close()
 
 def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
     apa = chnstr[0]
@@ -738,7 +837,7 @@ def DIS_PLOTs(result, rn, link_errs=None):
     DIS_PLOT(dec_chn=result, fdir=rn, title = "WIB CLK distribution", fn = "SBND_APA_CFG_WIB_CLK_DIS.png", ns=[63-11-41+0], ylim=[-2,2], ylabel="WIB CLK SRC", note="0:OSC100MHz, 1:SI5344")
     DIS_PLOT(dec_chn=result, fdir=rn, title = "WIB CMD distribution", fn = "SBND_APA_CFG_WIB_CMD_DIS.png", ns=[63-11-41+1], ylim=[-2,2], ylabel="WIB CMD SRC", note="0:WIB, 1:MBB")
     DIS_PLOT(dec_chn=result, fdir=rn, title = "WIB TST WFM distribution", fn = "SBND_APA_CFG_WIB_TST_WFM_DIS.png", ns=[63-11-41+4], ylim=[-2,4], ylabel="WIB TST WFM Mode", note="0:from FEMB, 1:Sawtooth,2:CHN-Map, -1:Bad")
-
+    Plot_RMS_Length(dec_chn=result, fdir=rn)
 
 rawdir = "/scratch_local/SBND_Installation/data/commissioning/"
 #rawdir = "/scratch_local/SBND_Installation/data/commissioning/ce_rampup_tests/"
