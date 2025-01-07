@@ -653,7 +653,11 @@ def Plot_RMS_Length(dec_chn, fdir):
     rms_wu = []
     rms_wv = []
     rms_wy = []
-
+    
+    #fitted paramters:
+    a = 0.0011301474020109922
+    b = 0.205105506607688
+    deadch = []
     for i in dec_chn:
         ch = int(i[10])
         if 'W' in i[0]:
@@ -665,6 +669,11 @@ def Plot_RMS_Length(dec_chn, fdir):
         this_length = wirelength[ch-1]
         this_rms = min(max(i[16],0.1),100)
 
+        logrms = a*this_length + b
+        rms = math.exp(logrms)
+        drms = i[16] - rms
+        if drms < -0.5:
+            deadch.append(ch)
         if 'E' in i[0] and 'U' in i[9]:
             length_eu.append(this_length)
             rms_eu.append(this_rms)
@@ -683,7 +692,10 @@ def Plot_RMS_Length(dec_chn, fdir):
         elif 'W' in i[0] and 'Y' in i[9]:
             length_wy.append(this_length)
             rms_wy.append(this_rms)
-
+    
+    deadch.sort()
+    print(f"{len(deadch)} dead channels")
+    print(deadch)
     plot_info = DIS_CFG_PLOT(dec_chn, fdir ) 
     tstr = datetime.fromtimestamp(plot_info[0]).strftime("%Y-%m-%d %H:%M:%S")
 
@@ -719,6 +731,11 @@ def Plot_RMS_Length(dec_chn, fdir):
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
     plt.savefig(ffig[0:-4] + ".png")
     plt.close()
+
+    #save dead channels
+    with open(fdir[0:-3]+".deadchannels", 'wb') as fp:
+        pickle.dump(deadch, fp)
+
 
 def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
     apa = chnstr[0]
@@ -898,8 +915,8 @@ for d1n in d1ns:
                         if result == None:
                             open(skip, 'a').close()
                             continue
-                        else:
-                            DIS_PLOTs(result, rn, link_errs)
+#                        else:
+#                            DIS_PLOTs(result, rn, link_errs)
                     except EOFError:
                         print("EOFError, check disk space")
                         open(skip, 'a').close()
