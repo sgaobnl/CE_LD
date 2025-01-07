@@ -146,7 +146,8 @@ def RMS_TS_ANA(rmsts, result_dir, rms_flg=True):
     #datex = datetime.datetime.strptime(t0str, "%Y-%m-%d %H:%M:%S")
     #t0 = datex.timestamp()
     #ts = (np.array(ts)-t0)/3600.0
-
+    
+    print(f"Latest data taken at {ts[-1]}")
     fig = plt.figure(figsize=(12,9))
     plt.rcParams.update({'font.size': 12})
     ax1 = plt.subplot(311)
@@ -188,9 +189,9 @@ def RMS_TS_ANA(rmsts, result_dir, rms_flg=True):
     plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
     #plt.show()
     if rms_flg:
-        plt.savefig(result_dir + "RMS_vs_Time.png")
+        plt.savefig(result_dir + "/RMS_vs_Time.png")
     else:
-        plt.savefig(result_dir + "RMS_Cali_vs_Time.png")
+        plt.savefig(result_dir + "/RMS_Cali_vs_Time.png")
     plt.close()
 
 #rawdir = """/Users/shanshangao/Downloads/SBND_LD/LD_result/"""
@@ -199,7 +200,7 @@ rawdir = """/scratch_local/SBND_Installation/data/commissioning/LD_result"""
 
 result_dir = rawdir 
 
-frmsts = result_dir + "RMSvsTime.rms"
+frmsts = result_dir + "/RMSvsTime.rms"
 if (os.path.isfile(frmsts)):
     with open (frmsts, "rb") as fs:
         rmsts = pickle.load(fs)
