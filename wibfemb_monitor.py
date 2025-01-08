@@ -22,6 +22,7 @@ def main():
                 subprocess.run(["python", "myemail.py"])
                 subprocess.run(["python", "myemail2.py"])
                 subprocess.run(["python", "myemail3.py"])
+                subprocess.run(["python", "myemail4.py"])
                 iskip = nskip
             else:
                 print(f"Run top_ld.py after {iskip*nap_time/60} minutes")
