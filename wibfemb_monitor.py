@@ -3,7 +3,8 @@ import subprocess
 import sys
 
 # uncomment the next two lines during stable operation, it will make the monitoring plots once an hour
-nap_time = 900  # in second 
+#nap_time = 900  # in second 
+nap_time = 1500  # in second 
 nskip = 3 # skip making rms plots
 
 # uncomment the next two lines during ramp-up, it will make the monitoring plots once every 8 minutes
