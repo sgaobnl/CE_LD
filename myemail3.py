@@ -12,7 +12,7 @@ from email.mime.image import MIMEImage
 strFrom = 'sbndwib'
 #recipients = 'tjyang@fnal.gov'
 #recipients = 'aaaaf37do5cye5svsdg3jj2rkm@shortbaseline.slack.com'
-recipients = 'sbnd_cold_electronics-aaaamjjujebziez3xtqixfexxy@shortbaseline.slack.com, tjyang@fnal.gov, sgao@bnl.gov'
+recipients = 'sbnd_cold_electronics-aaaamjjujebziez3xtqixfexxy@shortbaseline.slack.com, sbnd-shift-operations-aaaak3ro3cjdguez5l7glmobwu@shortbaseline.slack.com, tjyang@fnal.gov, sgao@bnl.gov, trj@fnal.gov'
 
 # Define the partition to check 
 partition = '/scratch_local' 

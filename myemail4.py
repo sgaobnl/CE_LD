@@ -23,7 +23,7 @@ with open(latest_file, 'rb') as file:
 strFrom = 'sbndwib'
 #recipients = 'tjyang@fnal.gov'
 #recipients = 'aaaaf37do5cye5svsdg3jj2rkm@shortbaseline.slack.com'
-recipients = 'sbnd_cold_electronics-aaaamjjujebziez3xtqixfexxy@shortbaseline.slack.com'
+recipients = 'sbnd_cold_electronics-aaaamjjujebziez3xtqixfexxy@shortbaseline.slack.com, sbnd-shift-operations-aaaak3ro3cjdguez5l7glmobwu@shortbaseline.slack.com'
 if deadchannels:
     message = MIMEMultipart()
     message['From'] = strFrom
