@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/16/2025 6:15:45 PM
+Last modified: 3/18/2025 5:10:54 PM
 """
 
 #defaut setting for scientific caculation
@@ -28,7 +28,7 @@ import pickle
 
 class CLS_CONFIG:
     def __init__(self):
-        self.jumbo_flag = False 
+        self.jumbo_flag = True 
         self.FEMB_ver = 0x501
         self.ip = "192.168.121.1"
         self.UDP = CLS_UDP()

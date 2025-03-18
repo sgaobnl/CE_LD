@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: 3/18/2025 12:38:39 PM
+Last modified: 3/18/2025 6:15:33 PM
 """
 
 #defaut setting for scientific caculation
@@ -174,25 +174,22 @@ class CLS_UDP:
                 pkg_index  = []
                 datalength = int( (len(dataNtuple) // pkg_len) -3) * (pkg_len) 
                 i = 0 
-                print (datalength)
-                #while (i <= datalength ):
-                while (i <= 2000 ):
+                while (i <= datalength ):
                     print (hex(dataNtuple[i]))
                     pkg_cnt0 =  ((dataNtuple[i+0]<<16)&0x00FFFFFFFF) + (dataNtuple[i+1]& 0x00FFFFFFFF) + 0x00000001
                     pkg_cnt1 =  ((dataNtuple[i+0+pkg_len]<<16)&0x00FFFFFFFF) + (dataNtuple[i+1+pkg_len]& 0x00FFFFFFFF)
                     acc_flag = (pkg_cnt0 == pkg_cnt1)
                     face_flg = ((dataNtuple[i+2+6] == 0xface) or (dataNtuple[i+2+6] == 0xfeed))
                     i = i + 1
-                    #if (face_flg == True) : 
-                    #    print (pkg_cnt0, pkg_cnt1)
-                    #if (acc_flag == True) and (face_flg == True) :
-                    #    pkg_index.append(i)
-                    #    i = i + pkg_len
-                    #else:
-                    #    lost_pkg_fg = True
-                    #    defe_pkg_cnt = defe_pkg_cnt + 1
-                    #    break
-                exit()
+                    if (face_flg == True) : 
+                        print (pkg_cnt0, pkg_cnt1)
+                    if (acc_flag == True) and (face_flg == True) :
+                        pkg_index.append(i)
+                        i = i + pkg_len
+                    else:
+                        lost_pkg_fg = True
+                        defe_pkg_cnt = defe_pkg_cnt + 1
+                        break
                 if (lost_pkg_fg == True):
                     if  (defe_pkg_cnt <10):
                         continue
