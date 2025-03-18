@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: Wed Jan 31 21:24:22 2024
+Last modified: 3/18/2025 12:38:39 PM
 """
 
 #defaut setting for scientific caculation
@@ -71,7 +71,6 @@ class CLS_UDP:
         try:
                 data = sock_readresp.recv(4*1024)
         except socket.timeout:
-                self.udp_timeout_cnt = self.udp_timeout_cnt  + 1
                 sock_readresp.close()
                 return -2        
         #dataHex = data.encode('hex')
@@ -86,129 +85,20 @@ class CLS_UDP:
         return dataHexVal
 
 
-    def write_reg_wib(self, reg , data ):
-        self.write_reg( reg,data )
-
-    def write_reg_femb(self, femb_addr, reg , data ):
-        self.udp_port_update()
-        regVal = int(reg)
-        if (regVal < 0) or (regVal > self.MAX_REG_NUM):
-            return None
-        dataVal = int(data)
-        if (dataVal < 0) or (dataVal > self.MAX_REG_VAL):
-            return None
-        #crazy packet structure require for UDP interface
-        dataValMSB = ((dataVal >> 16) & 0xFFFF)
-        dataValLSB = dataVal & 0xFFFF
-        WRITE_MESSAGE = struct.pack('HHHHHHHHH',socket.htons( self.KEY1  ), socket.htons( self.KEY2 ),socket.htons(regVal),socket.htons(dataValMSB),
-                socket.htons(dataValLSB),socket.htons( self.FOOTER  ), 0x0, 0x0, 0x0  )
-        #send packet to board, don't do any checks
-        sock_write = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
-        sock_write.setblocking(0)
-        if (femb_addr == 0 ):
-            sock_write.sendto(WRITE_MESSAGE,(self.UDP_IP, self.UDPFEMB0_PORT_WREG  ))
-        elif (femb_addr == 1 ):
-            sock_write.sendto(WRITE_MESSAGE,(self.UDP_IP, self.UDPFEMB1_PORT_WREG  ))
-        elif (femb_addr == 2 ):
-            sock_write.sendto(WRITE_MESSAGE,(self.UDP_IP, self.UDPFEMB2_PORT_WREG  ))
-        elif (femb_addr == 3 ):
-            sock_write.sendto(WRITE_MESSAGE,(self.UDP_IP, self.UDPFEMB3_PORT_WREG  ))
-        sock_write.close()
-
-    def write_reg_femb_checked (self, femb_addr, reg , data ):
+    def write_reg_checked (self, reg , data ):
         i = 0
         while (i < 10 ):
             time.sleep(0.001)
-            self.write_reg_femb(femb_addr, reg , data )
-            self.femb_wr_cnt = self.femb_wr_cnt + 1
+            self.write_reg(reg , data )
             time.sleep(0.001)
-            rdata = self.read_reg_femb(femb_addr,  reg)
+            rdata = self.read_reg( reg)
             time.sleep(0.001)
-            rdata = self.read_reg_femb(femb_addr,  reg)
+            rdata = self.read_reg( reg)
             time.sleep(0.001)
             if (data == rdata ):
                 break
             else:
                 i = i + 1
-                self.femb_wrerr_cnt = self.femb_wrerr_cnt + 1
-                self.femb_wrerr_log.append([femb_addr,reg, data])
-                time.sleep(abs(i -1 + 0.001))
-        if i >= 10 :
-            print ("readback value is different from written data, %d, %x, %x"%(reg, data, rdata))
-            sys.exit()
-
-    def read_reg_femb(self, femb_addr, reg ):
-        self.udp_port_update()
-        regVal = int(reg)
-        if (regVal < 0) or (regVal > self.MAX_REG_NUM):
-                return None
-        #set up listening socket, do before sending read request
-        sock_readresp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
-        sock_readresp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        if (femb_addr == 0 ):
-            sock_readresp.bind(('', self.UDPFEMB0_PORT_RREGRESP ))
-        elif (femb_addr == 1 ):
-            sock_readresp.bind(('', self.UDPFEMB1_PORT_RREGRESP ))
-        elif (femb_addr == 2 ):
-            sock_readresp.bind(('', self.UDPFEMB2_PORT_RREGRESP ))
-        elif (femb_addr == 3 ):
-            sock_readresp.bind(('', self.UDPFEMB3_PORT_RREGRESP ))
-        sock_readresp.settimeout(2)
-
-        #crazy packet structure require for UDP interface
-        READ_MESSAGE = struct.pack('HHHHHHHHH',socket.htons(self.KEY1), socket.htons(self.KEY2),socket.htons(regVal),0,0,socket.htons(self.FOOTER),0,0,0)
-        sock_read = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
-        sock_read.setblocking(0)
-        if (femb_addr == 0 ):
-            sock_read.sendto(READ_MESSAGE,(self.UDP_IP,self.UDPFEMB0_PORT_RREG))
-        elif (femb_addr == 1 ):
-            sock_read.sendto(READ_MESSAGE,(self.UDP_IP,self.UDPFEMB1_PORT_RREG))
-        elif (femb_addr == 2 ):
-            sock_read.sendto(READ_MESSAGE,(self.UDP_IP,self.UDPFEMB2_PORT_RREG))
-        elif (femb_addr == 3 ):
-            sock_read.sendto(READ_MESSAGE,(self.UDP_IP,self.UDPFEMB3_PORT_RREG))
-
-        sock_read.close()
-
-        #try to receive response packet from board, store in hex
-        data = []
-        try:
-                data = sock_readresp.recv(4*1024)
-        except socket.timeout:
-                self.udp_timeout_cnt = self.udp_timeout_cnt  + 1
-                sock_readresp.close()
-                return -1        
-        #dataHex = data.encode('hex')
-        #dataHex = codecs.encode(bytes(data, 'utf-8'), 'hex')
-        dataHex = codecs.encode(data, 'hex')
-        sock_readresp.close()
-
-        #extract register value from response
-        if int(dataHex[0:4],16) != regVal :
-                return None
-        dataHexVal = int(dataHex[4:12],16)
-        return dataHexVal
-
-    def read_reg_wib(self, reg ):
-        dataHex = self.read_reg( reg)
-        return dataHex
-
-    def write_reg_wib_checked (self, reg , data ):
-        i = 0
-        while (i < 10 ):
-            time.sleep(0.001)
-            self.write_reg_wib(reg , data )
-            self.wib_wr_cnt = self.wib_wr_cnt + 1
-            time.sleep(0.001)
-            rdata = self.read_reg_wib(reg)
-            time.sleep(0.001)
-            rdata = self.read_reg_wib(reg)
-            time.sleep(0.001)
-            if (data == rdata ):
-                break
-            else:
-                i = i + 1
-                self.wib_wrerr_cnt = self.wib_wrerr_cnt + 1
                 time.sleep(abs(i -1 + 0.001))
         if i >= 10 :
             print ("readback value is different from written data, %d, %x, %x"%(reg, data, rdata))
@@ -226,7 +116,6 @@ class CLS_UDP:
             #data = sock_data.recv(8*1024)
             data = sock_data.recv(9014)
         except socket.timeout:
-            self.udp_hstimeout_cnt = self.udp_hstimeout_cnt  + 1
             print ("FEMB_UDP--> Error get_data: No data packet received from board, quitting")
             data = []
         sock_data.close()
@@ -257,7 +146,6 @@ class CLS_UDP:
                 try:
                     data = sock_data.recv(8192)
                 except socket.timeout:
-                    self.udp_hstimeout_cnt = self.udp_hstimeout_cnt  + 1
                     if (timeout_cnt == 10):
                         sock_data.close()
                         print ("ERROR: UDP timeout, Please check if there is any conflict (someone else try to control WIB at the same time), continue anyway")
@@ -272,7 +160,7 @@ class CLS_UDP:
                     rawdataPackets += data
             sock_data.close()
 
-            pkg_chk = True
+            pkg_chk =  True
             if (pkg_chk):
                 try_n = try_n + 1
                 lost_pkg_fg = False
@@ -286,19 +174,25 @@ class CLS_UDP:
                 pkg_index  = []
                 datalength = int( (len(dataNtuple) // pkg_len) -3) * (pkg_len) 
                 i = 0 
-                while (i <= datalength ):
+                print (datalength)
+                #while (i <= datalength ):
+                while (i <= 2000 ):
+                    print (hex(dataNtuple[i]))
                     pkg_cnt0 =  ((dataNtuple[i+0]<<16)&0x00FFFFFFFF) + (dataNtuple[i+1]& 0x00FFFFFFFF) + 0x00000001
                     pkg_cnt1 =  ((dataNtuple[i+0+pkg_len]<<16)&0x00FFFFFFFF) + (dataNtuple[i+1+pkg_len]& 0x00FFFFFFFF)
                     acc_flag = (pkg_cnt0 == pkg_cnt1)
                     face_flg = ((dataNtuple[i+2+6] == 0xface) or (dataNtuple[i+2+6] == 0xfeed))
-
-                    if (acc_flag == True) and (face_flg == True) :
-                        pkg_index.append(i)
-                        i = i + pkg_len
-                    else:
-                        lost_pkg_fg = True
-                        defe_pkg_cnt = defe_pkg_cnt + 1
-                        break
+                    i = i + 1
+                    #if (face_flg == True) : 
+                    #    print (pkg_cnt0, pkg_cnt1)
+                    #if (acc_flag == True) and (face_flg == True) :
+                    #    pkg_index.append(i)
+                    #    i = i + pkg_len
+                    #else:
+                    #    lost_pkg_fg = True
+                    #    defe_pkg_cnt = defe_pkg_cnt + 1
+                    #    break
+                exit()
                 if (lost_pkg_fg == True):
                     if  (defe_pkg_cnt <10):
                         continue
@@ -344,193 +238,12 @@ class CLS_UDP:
         return rawdataPackets
 
 ########################################################################################################
-#Code below for Bloomberg mode
-    def bl_write_reg_send(self, sock_write, WRITE_MESSAGE, wib=True, femb = 0):
-        self.udp_port_update()
-        if (wib == True):
-            sock_write.sendto(WRITE_MESSAGE,(self.UDP_IP, self.UDP_PORT_WREG ))
-        else:
-            if (femb == 0 ):
-                sock_write.sendto(WRITE_MESSAGE,(self.UDP_IP, self.UDPFEMB0_PORT_WREG  ))
-            elif (femb == 1 ):
-                sock_write.sendto(WRITE_MESSAGE,(self.UDP_IP, self.UDPFEMB1_PORT_WREG  ))
-            elif (femb == 2 ):
-                sock_write.sendto(WRITE_MESSAGE,(self.UDP_IP, self.UDPFEMB2_PORT_WREG  ))
-            elif (femb == 3 ):
-                sock_write.sendto(WRITE_MESSAGE,(self.UDP_IP, self.UDPFEMB3_PORT_WREG  ))
-
-    def bl_reg_data_gen(self, reg , data ):
-        regVal = int(reg)
-        if (regVal < 0) or (regVal > self.MAX_REG_NUM):
-            return None
-        dataVal = int(data)
-        if (dataVal < 0) or (dataVal > self.MAX_REG_VAL):
-            return None
-        #crazy packet structure require for UDP interface
-        dataValMSB = ((dataVal >> 16) & 0xFFFF)
-        dataValLSB = dataVal & 0xFFFF
-        WRITE_MESSAGE = struct.pack('HHHHHHHHH',socket.htons( self.KEY1  ), socket.htons( self.KEY2 ),socket.htons(regVal),socket.htons(dataValMSB),
-                socket.htons(dataValLSB),socket.htons( self.FOOTER  ), 0x0, 0x0, 0x0  )
-        return WRITE_MESSAGE
-
-    def bl_select_femb_asic(self, sock_write, femb = 0, asic = 0 ):
-        #write wib
-        wib_femb_cs = self.bl_reg_data_gen(reg=7,data=0x80000000)
-        self.bl_write_reg_send(sock_write, wib_femb_cs, wib=True) #
-        #write femb 
-        asic_cs = asic & 0x0F
-        asic_cs = self.bl_reg_data_gen(reg=7,data=asic_cs)
-        self.bl_write_reg_send(sock_write, asic_cs, wib=False, femb=femb) #
-        #write femb 
-        hs = self.bl_reg_data_gen(reg=17,data=1)
-        self.bl_write_reg_send(sock_write, hs, wib=False, femb=femb) #
-        #write wib
-        wib_asic =  ( ((femb << 16)&0x000F0000) + ((asic << 8) &0xFF00) ) 
-        wib_femb_cs = self.bl_reg_data_gen(reg=7,data= wib_asic | 0x80000000)
-        self.bl_write_reg_send(sock_write, wib_femb_cs, wib=True) #
-        wib_femb_cs = self.bl_reg_data_gen(reg=7,data= wib_asic )
-        self.bl_write_reg_send(sock_write, wib_femb_cs, wib=True) #
-
-    def bl_write_reg_init(self ):
-        sock_write = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
-        sock_write.setblocking(0)
-        return sock_write
-
-    def bl_write_reg_close(self, sock_write):
-        sock_write.close()
-
-    def bl_get_rawdata_packets(self, path, step, fe_cfg_r, fembs_np = [0,1,2,3], cycle=100):
-        numVal = int(cycle)
-        if (numVal < 0) :
-            print ("FEMB_UDP--> Error record_hs_data: Invalid number of data packets requested")
-            return None
-
-        buf_size = self.bl_reg_data_gen(reg=16,data=0x7F00)
-        nor_mode = self.bl_reg_data_gen(reg=15,data=0)
-        fifo_clr_mode = self.bl_reg_data_gen(reg=15,data=3)
-        acq_mode = self.bl_reg_data_gen(reg=15,data=1)
-        stopacq_mode = self.bl_reg_data_gen(reg=15,data=2)
-        read_mode = self.bl_reg_data_gen(reg=15,data=0x12)
-
-        #set up listening socket
-        sock_data = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
-        sock_data.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock_data.bind(('',self.UDP_PORT_HSDATA))
-        sock_data.settimeout(0.05)
-
-        sock_write = self.bl_write_reg_init()
-        self.bl_write_reg_send(sock_write, buf_size, wib=True) #set buffer size
-
-        for read_no in range(0,numVal,1):
-            print ("Read cycle = %d "%read_no)
-            self.bl_write_reg_send(sock_write, nor_mode, wib=True) #
-            time.sleep(0.001)
-            self.bl_write_reg_send(sock_write, fifo_clr_mode, wib=True) #
-
-            empty_udp = False
-            while ( empty_udp != True ):
-                try:
-                    data = sock_data.recv(8192)
-                except socket.timeout:
-                    self.udp_hstimeout_cnt = self.udp_hstimeout_cnt  + 1
-                    #print "Empty UDP buffer"
-                    empty_udp = True 
-                    break
-
-            self.bl_write_reg_send(sock_write, acq_mode, wib=True) #
-            time.sleep(0.01) #10ms
-            self.bl_write_reg_send(sock_write, stopacq_mode, wib=True) #
-
-            for femb in fembs_np:
-                for asic in range(0,8,2):
-                    self.select_femb_asic_bromberg(sock_write, femb, asic )
-                    rawdataPackets = b"" 
-                    filename = path + "/" + step +"_FEMB" + str(femb) + "CHIP" + str(asic) + "_" + format(fe_cfg_r,'02X') + "_" + format(read_no,'04d') + ".bin"
-
-                    self.bl_write_reg_send(sock_write, read_mode, wib=True) #
-                    for packet in range(0,1000,1):
-                        data = None
-                        timeout_flg = False
-                        try:
-                            data = sock_data.recv(8192)
-                        except socket.timeout:
-                            self.udp_hstimeout_cnt = self.udp_hstimeout_cnt  + 1
-                            timeout_flg = True
-                        if data != None :
-                            #rawdataPackets.append(data)
-                            rawdataPackets +=data
-                        if (timeout_flg):
-                            break
-        
-                    with open(filename,"wb") as f:
-                        f.write(rawdataPackets) 
-
-        self.bl_write_reg_send(sock_write, nor_mode, wib=True) #
-        time.sleep(0.1)
-        empty_udp = False
-        data = None
-        while ( empty_udp != True ):
-            try:
-                data = sock_data.recv(8192)
-            except socket.timeout:
-                self.udp_hstimeout_cnt = self.udp_hstimeout_cnt  + 1
-                print ("Can't return to normal mode")
-                sys.exit()
-            if data!= None: 
-                print ("Brombreg mode is DONE, return to normal mode sucessfully")
-                empty_udp = True 
-                break
-
-        sock_data.close()
-        self.bl_write_reg_close(sock_write)
-#Code above for Bloomberg mode
-########################################################################################################
 
     def udp_port_update(self):
-        if self.MultiPort:
-            self.UDP_PORT_WREG = 32000
-            self.UDP_PORT_RREG = 32001
-            self.UDP_PORT_RREGRESP = 0x7D10 + int(self.UDP_IP[-2:])
-            self.UDP_PORT_HSDATA = 32003
-
-            self.UDPFEMB0_PORT_WREG =     0x7900 
-            self.UDPFEMB0_PORT_RREG =     0x7901
-            self.UDPFEMB0_PORT_RREGRESP = 0x7910 + int(self.UDP_IP[-2:])
-
-            self.UDPFEMB1_PORT_WREG =     0x7A00
-            self.UDPFEMB1_PORT_RREG =     0x7A01
-            self.UDPFEMB1_PORT_RREGRESP = 0x7A10 + int(self.UDP_IP[-2:])
-
-            self.UDPFEMB2_PORT_WREG =     0x7B00
-            self.UDPFEMB2_PORT_RREG =     0x7B01
-            self.UDPFEMB2_PORT_RREGRESP = 0x7B10 + int(self.UDP_IP[-2:])
-
-            self.UDPFEMB3_PORT_WREG =     0x7C00
-            self.UDPFEMB3_PORT_RREG =     0x7C01
-            self.UDPFEMB3_PORT_RREGRESP = 0x7C10 + int(self.UDP_IP[-2:])
-        else:
-            self.UDP_PORT_WREG = 32000
-            self.UDP_PORT_RREG = 32001
-            self.UDP_PORT_RREGRESP = 32002
-            self.UDP_PORT_HSDATA = 32003
-
-            self.UDPFEMB0_PORT_WREG =     32016
-            self.UDPFEMB0_PORT_RREG =     32017
-            self.UDPFEMB0_PORT_RREGRESP = 32018
-
-            self.UDPFEMB1_PORT_WREG =     32032
-            self.UDPFEMB1_PORT_RREG =     32033
-            self.UDPFEMB1_PORT_RREGRESP = 32034
-
-            self.UDPFEMB2_PORT_WREG =     32048
-            self.UDPFEMB2_PORT_RREG =     32049
-            self.UDPFEMB2_PORT_RREGRESP = 32050
-
-            self.UDPFEMB3_PORT_WREG =     32064
-            self.UDPFEMB3_PORT_RREG =     32065
-            self.UDPFEMB3_PORT_RREGRESP = 32066
-
-
+        self.UDP_PORT_WREG = 32000
+        self.UDP_PORT_RREG = 32001
+        self.UDP_PORT_RREGRESP = 32002
+        self.UDP_PORT_HSDATA = 32003
 
     #__INIT__#
     def __init__(self):
@@ -546,29 +259,5 @@ class CLS_UDP:
         self.MAX_REG_NUM = 0x666
         self.MAX_REG_VAL = 0xFFFFFFFF
         self.MAX_NUM_PACKETS = 1000000
-
-        self.UDPFEMB0_PORT_WREG =     32016
-        self.UDPFEMB0_PORT_RREG =     32017
-        self.UDPFEMB0_PORT_RREGRESP = 32018
-
-        self.UDPFEMB1_PORT_WREG =     32032
-        self.UDPFEMB1_PORT_RREG =     32033
-        self.UDPFEMB1_PORT_RREGRESP = 32034
-
-        self.UDPFEMB2_PORT_WREG =     32048
-        self.UDPFEMB2_PORT_RREG =     32049
-        self.UDPFEMB2_PORT_RREGRESP = 32050
-
-        self.UDPFEMB3_PORT_WREG =     32064
-        self.UDPFEMB3_PORT_RREG =     32065
-        self.UDPFEMB3_PORT_RREGRESP = 32066
-
         self.jumbo_flag = False
-        self.wib_wr_cnt = 0
-        self.wib_wrerr_cnt = 0
-        self.femb_wr_cnt = 0
-        self.femb_wrerr_cnt = 0
-        self.femb_wrerr_log = []
-        self.udp_timeout_cnt = 0
-        self.udp_hstimeout_cnt = 0
 

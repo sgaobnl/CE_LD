@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/16/2025 4:47:30 PM
+Last modified: 3/16/2025 6:15:45 PM
 """
 
 #defaut setting for scientific caculation
@@ -29,22 +29,18 @@ import pickle
 class CLS_CONFIG:
     def __init__(self):
         self.jumbo_flag = False 
-        self.ldflg = False # True --> configuration done by DAQ, only taking data
-        self.pwr_femb_ignore = False
-        self.FEMB_ver = 0x407
+        self.FEMB_ver = 0x501
         self.ip = "192.168.121.1"
         self.UDP = CLS_UDP()
         self.UDP.jumbo_flag = self.jumbo_flag
-        self.Int_CLK =  True 
-        self.fecfg_f ="./fecfg.csv" 
+        self.UDP.UDP_IP = self.ip
         self.FEREG_MAP = FE_REG_MAPPING()
-        self.val = 100 #how many UDP HS package are collected per time
-        self.f_save = True #if False, no raw data is saved, if True, no further data analysis 
-        self.savedir = "./" 
-        self.err_code = ""
-        self.fecfg_loadflg = False
-        self.fe_monflg = False
-        self.REGS = []
+
+    def CE_VER_CHK(self ):
+        print ("bbb")
+        a = self.UDP.read_reg( 0x101)
+        print (hex(a))
+        print ("ccc")
 
     def CE_CHK_CFG(self, \
                    pls_cs=0, dac_sel=0, fpgadac_en=0, asicdac_en=0, fpgadac_v=0, \
@@ -53,7 +49,6 @@ class CLS_CONFIG:
                    sts=0, snc=0, sg0=0, sg1=1, st0=1, st1=1, smn=0, sdf=1, \
                    slk0 = 0, stb1 = 0, stb = 0, s16=0, slk1=0, sdc=0, swdac1=0, swdac2=0, dac=0, \
                   ):
-        cfglog = []
         if (mon_cs == 0):
             tp_sel = ((asicdac_en&0x01) <<1) + (fpgadac_en&0x01) + ((dac_sel&0x1)<<8)
         else:
@@ -73,26 +68,26 @@ class CLS_CONFIG:
         else:
             reg_5_value = ((pls_gap<<16)&0xFFFF0000) + ((pls_dly<<8)&0xFF00) + ( 0x00 )
 
-        self.UDP.UDP_IP = wib_ip
-        self.UDP.write_reg_femb(femb_addr,  0, 1)
+        self.UDP.write_reg( 0, 1)
         time.sleep(0.001)
-        self.UDP.write_reg_femb_checked (femb_addr,  5, reg_5_value)
-        self.UDP.write_reg_femb_checked (femb_addr, 16, tp_sel&0x0000ffff)
-        self.UDP.write_reg_femb_checked (femb_addr, 18, pls_cs_value)
-        if ( data_cs&0x0F != 0):
-            self.UDP.write_reg_femb_checked (femb_addr, 42, ((femb_addr&0x0F)<<4) + (data_cs&0x0F))
+        if self.jumbo_flag :
+            self.UDP.write_reg_checked ( 10, 0xEFB)
         else:
-            self.UDP.write_reg_femb_checked (femb_addr, 42, 0)
+            self.UDP.write_reg_checked ( 10, 0x1FB)
+
+        self.UDP.write_reg_checked ( 5, reg_5_value)
+        self.UDP.write_reg_checked (16, tp_sel&0x0000ffff)
+        self.UDP.write_reg_checked (18, pls_cs_value)
+        self.UDP.write_reg_checked (42, data_cs&0x0F)
+#        self.UDP.write_reg_checked (42, 1)
 
         #FE configuration
-        if (self.fecfg_loadflg ):
-            regs = self.REGS
-        else:
-            self.FEREG_MAP.set_fe_board(sts, snc, sg0, sg1, st0, st1, smn, sdf,\
-                                        slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac)
-            regs = self.FEREG_MAP.REGS
+        self.FEREG_MAP.set_fe_board(sts, snc, sg0, sg1, st0, st1, smn, sdf,\
+                                    slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac)
+        regs = self.FEREG_MAP.REGS
         fe_regs = [0x00000000]*(8+1)*4
-        for chip in [0,2,4,6]:
+        #@for chip in [0,2,4,6]:
+        for chip in [0]:
             chip_bits_len = 8*(16+2)
             chip_fe_regs0 = regs[   chip*chip_bits_len: (chip+1)* chip_bits_len]
             chip_fe_regs1 = regs[   (chip+1)*chip_bits_len: (chip+2)* chip_bits_len]
@@ -110,63 +105,35 @@ class CLS_CONFIG:
                         bits32 = chip_regs[i*32: (i+1)*32]
                         fe_regs[int(chip/2*len32) + i ] = (sum(v<<j for j, v in enumerate(bits32)))
         i = 0
-        for regNum in range(0x200,0x200+len(fe_regs),1):
-            self.UDP.write_reg_femb_checked (femb_addr, regNum, fe_regs[i])
+        #for regNum in range(0x200,0x200+len(fe_regs),1):
+        for regNum in range(0x200,0x200+9,1):
+            self.UDP.write_reg_checked ( regNum, fe_regs[i])
             i = i + 1
-        self.UDP.write_reg_femb (femb_addr, 2, 1) #SPI write
+        self.UDP.write_reg ( 2, 1) #SPI write
         time.sleep(0.001)
-        self.UDP.write_reg_femb (femb_addr, 2, 1) #SPI write
+        self.UDP.write_reg ( 2, 1) #SPI write
         time.sleep(0.001)
-        self.UDP.write_reg_femb (femb_addr, 2, 1) #SPI write
+        self.UDP.write_reg ( 2, 1) #SPI write
         time.sleep(0.001)
         fe_rb_regs = []
-        for regNum in range(0x250,0x250+len(fe_regs),1):
-            val = self.UDP.read_reg_femb (femb_addr, regNum ) 
+        #for regNum in range(0x250,0x250+len(fe_regs),1):
+        for regNum in range(0x250,0x250+9,1):
+            val = self.UDP.read_reg ( regNum ) 
             fe_rb_regs.append( val )
         j = 0
-        for j in range(len(fe_regs)):
+        for j in range(9):
             if (fe_regs[j] != fe_rb_regs[j]) and (data_cs == 0 ):
                 print ("%dth, %8x,%8x"%(j, fe_regs[j],fe_rb_regs[j]))
-                fid = "IP%s-SLOT%d"%(wib_ip, femb_addr)
-                if ( j<= 9 ):
-                    print ("FE-ADC 0 SPI failed")
-                    spi_err ="-F8_FE01"
-                elif ( j<= 18 ):
-                    print ("FE-ADC 1 SPI failed")
-                    spi_err ="-F8_FE23"
-#                elif ( j<= 27 ):
-#                    print ("FE-ADC 2 SPI failed")
-#                    spi_err ="-F8_FE34"
-#                elif ( j<= 36 ):
-#                    print ("FE-ADC 3 SPI failed")
-#                    spi_err ="-F8_FE56"
-#                elif ( j<= 45 ):
-#                    print ("FE-ADC 4 SPI failed")
-#                    spi_err ="-F8_IDLE0"
-#                elif ( j<= 54 ):
-#                    print ("FE-ADC 5 SPI failed")
-#                    spi_err ="-F8_IDLE1"
-#                elif ( j<= 64 ):
-#                    print ("FE-ADC 6 SPI failed")
-#                    spi_err ="-F8_IDLE2"
-#                elif ( j<= 72 ):
-#                    print ("FE-ADC 7 SPI failed")
-#                    spi_err ="-F8_IDLE3"
-                else:
-                    spi_err =""
-                if  fid in self.err_code:  
-                    t = self.err_code.index (fid) + len(fid)
-                    self.err_code = self.err_code[0:t] + spi_err + self.err_code[t:]
+                print ("FE-ADC 0 SPI failed, exit anyway")
+                exit()
 
-        self.UDP.write_reg_femb_checked (femb_addr, 9, 9)
+        self.UDP.write_reg_checked( 7, 0) 
+        time.sleep(1)
+        self.UDP.write_reg_checked( 7, 1) #enable data
 
-        cfglog.append( [ wib_ip, femb_addr,\
-               self.act_fembs[wib_ip][femb_addr], self.fecfg_loadflg, \
-               pls_cs, dac_sel, fpgadac_en, asicdac_en, fpgadac_v, \
-               pls_gap, pls_dly, mon_cs, \
-               data_cs, \
-               sts, snc, sg0, sg1, st0, st1, smn, sdf, \
-               slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac, \
-               bl_mean, bl_rms ] )
-        return cfglog
-
+if __name__ == '__main__':
+   cls = CLS_CONFIG()
+   cls.CE_VER_CHK()
+   cls.CE_CHK_CFG(data_cs=0)
+   rawdata = cls.UDP.get_rawdata_packets(100)  
+   print ("done")
