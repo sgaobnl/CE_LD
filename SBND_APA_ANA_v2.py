@@ -672,7 +672,9 @@ def Plot_RMS_Length(dec_chn, fdir):
         logrms = a*this_length + b
         rms = math.exp(logrms)
         drms = i[16] - rms
-        if drms < -0.5:
+        #if drms < -0.5:
+        #T.Y. Do not include channel 1377. This is a half-channel and its rms fluctuates a lot
+        if drms < -0.5 and ch != 1377:
             deadch.append(ch)
         if 'E' in i[0] and 'U' in i[9]:
             length_eu.append(this_length)
