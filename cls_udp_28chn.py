@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: 3/24/2025 11:02:59 AM
+Last modified: 3/24/2025 10:58:32 AM
 """
 
 #defaut setting for scientific caculation
@@ -157,7 +157,7 @@ class CLS_UDP:
                         time.sleep(3)
                         continue
                 if data != None :
-                    #rawdataPackets += data #don't do this way, too slow and cause UDP package loss
+                    #rawdataPackets += data
                     rawdataPackets.append(data)
             if len(rawdataPackets) != 0:
                 rawdata = b''.join(rawdataPackets)
@@ -174,6 +174,7 @@ class CLS_UDP:
                 dataNtuple =struct.unpack_from(">%dH"%(smps*16),rawdata)
                 if (self.jumbo_flag):
                     pkg_len = int(0x1E06/2)
+                    pkg_len = int(0xcec)
                 else:
                     pkg_len = int(0x406/2)
                 pkg_index  = []
@@ -188,6 +189,7 @@ class CLS_UDP:
                         pkg_index.append(i)
                         i = i + pkg_len
                     else:
+                        print (pkg_cnt0, pkg_cnt1)
                         lost_pkg_fg = True
                         defe_pkg_cnt = defe_pkg_cnt + 1
                         break
