@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/18/2025 5:10:54 PM
+Last modified: 3/24/2025 10:44:07 AM
 """
 
 #defaut setting for scientific caculation
@@ -37,10 +37,8 @@ class CLS_CONFIG:
         self.FEREG_MAP = FE_REG_MAPPING()
 
     def CE_VER_CHK(self ):
-        print ("bbb")
         a = self.UDP.read_reg( 0x101)
-        print (hex(a))
-        print ("ccc")
+        print ("version:", hex(a))
 
     def CE_CHK_CFG(self, \
                    pls_cs=0, dac_sel=0, fpgadac_en=0, asicdac_en=0, fpgadac_v=0, \
