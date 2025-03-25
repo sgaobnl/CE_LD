@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: 3/24/2025 10:58:32 AM
+Last modified: 3/25/2025 11:55:18 AM
 """
 
 #defaut setting for scientific caculation
@@ -173,10 +173,9 @@ class CLS_UDP:
                 smps = len(rawdata) / 2 / 16
                 dataNtuple =struct.unpack_from(">%dH"%(smps*16),rawdata)
                 if (self.jumbo_flag):
-                    pkg_len = int(0x1E06/2)
                     pkg_len = int(0xcec)
                 else:
-                    pkg_len = int(0x406/2)
+                    pkg_len = int(0xcec)
                 pkg_index  = []
                 datalength = int( (len(dataNtuple) // pkg_len) -3) * (pkg_len) 
                 i = 0 
@@ -235,7 +234,7 @@ class CLS_UDP:
 
             else:
                 lost_pkg_fg = False
-        return rawdataPackets
+        return rawdata
 
 ########################################################################################################
 

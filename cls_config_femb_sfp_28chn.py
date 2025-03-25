@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/24/2025 11:14:40 AM
+Last modified: 3/25/2025 4:10:58 PM
 """
 
 #defaut setting for scientific caculation
@@ -24,6 +24,7 @@ from datetime import datetime
 import struct
 from cls_udp_28chn import CLS_UDP
 from fe_reg_mapping import FE_REG_MAPPING
+from setdatadir import savedir 
 import pickle
 
 class CLS_CONFIG:
@@ -39,6 +40,8 @@ class CLS_CONFIG:
     def CE_VER_CHK(self ):
         a = self.UDP.read_reg( 0x101)
         print ("version:", hex(a))
+        self.UDP.write_reg_checked ( 10, 6600//2) #28CHN
+        time.sleep(0.1)
 
     def CE_CHK_CFG(self, \
                    pls_cs=0, dac_sel=0, fpgadac_en=0, asicdac_en=0, fpgadac_v=0, \
@@ -70,22 +73,20 @@ class CLS_CONFIG:
         time.sleep(0.001)
         if self.jumbo_flag :
             #self.UDP.write_reg_checked ( 10, 0xEFB)
-            self.UDP.write_reg_checked ( 10, 6600//2)
+            self.UDP.write_reg_checked ( 10, 6600//2) #28CHN
         else:
-            self.UDP.write_reg_checked ( 10, 0x1FB)
+            self.UDP.write_reg_checked ( 10, 6600//2) #28CHN
 
         self.UDP.write_reg_checked ( 5, reg_5_value)
         self.UDP.write_reg_checked (16, tp_sel&0x0000ffff)
         self.UDP.write_reg_checked (18, pls_cs_value)
         self.UDP.write_reg_checked (42, data_cs&0x0F)
-#        self.UDP.write_reg_checked (42, 1)
 
         #FE configuration
         self.FEREG_MAP.set_fe_board(sts, snc, sg0, sg1, st0, st1, smn, sdf,\
                                     slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac)
         regs = self.FEREG_MAP.REGS
         fe_regs = [0x00000000]*(8+1)*4
-        #@for chip in [0,2,4,6]:
         for chip in [0]:
             chip_bits_len = 8*(16+2)
             chip_fe_regs0 = regs[   chip*chip_bits_len: (chip+1)* chip_bits_len]
@@ -104,7 +105,6 @@ class CLS_CONFIG:
                         bits32 = chip_regs[i*32: (i+1)*32]
                         fe_regs[int(chip/2*len32) + i ] = (sum(v<<j for j, v in enumerate(bits32)))
         i = 0
-        #for regNum in range(0x200,0x200+len(fe_regs),1):
         for regNum in range(0x200,0x200+9,1):
             self.UDP.write_reg_checked ( regNum, fe_regs[i])
             i = i + 1
@@ -133,6 +133,23 @@ class CLS_CONFIG:
 if __name__ == '__main__':
    cls = CLS_CONFIG()
    cls.CE_VER_CHK()
-   cls.CE_CHK_CFG(data_cs=0)
-   rawdata = cls.UDP.get_rawdata_packets(10000)  
+   #cls.CE_CHK_CFG(pls_cs=1, asicdac_en=1, sts=1, snc=1, sdf=1, dac=30, swdac1=0, swdac2=1, data_cs=0)
+   cls.UDP.write_reg_checked( 7, 0) 
+   time.sleep(1)
+   cls.UDP.write_reg_checked( 7, 1) #enable data
+   rawdata = cls.UDP.get_rawdata_packets(10)  
+   savedir = "D:/uFEMB/Rawdata/"
+
+   if (os.path.exists(savedir)):
+       pass
+   else:
+       try:
+           os.makedirs(savedir)
+       except OSError:
+           print ("Error to create folder %s"%savedir)
+           sys.exit()
+   fn = savedir + "/" + "Rawdata.bin"
+   with open(fn, 'wb') as f:
+       pickle.dump(rawdata, f)           
+
    print ("done")

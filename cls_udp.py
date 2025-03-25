@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: 3/24/2025 11:02:59 AM
+Last modified: 3/25/2025 4:51:56 PM
 """
 
 #defaut setting for scientific caculation
@@ -233,7 +233,7 @@ class CLS_UDP:
 
             else:
                 lost_pkg_fg = False
-        return rawdataPackets
+        return rawdata
 
 ########################################################################################################
 

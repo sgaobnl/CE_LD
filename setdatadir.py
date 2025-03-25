@@ -5,19 +5,8 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 2/22/2024 11:44:19 AM
+Last modified: 3/24/2025 11:29:26 AM
 """
 from datetime import datetime
-rundate = datetime.now().strftime('%Y_%m_%d')
-savedir = "D:/nEXO/FEMB_QC/"+rundate+"/"
-#"/home/nfs/sgao/SBND_Installation/data/1129/"
-#savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/config_gain_14_ST_1/"
-#savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/config_gain_7_ST_1/" 
-#savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/config_gain_25_ST_0_5/"
-#savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/config_gain_25_ST_1/"  
-#savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/U_ramp_up_neg_2/"
-#savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/Y_ramp_up_4V/"
-#savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/U_neg_2V_Y_4V_CB_neg_3V/"
-#savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/No_bias_ramp_down/"
-#savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/No_bias_FCTB_up/"
-#savedir = "/scratch_local/SBND_Installation/data/commissioning/02_09_2024/final_chilly_checkout/"
+rundate = datetime.now().strftime('DATE%Y_%m_%d_%H_%M_%S')
+savedir = "D:/uFEMB/Rawdata/"+rundate+"/"
