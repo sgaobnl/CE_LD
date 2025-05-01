@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 7/15/2016 11:47:39 AM
-Last modified: 4/8/2019 6:44:50 PM
+Last modified: 3/25/2025 5:38:50 PM
 """
 
 #defaut setting for scientific caculation
@@ -135,5 +135,5 @@ class RAW_CONV():
         return  chn_data, feed_loc, chn_peakp, chn_peakn
 
     def __init__(self):
-        self.jumbo_flag = False
+        self.jumbo_flag = True
             

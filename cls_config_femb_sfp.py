@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 3/24/2025 10:44:07 AM
+Last modified: 3/31/2025 5:24:33 PM
 """
 
 #defaut setting for scientific caculation
@@ -25,6 +25,7 @@ import struct
 from cls_udp import CLS_UDP
 from fe_reg_mapping import FE_REG_MAPPING
 import pickle
+from setdatadir import savedir 
 
 class CLS_CONFIG:
     def __init__(self):
@@ -39,13 +40,19 @@ class CLS_CONFIG:
     def CE_VER_CHK(self ):
         a = self.UDP.read_reg( 0x101)
         print ("version:", hex(a))
+        if a&(0x501) != 0x501:
+            exit()
+        self.UDP.write_reg_checked ( 10, 0xEFB)
+        print ("Jambo frame enabled")
+        time.sleep(1)
+
 
     def CE_CHK_CFG(self, \
                    pls_cs=0, dac_sel=0, fpgadac_en=0, asicdac_en=0, fpgadac_v=0, \
                    pls_gap = 500, pls_dly = 10, mon_cs=0, \
                    data_cs = 0, \
                    sts=0, snc=0, sg0=0, sg1=1, st0=1, st1=1, smn=0, sdf=1, \
-                   slk0 = 0, stb1 = 0, stb = 0, s16=0, slk1=0, sdc=0, swdac1=0, swdac2=0, dac=0, \
+                   slk0 = 0, stb1 = 0, stb = 0, s16=0, slk1=0, sdc=0, sdd=0, sgp=0, swdac=0, dac=0, \
                   ):
         if (mon_cs == 0):
             tp_sel = ((asicdac_en&0x01) <<1) + (fpgadac_en&0x01) + ((dac_sel&0x1)<<8)
@@ -81,7 +88,7 @@ class CLS_CONFIG:
 
         #FE configuration
         self.FEREG_MAP.set_fe_board(sts, snc, sg0, sg1, st0, st1, smn, sdf,\
-                                    slk0, stb1, stb, s16, slk1, sdc, swdac1, swdac2, dac)
+                                    slk0, stb1, stb, s16, slk1, sdc, sdd, sgp, swdac, dac)
         regs = self.FEREG_MAP.REGS
         fe_regs = [0x00000000]*(8+1)*4
         #@for chip in [0,2,4,6]:
@@ -124,14 +131,66 @@ class CLS_CONFIG:
                 print ("%dth, %8x,%8x"%(j, fe_regs[j],fe_rb_regs[j]))
                 print ("FE-ADC 0 SPI failed, exit anyway")
                 exit()
+        time.sleep(5)
 
         self.UDP.write_reg_checked( 7, 0) 
-        time.sleep(1)
+
+
+    def CE_ACQ(self, val=100):
         self.UDP.write_reg_checked( 7, 1) #enable data
+        time.sleep(0.1)
+        data = []
+        for chip in range(2):
+            self.UDP.write_reg_checked ( 0x06, chip)
+            rawdata = cls.UDP.get_rawdata_packets(val)  
+            data.append(rawdata)
+        self.UDP.write_reg_checked( 7, 0) 
+        return data
+
 
 if __name__ == '__main__':
-   cls = CLS_CONFIG()
-   cls.CE_VER_CHK()
-   cls.CE_CHK_CFG(data_cs=0)
-   rawdata = cls.UDP.get_rawdata_packets(100)  
-   print ("done")
+    cls = CLS_CONFIG()
+    cls.CE_VER_CHK()
+#    cls.CE_CHK_CFG(data_cs=0)
+    #cls.CE_CHK_CFG(pls_cs=1, asicdac_en=1, sts=1, snc=0, sdf=1, dac=30, swdac=1, data_cs=0)
+
+#    for sg0 in [0,1]:
+#        for sg1 in [0,1]:
+#    for sg0 in [0]:
+#        for sg1 in [0]: #14mV
+#    for sg0 in [1]:
+#        for sg1 in [1]: #4.7mV
+#            for st0 in [0,1]:
+#                for st1 in [0,1]:
+#    for sg0 in [0]:
+#        for sg1 in [0]: #4.7mV
+#            for st0 in [0]:
+#                for st1 in [0]:
+
+#    for sg0 in [0,1]:
+#        for sg1 in [0,1]: #4.7mV
+#            for st0 in [0,1]:
+#                for st1 in [0,1]:
+
+    for sg0 in [0]:
+        for sg1 in [0]: #4.7mV
+            for st0 in [0]:
+                for st1 in [0]:
+                    #cls.CE_CHK_CFG(pls_cs=0, asicdac_en=0, sts=0, snc=0, sg0=sg0, sg1=sg1, st0=st0, st1=st1, sdf=1, dac=0, swdac=0, data_cs=0)
+                    cls.CE_CHK_CFG(pls_cs=1, asicdac_en=1, sts=1, snc=0, sg0=sg0, sg1=sg1, st0=st0, st1=st1, sdf=1, dac=5, sgp=1, swdac=1, data_cs=0)
+                    rawdata = cls.CE_ACQ(val=2000)
+                    #savedir = "D:/uFEMB/Rawdata/RTRMS/"
+                    #savedir = "D:/uFEMB/Rawdata/LNRMS_T2T1/"
+                    savedir = "D:/uFEMB/Rawdata/LNSGP05/"
+                    if (os.path.exists(savedir)):
+                        pass
+                    else:
+                        try:
+                            os.makedirs(savedir)
+                        except OSError:
+                            print ("Error to create folder %s"%savedir)
+                            sys.exit()
+                    fn = savedir + "/" + "RMS_SG0%d_SG1%d_ST0%d_ST1%d_Rawdata.bin"%(sg0, sg1, st0, st1)
+                    print (fn)
+                    with open(fn, 'wb') as f:
+                        pickle.dump(rawdata, f)       

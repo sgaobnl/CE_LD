@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 7/15/2016 11:47:39 AM
-Last modified: 11/22/2018 4:56:59 PM
+Last modified: 3/28/2025 9:45:14 AM
 """
 
 #defaut setting for scientific caculation
@@ -84,16 +84,17 @@ def chn_fft(chndata, fs = 2000000.0, fft_s = 2000, avg_cycle = 50):
     else:
         avg_cycle_tmp = (len_chndata//fft_s)
         #fft_s = (len_chndata//(avg_cycle_tmp*1000))*1000
+    print (avg_cycle_tmp)
 
     p = np.array([])
     for i in range(0,avg_cycle_tmp,1):
         x = chndata[i*fft_s:(i+1)*fft_s]
         if ( i == 0 ):
             pt = (fft(x)/fft_s)# fft computing and normalization
-            p = (np.abs(pt[0:fft_s/2+1]))
+            p = (np.abs(pt[0:fft_s//2+1]))
         else:
             pt = (fft(x)/fft_s)# fft computing and normalization
-            p = p +  (np.abs(pt[0:fft_s/2+1]))
+            p = p +  (np.abs(pt[0:fft_s//2+1]))
     f = np.linspace(0,fs/2,len(p))
     p = p / avg_cycle_tmp
     p = 20*np.log10(p)

@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: 4/6/2025 3:56:29 PM
+Last modified: 5/1/2025 10:14:56 AM
 """
 
 #defaut setting for scientific caculation
@@ -24,6 +24,8 @@ import time
 import copy
 from socket import AF_INET, SOCK_DGRAM
 import codecs
+from raw_convertor_trig import RAW_CONV
+import pickle
 
 class CLS_UDP:
     def write_reg(self, reg , data ):
@@ -131,8 +133,7 @@ class CLS_UDP:
         try_n = 0
         timeout_cnt = 0
         defe_pkg_cnt = 0
-        lost_pkg_fg  = True
-        while ( lost_pkg_fg == True ):
+        if True:
             #set up listening socket
             sock_data = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
             sock_data.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -159,83 +160,62 @@ class CLS_UDP:
                 if data != None :
                     #rawdataPackets += data #don't do this way, too slow and cause UDP package loss
                     rawdataPackets.append(data)
-            if len(rawdataPackets) != 0:
-                rawdata = b''.join(rawdataPackets)
+            #if len(rawdataPackets) != 0:
+            #    rawdata = b''.join(rawdataPackets)
             sock_data.close()
 
-            pkg_chk =  True
-            if (pkg_chk):
-                try_n = try_n + 1
-                lost_pkg_fg = False
-                #check data 
-                #smps = len(rawdataPackets) / 2 / 16
-                #dataNtuple =struct.unpack_from(">%dH"%(smps*16),rawdataPackets)
-                smps = len(rawdata) / 2 / 16
-                dataNtuple =struct.unpack_from(">%dH"%(smps*16),rawdata)
-                if (self.jumbo_flag):
-                    pkg_len = int(0x1E06/2)
-                else:
-                    pkg_len = int(0x406/2)
-                pkg_index  = []
-                datalength = int( (len(dataNtuple) // pkg_len) -3) * (pkg_len) 
-                i = 0 
-                while (i <= datalength ):
-                    pkg_cnt0 =  ((dataNtuple[i+0]<<16)&0x00FFFFFFFF) + (dataNtuple[i+1]& 0x00FFFFFFFF) + 0x00000001
-                    pkg_cnt1 =  ((dataNtuple[i+0+pkg_len]<<16)&0x00FFFFFFFF) + (dataNtuple[i+1+pkg_len]& 0x00FFFFFFFF)
-                    acc_flag = (pkg_cnt0 == pkg_cnt1)
-                    face_flg = ((dataNtuple[i+2+6] == 0xface) or (dataNtuple[i+2+6] == 0xfeed))
-                    if (acc_flag == True) and (face_flg == True) :
-                        pkg_index.append(i)
-                        i = i + pkg_len
-                    else:
-                        lost_pkg_fg = True
-                        defe_pkg_cnt = defe_pkg_cnt + 1
+        return rawdataPackets
+
+
+    def get_rawdata_trig_rece(self, queue,save_n=200):
+        #set up listening socket
+        sock_data = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Internet, UDP
+        sock_data.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+#        sock_data.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 81920000)
+        sock_data.bind(('',self.UDP_PORT_HSDATA))
+        sock_data.settimeout(60)
+        i = 0
+        rawdataPackets = []
+        t0 =time.time_ns()
+        while True:
+            data = None
+            try:
+                data = sock_data.recv(8192)
+                    #save data using MP
+            except socket.timeout:
+                print ("No trigger in 60s...")
+                continue
+            if data != None:
+                i = i + 1
+                rawdataPackets.append(data)
+                if i == save_n:
+                    t1 =time.time_ns()
+                    i = 0
+                    dt = (t1-t0)*1e-9
+                    print ("Trigger Rate = %.1fHz, %.1fHz"%((save_n/dt), (save_n/dt/30)))
+                    t0=t1
+                    rdata = copy.deepcopy(rawdataPackets)
+                    queue.put(rdata)
+                    rawdataPackets = []
+        sock_data.close()
+
+    def get_rawdata_trig_save(self, queue, fdir="./"):
+        badi = 0
+        while True:
+            if not queue.empty():
+                data = queue.get()
+                for i in range(3):
+                    chndata, ts, udp_id, ufemb_id = self.raw_dec.raw_conv_per_trig(pkg_data = data[i], total_samN=140)
+                    if (ufemb_id == 1) or (ufemb_id) == 2:
                         break
-                if (lost_pkg_fg == True):
-                    if  (defe_pkg_cnt <10):
-                        continue
-                    else:
-                        print ("Warning: defective packages in the %dth try were found!!!, try again"%defe_pkg_cnt)
-                        pass
+                if ufemb_id == 0:
+                    badi = badi + 1
+                    fn = fdir + "bad%d_%032d.bin"%(badi, ts)
                 else:
-                    pass
-                tmpa = pkg_index[0]
-                tmpb = pkg_index[-1]
-                data_a = ((dataNtuple[tmpa+0]<<16)&0x00FFFFFFFF) + (dataNtuple[tmpa+1]&0x00FFFFFFFF) 
-                data_b = ((dataNtuple[tmpb+0]<<16)&0x00FFFFFFFF) + (dataNtuple[tmpb+1]&0x00FFFFFFFF) 
-                if ( data_b > data_a ):
-                    pkg_sum = data_b - data_a + 1
-                else:
-                    pkg_sum = (0x100000000 + data_b) - data_a + 1
-                missed_pkgs = 0
-                for i in range(len(pkg_index)-1):
-                    tmpa = pkg_index[i]
-                    tmpb = pkg_index[i+1]
-                    data_a = ((dataNtuple[tmpa+0]<<16)&0x00FFFFFFFF) + (dataNtuple[tmpa+1]&0x00FFFFFFFF)
-                    data_b = ((dataNtuple[tmpb+0]<<16)&0x00FFFFFFFF) + (dataNtuple[tmpb+1]&0x00FFFFFFFF) 
-                    if ( data_b > data_a ):
-                        add1 = data_b - data_a 
-                    else:
-                        add1 = (0x100000000 + data_b) - data_a 
-                    missed_pkgs = missed_pkgs + add1 -1
-
-                if (missed_pkgs > 0 ):
-                    if (try_n > 8 ):
-                        print ("Warning: UDP. missing udp pkgs = %d, total pkgs = %d "%(missed_pkgs, pkg_sum))
-                        print ("Warning: UDP. missing %.8f%% udp packages"%(100.0*missed_pkgs/pkg_sum))
-                    lost_pkg_fg = True
-                else:
-                    lost_pkg_fg = False
-
-                if (try_n > 10 ):
-                    print ("ERROR: defective packages or missing packages at 10th attempts, pass anyway")
-                    lost_pkg_fg = False
-
-            else:
-                lost_pkg_fg = False
-        return rawdata
-
-########################################################################################################
+                    fn = fdir + "uFEMB%d_%032d.bin"%(ufemb_id, ts)
+                with open(fn, 'wb') as f:
+                    pickle.dump(data, f)       
+                time.sleep(0.1)
 
     def udp_port_update(self):
         self.UDP_PORT_WREG = 32000
@@ -258,4 +238,5 @@ class CLS_UDP:
         self.MAX_REG_VAL = 0xFFFFFFFF
         self.MAX_NUM_PACKETS = 1000000
         self.jumbo_flag = False
+        self.raw_dec = RAW_CONV()
 
