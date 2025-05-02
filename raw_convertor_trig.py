@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 7/15/2016 11:47:39 AM
-Last modified: 4/9/2025 5:25:13 PM
+Last modified: 5/2/2025 8:32:44 AM
 """
 
 #defaut setting for scientific caculation
@@ -27,6 +27,7 @@ class RAW_CONV():
         timestampes = 0
         ufemb_id = 0
         bad_pkg_flg = False
+        ext_trig_flg = 0 
         #pkg_len = (((total_samN+1)*2)*13 + 8) *2
         #if len(pkg_data) != pkg_len :
         #    print ("wrong UDP pakage size, defective data likely")
@@ -57,10 +58,15 @@ class RAW_CONV():
                 bad_pkg_flg = True
 
             if bad_pkg_flg:
-                return chn_data, timestampes, udp_pkg_id, ufemb_id
+                return chn_data, timestampes, udp_pkg_id, ufemb_id, ext_trig_flg
             else:
                 onepkgdata = dataNtuple
                 i = 8
+                if (onepkgdata[i]&0xf000 == 0xe000 ):
+                    ext_trig_flg = 1 
+                else:
+                    ext_trig_flg = 0 
+
                 while i < len(onepkgdata) :
                     if (onepkgdata[i]&0xf000 == 0xf000 ) or (onepkgdata[i]&0xe000 == 0xe000 )  :
                         if onepkgdata[i]&0x0100 == 0x0100:
@@ -89,7 +95,7 @@ class RAW_CONV():
                     else:
                         pass
                     i = i + 13 
-                return chn_data, timestampes, udp_pkg_id, ufemb_id
+                return chn_data, timestampes, udp_pkg_id, ufemb_id, ext_trig_flg
 
 
 
