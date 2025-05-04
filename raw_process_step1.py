@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/2/2025 5:08:54 PM
+Last modified: 5/4/2025 11:11:57 AM
 """
 
 #defaut setting for scientific caculation
@@ -32,7 +32,7 @@ import numpy as np
 rc = RAW_CONV()
 
 rootdir = """D:/tmppp/sipm/"""
-subdir = "Rawdata_20250501_11_38/"
+subdir = "Rawdata_20250501_11_48/"
 raw_dir = rootdir + subdir
 ana_dir = rootdir + "Ana" + subdir[4:]
 bak_dir = rootdir + "Bak" + subdir[4:]
