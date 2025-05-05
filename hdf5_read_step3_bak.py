@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/4/2025 5:43:14 PM
+Last modified: 5/4/2025 4:34:30 PM
 """
 
 #defaut setting for scientific caculation
@@ -29,10 +29,48 @@ import shutil
 import numpy as np
 import h5py
 
+# dtype=np.dtype([("TS","i8"), ("Value", "u2")]
+def create_structured_hdf5(hdf5_fp):
+    if os.path.exists(hdf5_fp):
+        print("File exists.")   
+    else:
+        with h5py.File(hdf5_fp, 'w') as f:
+            maxshape = (None,)
+            for chi in range(32):
+                #f.create_dataset("CH%02d"%chi, shape=(0,), maxshape=maxshape, dtype=dtype, chunks=True)
+                grp = f.create_group("CH%02d"%chi)
+                last_ts = np.array([0], dtype='i8')
+                dset1 = grp.create_dataset("Last_TS", data=last_ts)
+        print("File and structured datasets created.")
+
+
+#def append_structured_data( hdf5_fp, tdszip,anafp,  dtype=np.dtype([("TS","i8"), ("Value", "u2")]),):
+def append_structured_data( hdf5_fp, chi, hi, subts, subds, f1hz_1s ):
+    with h5py.File(hdf5_fp, 'a') as f:
+        parent = f.require_group('/CH%02d'%chi)
+
+        try:
+            new_subgrp = parent.create_group('Hour%06d'%hi)
+        except ValueError:
+            # subgroup already exists
+            new_subgrp = parent['Hour%06d'%hi]
+
+        subts = np.array(subts, dtype="i8")
+        new_subgrp.create_dataset('TS', data=subts)
+        subds = np.array(subds, dtype="u2")
+        new_subgrp.create_dataset('Value', data=subds)
+        subds = np.array(subds, dtype="u2")
+        new_subgrp.create_dataset('Rate', data=f1hz_1s)
+
+def change_structured_data( hdf5_fp, chi, last_ts):
+    with h5py.File(hdf5_fp, 'a') as f:
+        parent = f.require_group('/CH%02d'%chi)
+        dataset = f['/%s/Last_TS'%key]
+        dataset[0] = last_ts
+
 
 rootdir = """D:/tmppp/sipm/"""
-subdir = "Rawdata_20250501_11_48/"
-ufemb_id =1
+subdir = "Rawdata_20250502_15_46/"
 raw_dir = rootdir + subdir
 ana_dir = rootdir + "Ana" + subdir[4:]
 rst_dir = rootdir + "Result" + subdir[7:]
@@ -42,44 +80,58 @@ if not os.path.exists(rst_dir):
     print ("folder does not exist")
     exit()
 
+
 #create_structured_hdf5(hdf5_fp=rootdir + subdir + "xx.hdf5")
-hdf5_fp=rst_dir + "ufemb%d_darkrate.hdf5"%ufemb_id
+hdf5_fp=rst_dir + "darkrate.hdf5"
+hdf5_rfp=rst_dir + "result.hdf5"
+create_structured_hdf5(hdf5_rfp)
+
 #hdf5_fp=rst_dir + "trigger.hdf5"
-
-
-
 with h5py.File(hdf5_fp, "r") as f:
-    for ch in range(32):
+    print("Datasets in file:", list(f.keys()))
+    for ch in range(1, 32):
+        key = "CH%02d"%ch
+
+        with h5py.File(hdf5_rfp, "r") as fr:
+            last_ts = fr['/%s/Last_TS'%key][:][0]
 
         key = "CH%02d"%ch
-        print ("uFEMB%d"%ufemb_id, key)
-        plt_dir = rst_dir + "CH%d"%((ufemb_id-1)*32+ch)  + "_plots/"
-        if not os.path.exists(plt_dir):
-            try:
-                os.makedirs(plt_dir)
-            except OSError:
-                print ("Error to create folder %s"%plt_dir)
-                sys.exit()
+        print( "CH%02d"%ch)
+
         data = f[key]
         data=data[:]
         h2s = 3600
-
         if len(data) > 0:
             ts,ds = zip(*data)
+            if last_ts == 0:
+                last_ts_pos0 = 0
+            else:
+                last_ts_pos0 = np.where(ts == last_ts)[0][0]
+
+            ts=ts[last_ts_pos0:]
+            ds=ds[last_ts_pos0:]
 
             ts = np.array(ts)
+            if last_ts%(1e9*h2s) == 0:
+                hi0 = int(last_ts//(1e9*h2s) )
+            else:
+                hi0 = int(last_ts//(1e9*h2s) + 1)
 
-#            ts = ts-ts[0]
-            tlen = int(ts[-1])
+            #ts = ts-ts[0]
+            #ts = ts-last_ts
+
+            tlen = ts[-1]-last_ts
+            if tlen < 1e9*h2s:
+                continue
+
             cutoffhz=20
             vbinw=10
 
-            for hi in range (int(tlen//(1e9*h2s))):
-                print ("hour of ", hi)
+
+#            print ((hi0, int(hi0+int(tlen//(1e9*h2s))), int(1e9*h2s)))
+            for hi in range (hi0, int(hi0+int(tlen//(1e9*h2s))), 1):
+                print (hi)
                 subts = ts[(ts>hi*h2s*1e9)&(ts<=(hi+1)*h2s*1e9)]
-                if len(subts) <= 0:
-                    print ("no data during this period")
-                    continue
                 subts_pos0 = np.where(ts == subts[0])[0][0]
                 subds = ds[subts_pos0: subts_pos0 + len(subts)]
 
@@ -97,56 +149,68 @@ with h5py.File(hdf5_fp, "r") as f:
                 avghz =  (len(subts)/3600)
                 avghz2= (f1hz_1s2.sum()/len(f1hz_1s2))
 
+                append_structured_data( hdf5_rfp, ch, hi, subts, subds, f1hz_1s )
+                last_ts = subts[-1]
+#                continue
+            change_structured_data(hdf5_rfp, ch, last_ts)
+                #exit()
 
+#            plt_dir = rst_dir + key + "_plots/"
+#            if not os.path.exists(plt_dir):
+#                try:
+#                    os.makedirs(plt_dir)
+#                except OSError:
+#                    print ("Error to create folder %s"%plt_dir)
+#                    sys.exit()
 
-                import matplotlib.pyplot as plt
-
-                # Create a 2x2 grid of subplots
-                fig, axes = plt.subplots(2, 2, figsize=(10, 8))
-                fig.suptitle("Hour#%d"%hi)
-
-                # Top-left plot
-                axes[0, 0].scatter(np.arange(h2s), f1hz_1s, color='red', marker='.')
-                axes[0, 0].set_title('Dark Rate')
-                axes[0, 0].set_xlabel('Time / s')
-                axes[0, 0].set_ylabel('Dark Rate / Hz')
-                axes[0, 0].set_yscale('log')
-                axes[0, 0].grid()
+#                import matplotlib.pyplot as plt
+#
+#                # Create a 2x2 grid of subplots
+#                fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+#                fig.suptitle("Hour#%d"%hi)
+#
+#                # Top-left plot
+#                axes[0, 0].scatter(np.arange(h2s), f1hz_1s, color='red', marker='.')
+#                axes[0, 0].set_title('Dark Rate')
+#                axes[0, 0].set_xlabel('Time / s')
+#                axes[0, 0].set_ylabel('Dark Rate / Hz')
+#                axes[0, 0].set_yscale('log')
+#                axes[0, 0].grid()
+#                
+#                # Top-right plot
+#                axes[0, 1].scatter(np.array(subts2)/1e9, subds, color='green', marker='.')
+#                axes[0, 1].set_title('SiPM Output')
+#                axes[0, 1].set_xlabel('Time / s')
+#                axes[0, 1].set_ylabel('Amplitude Peak / ADC bit')
+#                axes[0, 1].set_ylim((0,2000))
+#                axes[0, 1].grid()
+#                
+#                # Bottom-left plot
+#                axes[1, 0].hist(f1hz_1s, bins=range(min(f1hz_1s), max(f1hz_1s)+1, 1), color='blue', label="Avg = %.02f Hz"%avghz)
+#                axes[1, 0].hist(f1hz_1s2, bins=range(min(f1hz_1s2), max(f1hz_1s2)+1, 1), color='m', label="Avg(<20Hz) = %.02f Hz"%avghz2)
+#                axes[1, 0].set_title('Dark Rate Frequency distribution')
+#                axes[1, 0].set_xlabel('Dark Rate / Hz')
+#                axes[1, 0].set_ylabel("Counts")
+#                axes[1, 0].set_yscale('log')
+#                axes[1, 0].legend()
+#                axes[1, 0].grid()
+#                
+#                # Bottom-right plot
+#                axes[1, 1].hist(subds, bins=range(min(subds), max(subds)+vbinw, vbinw), color='purple')
+#                axes[1, 1].set_title('Dark Rate Amplitude distribution')
+#                axes[1, 1].set_xlabel('Amplitude / ADC bit')
+#                axes[1, 1].set_ylabel('Counts')
+#                axes[1, 1].set_yscale('log')
+#                axes[1, 1].grid()
+#                
+#                # Adjust layout to prevent overlap
+#                plt.tight_layout()
+#                pltfp = plt_dir + "CH%d_Hour%04d.png"%(ch, hi)
+#
+#                fig.savefig(pltfp, format='png')
                 
-                # Top-right plot
-                axes[0, 1].scatter(np.array(subts2)/1e9, subds, color='green', marker='.')
-                axes[0, 1].set_title('SiPM Output')
-                axes[0, 1].set_xlabel('Time / s')
-                axes[0, 1].set_ylabel('Amplitude Peak / ADC bit')
-                axes[0, 1].set_ylim((0,2000))
-                axes[0, 1].grid()
-                
-                # Bottom-left plot
-                axes[1, 0].hist(f1hz_1s, bins=range(min(f1hz_1s), max(f1hz_1s)+1, 1), color='blue', label="Avg = %.02f Hz"%avghz)
-                axes[1, 0].hist(f1hz_1s2, bins=range(min(f1hz_1s2), max(f1hz_1s2)+1, 1), color='m', label="Avg(<20Hz) = %.02f Hz"%avghz2)
-                axes[1, 0].set_title('Dark Rate Frequency distribution')
-                axes[1, 0].set_xlabel('Dark Rate / Hz')
-                axes[1, 0].set_ylabel("Counts")
-                axes[1, 0].set_yscale('log')
-                axes[1, 0].legend()
-                axes[1, 0].grid()
-                
-                # Bottom-right plot
-                axes[1, 1].hist(subds, bins=range(min(subds), max(subds)+vbinw, vbinw), color='purple')
-                axes[1, 1].set_title('Dark Rate Amplitude distribution')
-                axes[1, 1].set_xlabel('Amplitude / ADC bit')
-                axes[1, 1].set_ylabel('Counts')
-                axes[1, 1].set_yscale('log')
-                axes[1, 1].grid()
-                
-                # Adjust layout to prevent overlap
-                plt.tight_layout()
-                pltfp = plt_dir + "ufemb%d_CH%d_Hour%04d.png"%(ufemb_id,ch, hi)
-
-                fig.savefig(pltfp, format='png')
-               
-               # Show the figure
-               #plt.show()
+                # Show the figure
+                #plt.show()
 
 
 #                #plt.scatter(ts[1000:], ds[1000:], marker='.')
