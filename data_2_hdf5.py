@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/8/2025 10:17:19 AM
+Last modified: 5/2/2025 5:10:39 PM
 """
 
 #defaut setting for scientific caculation
@@ -30,29 +30,19 @@ import numpy as np
 import h5py
 
 
-rootdir = """G:/SiPM/"""
-subdir = "Rawdata_20250505_17_45/"
+rootdir = """D:/tmppp/sipm/"""
+subdir = "Rawdata_20250501_11_34/"
 
 raw_dir = rootdir + subdir
 ana_dir = rootdir + "Ana" + subdir[4:]
-rst_dir = rootdir + "Result" + subdir[7:]
 bak_dir = rootdir + "Bak" + subdir[4:]
 
 if not os.path.exists(ana_dir):
     print ("folder does not exist")
 
-if not os.path.exists(rst_dir):
-    try:
-        os.makedirs(rst_dir)
-    except OSError:
-        print ("Error to create folder %s"%rst_dir)
-        sys.exit()
-
-
 def create_structured_hdf5(hdf5_fp, dtype=np.dtype([("TS","i8"), ("Value", "u2")])):
     if os.path.exists(hdf5_fp):
-        pass
-        #print("File exists.")   
+        print("File exists.")   
     else:
         with h5py.File(hdf5_fp, 'w') as f:
             maxshape = (None,)
@@ -89,6 +79,10 @@ def filter_anaed_file( hdf5_fp, anafp  ):
         else:
             return False
 
+dr_fp= ana_dir + "darkrate.hdf5"
+tg_fp= ana_dir + "trigger.hdf5"
+create_structured_hdf5(hdf5_fp=dr_fp)
+create_structured_hdf5(hdf5_fp=tg_fp)
 
 used_files = []
 
@@ -114,15 +108,6 @@ while True:
     
     for onef in newfiles:
         fp = ana_dir + onef
-        if "uFEMB" in onef :
-            pos = onef.find("uFEMB")
-            ufemb_id = int(onef[pos+5])
-            dr_fp= rst_dir + "uFEMB%d_darkrate.hdf5"%ufemb_id
-            tg_fp= rst_dir + "uFEMB%d_trigger.hdf5"%ufemb_id
-            create_structured_hdf5(hdf5_fp=dr_fp)
-            create_structured_hdf5(hdf5_fp=tg_fp)
-
-
         if (".ana" in onef) or (".tana" in onef): 
             if (".ana" in onef) :
                 hdf5_fp = dr_fp
@@ -148,7 +133,7 @@ while True:
                             td = np.array(datas[chi][xi][1][40:60])
                             namp = np.min(td) 
                             np_pos = np.where( td== namp)[0][0]
-                            tdszip[chi].append((datas[chi][xi][0]*10+np_pos*500, abs(ped-namp)))
+                            tdszip[chi].append((datas[chi][xi][0]*10+np_pos*500, ped-namp))
             append_structured_data(hdf5_fp=hdf5_fp, anafp=onef, tdszip=tdszip)
     
 

@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/8/2025 10:17:19 AM
+Last modified: 5/2/2025 2:59:46 PM
 """
 
 #defaut setting for scientific caculation
@@ -23,48 +23,38 @@ import time
 from datetime import datetime
 import struct
 import codecs
+from raw_convertor_trig import RAW_CONV
 import pickle
 from shutil import copyfile
 import shutil
 import numpy as np
 import h5py
 
+rc = RAW_CONV()
 
-rootdir = """G:/SiPM/"""
-subdir = "Rawdata_20250505_17_45/"
-
+rootdir = """D:/tmppp/sipm/"""
+subdir = "Rawdata_20250501_11_42/"
 raw_dir = rootdir + subdir
 ana_dir = rootdir + "Ana" + subdir[4:]
-rst_dir = rootdir + "Result" + subdir[7:]
 bak_dir = rootdir + "Bak" + subdir[4:]
-
 if not os.path.exists(ana_dir):
     print ("folder does not exist")
+    exit()
 
-if not os.path.exists(rst_dir):
-    try:
-        os.makedirs(rst_dir)
-    except OSError:
-        print ("Error to create folder %s"%rst_dir)
-        sys.exit()
-
+for root, dirs, files in os.walk(ana_dir):
+    files.sort()
+    break
 
 def create_structured_hdf5(hdf5_fp, dtype=np.dtype([("TS","i8"), ("Value", "u2")])):
-    if os.path.exists(hdf5_fp):
-        pass
-        #print("File exists.")   
-    else:
-        with h5py.File(hdf5_fp, 'w') as f:
-            maxshape = (None,)
-            for chi in range(32):
-                f.create_dataset("CH%02d"%chi, shape=(0,), maxshape=maxshape, dtype=dtype, chunks=True)
+    with h5py.File(hdf5_fp, 'w') as f:
+        maxshape = (None,)
+        for chi in range(32):
+            f.create_dataset("CH%02d"%chi, shape=(0,), maxshape=maxshape, dtype=dtype, chunks=True)
+    print("File and structured datasets created.")
 
-            dt = h5py.string_dtype(encoding='utf-8')
-            f.create_dataset("file_analyzed", shape=(0,), maxshape=maxshape, dtype=dt, chunks=True)
-        print("File and structured datasets created.")
-
-def append_structured_data( hdf5_fp, tdszip,anafp,  dtype=np.dtype([("TS","i8"), ("Value", "u2")]),):
-    dt = h5py.string_dtype(encoding='utf-8')
+# Step 2: Append structured data
+def append_structured_data( hdf5_fp, tdszip, dtype=np.dtype([("TS","i8"), ("Value", "u2")])):
+    
     with h5py.File(hdf5_fp, 'a') as f:
         for chi in range(32):
             newdata = np.array(tdszip[chi], dtype)
@@ -73,93 +63,59 @@ def append_structured_data( hdf5_fp, tdszip,anafp,  dtype=np.dtype([("TS","i8"),
             new_size = newdata.shape[0]
             dset.resize((old_size + new_size,))
             dset[old_size:] = newdata
-        nstring = np.array([anafp], dtype=dt)
-        dset=f["file_analyzed"]
-        old_size = dset.shape[0]
-        new_size = nstring.shape[0]
-        dset.resize((old_size + new_size,))
-        dset[old_size:] = nstring
-
-def filter_anaed_file( hdf5_fp, anafp  ):
-    with h5py.File(hdf5_fp, 'r') as f:
-        dset=f["file_analyzed"]
-        fns = dset[:]
-        if anafp.encode('utf-8') in fns:
-            return True
-        else:
-            return False
+#    print(f"Appended {new_size} entries to {dataset_name}.")
 
 
-used_files = []
+#create_structured_hdf5(hdf5_fp=rootdir + subdir + "xx.hdf5")
+hdf5_fp=rootdir + subdir + "xx.hdf5"
+with h5py.File(hdf5_fp, "r") as f:
+    # List all datasets
+    print("Datasets in file:", list(f.keys()))
+    data = f["CH02"]
+    #print (data)
+    data=data[:]
+    print (data)
+    exit()
 
-while True:
-    try:  
-        for root, dirs, files in os.walk(ana_dir):
-            files.sort()
-            break
+    ts,ds = zip(*data)
+    import matplotlib.pyplot as plt
+    plt.plot(ts, ds)
+    plt.plot(ts[0:10], ds[0:10], color='r')
+    plt.show()
+    plt.close()
 
-        newfiles = [item for item in files if item not in used_files]
-        newfiles = [item for item in newfiles if ".hdf5" not in item]
-
-        if len(newfiles) > 0:
-            pass
-        elif len(newfiles) == 0:
-            print ("no new files, wait 10 seconds...")
-            time.sleep(10)
-            continue
-    except KeyboardInterrupt:
-        print ("Terminated by Ctrl+C ")
-        exit()
-
-    
-    for onef in newfiles:
-        fp = ana_dir + onef
-        if "uFEMB" in onef :
-            pos = onef.find("uFEMB")
-            ufemb_id = int(onef[pos+5])
-            dr_fp= rst_dir + "uFEMB%d_darkrate.hdf5"%ufemb_id
-            tg_fp= rst_dir + "uFEMB%d_trigger.hdf5"%ufemb_id
-            create_structured_hdf5(hdf5_fp=dr_fp)
-            create_structured_hdf5(hdf5_fp=tg_fp)
-
-
-        if (".ana" in onef) or (".tana" in onef): 
-            if (".ana" in onef) :
-                hdf5_fp = dr_fp
-            elif (".tana" in onef): 
-                hdf5_fp = tg_fp
-    
-            if filter_anaed_file(hdf5_fp=hdf5_fp, anafp=onef  ):
-                used_files.append(onef)
-                print (onef, " was analyzed, ignore...")
-                continue
-    
-            tdszip = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
-            with open (fp, "rb") as fs:
-                print (fp)
-                datas = pickle.load(fs)
-                for chi in range(32):
-                    if len(datas[chi])> 0:
-                        ts = []
-                        ds = []
-                        for xi in range(len(datas[chi])):
-                            if xi == 0:
-                                ped = int(np.mean(datas[chi][xi][1][0:30]))
-                            td = np.array(datas[chi][xi][1][40:60])
-                            namp = np.min(td) 
-                            np_pos = np.where( td== namp)[0][0]
-                            tdszip[chi].append((datas[chi][xi][0]*10+np_pos*500, abs(ped-namp)))
-            append_structured_data(hdf5_fp=hdf5_fp, anafp=onef, tdszip=tdszip)
-    
+exit()
 
 #from scipy.signal import find_peaks 
 #tss = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
 #dss = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+tdszip = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
 
-#import matplotlib.pyplot as plt
-#plt.plot(np.array(tss[1])/1e9,dss[1])
-#plt.show()
-#plt.close()
+for onef in files:
+    fp = ana_dir + onef
+    if ".ana" in onef: #dark data
+        with open (fp, "rb") as fs:
+            datas = pickle.load(fs)
+            print (onef)
+            for chi in range(32):
+                if len(datas[chi])> 0:
+                    ts = []
+                    ds = []
+                    for xi in range(len(datas[chi])):
+                        if xi == 0:
+                            ped = int(np.mean(datas[chi][xi][1][0:30]))
+                        td = np.array(datas[chi][xi][1][40:60])
+                        namp = np.min(td) 
+                        np_pos = np.where( td== namp)[0][0]
+                        tdszip[chi].append((datas[chi][xi][0]*10+np_pos*500, ped-namp))
+            append_structured_data(hdf5_fp=rootdir + subdir + "xx.hdf5", tdszip=tdszip)
+                    #    ts.append(datas[chi][xi][0]*10+np_pos*500)
+                        #print (datas[chi][xi][0]*10+np_pos*500)
+                    #    ds.append(ped-namp)
+                    #tss[chi] +=ts
+                    #dss[chi] +=ds
+    
+
 
                 #ts=datas[chi][xi][0]
                 #data=datas[chi][xi][1]

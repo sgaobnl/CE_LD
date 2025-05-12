@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 4/30/2025 2:12:26 PM
+Last modified: 5/9/2025 12:23:54 PM
 """
 
 #defaut setting for scientific caculation
@@ -341,18 +341,19 @@ if __name__ == '__main__':
     cls.Trig_threshold(thr_ds)
     record_save(thr_ds=thr_ds, t=t, fp="./test_record.csv" )
 
-    ts = datetime.now().strftime("%Y%m%d_%H_%M")
-    savedir = "D:/uFEMB/SiPM/Rawdata_%s/"%ts
-    if (os.path.exists(savedir)):
-        pass
-    else:
-        try:
-            os.makedirs(savedir)
-        except OSError:
-            print ("Error to create folder %s"%savedir)
-            sys.exit()
+#    ts = datetime.now().strftime("%Y%m%d_%H_%M")
+#    savedir = "G:/SiPM/Rawdata_%s/"%ts
+#    if (os.path.exists(savedir)):
+#        pass
+#    else:
+#        try:
+#            os.makedirs(savedir)
+#        except OSError:
+#            print ("Error to create folder %s"%savedir)
+#            sys.exit()
+    fdir = "G:/SiPM/"
 
-    cls.get_rawdata_trig(fdir = savedir, thr_ds=thr_ds)
+    cls.get_rawdata_trig(fdir = fdir, thr_ds=thr_ds)
 
     cls.UDP.write_reg_checked( 7, 0) #disable data
     print ("Well Done!")

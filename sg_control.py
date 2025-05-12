@@ -1,0 +1,21 @@
+import time
+import sys
+import numpy as np
+import pyvisa  
+
+
+def sg_control(period=300):
+    try:
+        rm = pyvisa.ResourceManager()
+        sig_gen = rm.open_resource('TCPIP0::192.168.123.3::inst0::INSTR')
+        print(sig_gen.query("*IDN?"),end='')
+        sig_gen.write('Output{} {}'.format(1, "ON"))
+        sig_gen.write('Output{} {}'.format(2, "ON"))
+        time.sleep(300)
+        sig_gen.write('Output{} {}'.format(2, "OFF"))
+        sig_gen.write('Output{} {}'.format(1, "OFF"))
+        sig_gen.close() 
+    except Exception as e:
+        print(e)
+    
+sg_control() 

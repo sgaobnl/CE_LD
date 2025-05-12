@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/5/2025 11:27:07 AM
+Last modified: 5/8/2025 10:37:47 AM
 """
 
 #defaut setting for scientific caculation
@@ -31,8 +31,8 @@ import h5py
 
 
 
-rootdir = """D:/tmppp/sipm/"""
-subdir = "Rawdata_20250502_15_46/"
+rootdir = """G:/SiPM/"""
+subdir = "Rawdata_20250505_17_45/"
 
 ufemb_id = int(input ("Choose a uFEMB(1-2):"))
 if ufemb_id not in [1,2]:

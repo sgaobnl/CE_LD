@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/1/2025 11:51:50 AM
+Last modified: 5/9/2025 12:40:07 PM
 """
 
 #defaut setting for scientific caculation
@@ -34,11 +34,11 @@ from fft_chn import chn_fft
 #fn = rawdir + "uFEMB1_00000000000000000000000897318436.bin"
 
 while True:
-    rawdir = """D:/uFEMB/SiPM/"""
+    rawdir = """G:/SiPM/"""
     print ("##################################")
     for root, dirs, files in os.walk(rawdir):
         #t = datetime.now().strftime("%Y%m%d")
-        t = "20250501_11_42"
+        t = "Bakata_20250509_12_38"
         dirs_today = [] 
         for onedir in dirs:
             if t in onedir:
@@ -56,11 +56,11 @@ while True:
         time.sleep(1)
         
         #exit()
-    #elif len(files) == 1 :
-    #    onefile = files[0]
+    if len(files) > 1 :
+        onefile = files[0]
     else:
         onefile = files[0]
-    onefile = "uFEMB1_00000000000000000000002974445468.bin"
+    #onefile = "uFEMB1_00000000000000000000002974445468.bin"
     
     print (onefile)
     print ("##################################")
@@ -75,7 +75,9 @@ while True:
     
     for apkg in rawdata:
         try:
-            chndata, ts, udp_id, ufemb_id = rc.raw_conv_per_trig(pkg_data = apkg, total_samN=140)
+            chndata, ts, udp_id, ufemb_id, ext_trigger = rc.raw_conv_per_trig(pkg_data = apkg, total_samN=140)
+            #if ext_trigger == 0:
+            #    continue
             import matplotlib.pyplot as plt
             fig = plt.figure(figsize=(16,8))
             #for ch in [1,2,3,4,5,6]:
@@ -84,17 +86,18 @@ while True:
             for ch in range(32):
                 i = ch-0
                 rmsch = np.std(chndata[i][80:])
-                meanch = np.mean(chndata[i])
-                peakn = np.min(chndata[i])
+                meanch = int(np.mean(chndata[i]))
+                peakn = meanch-np.min(chndata[i])
                 #plt.plot(chndata[i], marker = '^', label="P1_%s_ch%d_rms%.3f_peak%d"%(sipmorders[ch-1], ch, rmsch, peakp ))
-                plt.plot(chndata[i], marker = '^', label="ch%d_rms%.3f_peak%d"%( ch, rmsch, peakn ))
-                print (i, rmsch, meanch, meanch-10*rmsch, peakn)
+                plt.plot(chndata[i], marker = '^', label="ch%d_rms%.3f_mean%d_amp%d_Ext%d"%( ch, rmsch,meanch, peakn,ext_trigger ))
+                #print (i, rmsch, meanch, meanch-10*rmsch, peakn)
+                print (meanch-50, i)
             plt.legend(loc=1, fontsize=10)
             plt.grid()
             plt.title(dirs_today[0] + ":" + onefile)
             plt.show()
             plt.close()
-            #break
+            break
         except KeyboardInterrupt:
             print ("End the process! ")
             exit()

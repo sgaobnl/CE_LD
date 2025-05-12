@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:52:43 PM
-Last modified: 5/1/2025 10:14:56 AM
+Last modified: 5/9/2025 2:27:10 PM
 """
 
 #defaut setting for scientific caculation
@@ -23,7 +23,9 @@ import socket
 import time
 import copy
 from socket import AF_INET, SOCK_DGRAM
+from datetime import datetime
 import codecs
+import os
 from raw_convertor_trig import RAW_CONV
 import pickle
 
@@ -200,22 +202,47 @@ class CLS_UDP:
         sock_data.close()
 
     def get_rawdata_trig_save(self, queue, fdir="./"):
+        ts = datetime.now().strftime("%Y%m%d_%H_%M")
+        savedir = fdir + "/Rawdata_%s/"%ts
+        if (os.path.exists(savedir)):
+            pass
+        else:
+            try:
+                os.makedirs(savedir)
+            except OSError:
+                print ("Error to create folder %s"%savedir)
+                sys.exit()
         badi = 0
         while True:
             if not queue.empty():
                 data = queue.get()
                 for i in range(3):
-                    chndata, ts, udp_id, ufemb_id = self.raw_dec.raw_conv_per_trig(pkg_data = data[i], total_samN=140)
+                    chndata, ts, udp_id, ufemb_id, ext_trig_flg = self.raw_dec.raw_conv_per_trig(pkg_data = data[i], total_samN=140)
                     if (ufemb_id == 1) or (ufemb_id) == 2:
                         break
+                dates = datetime.now().strftime("%Y%m%d_%H_%M")
                 if ufemb_id == 0:
                     badi = badi + 1
-                    fn = fdir + "bad%d_%032d.bin"%(badi, ts)
+                    fn = savedir + "bad%d_%s_%032d.bin"%(badi, dates,ts)
                 else:
-                    fn = fdir + "uFEMB%d_%032d.bin"%(ufemb_id, ts)
+                    fn = savedir + "uFEMB%d_%s_%032d.bin"%(ufemb_id, dates, ts)
                 with open(fn, 'wb') as f:
                     pickle.dump(data, f)       
                 time.sleep(0.1)
+                ts = datetime.now().strftime("%Y%m%d")
+                if ts not in savedir: #new date
+                    ts = datetime.now().strftime("%Y%m%d_%H_%M")
+                    savedir = fdir + "/Rawdata_%s/"%ts
+                    if (os.path.exists(savedir)):
+                        pass
+                    else:
+                        try:
+                            os.makedirs(savedir)
+                        except OSError:
+                            print ("Error to create folder %s"%savedir)
+                            sys.exit()
+
+
 
     def udp_port_update(self):
         self.UDP_PORT_WREG = 32000
