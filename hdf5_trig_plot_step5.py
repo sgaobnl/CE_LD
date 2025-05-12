@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/8/2025 4:34:56 PM
+Last modified: 5/8/2025 4:40:59 PM
 """
 
 #defaut setting for scientific caculation
@@ -42,10 +42,10 @@ dtt0 = int(dt.timestamp())
 ufemb_id = 2
 if ufemb_id not in [1,2]:
     exit()
-chin = int(input ("Choose a CH(0-31):"))
+#chin = int(input ("Choose a CH(0-31):"))
 
-if chin>=32:
-    exit()
+#if chin>=32:
+#    exit()
 #hi0 = int(input ("Hours after %s: "%subdir[8:-1]))
 hi0 = 0
 
@@ -64,10 +64,17 @@ hdf5_fp=rst_dir + "ufemb%d_trigger.hdf5"%ufemb_id
 #hdf5_fp=rst_dir + "trigger.hdf5"
 
 with h5py.File(hdf5_fp, "r") as f:
-    for ch in [chin]:
+    #for ch in [chin]:
+    for ch in range(32):
         key = "CH%02d"%ch
-        print (key)
+        bypass_ch_flg = False
         plt_dir = rst_dir + "CH%d"%((ufemb_id-1)*32+ch)  + "_plots/Triggers/"
+        if not os.path.exists(plt_dir):
+            try:
+                os.makedirs(plt_dir)
+            except OSError:
+                print ("Error to create folder %s"%plt_dir)
+                sys.exit()
 
         data = f[key]
         data=data[:]
@@ -86,6 +93,9 @@ with h5py.File(hdf5_fp, "r") as f:
                 subt = ts[prev : idx + 1].copy()
                 subd = ds[prev : idx + 1].copy()
                 poss = np.where(subd > 30)[0]
+                if len(poss) < 10:
+                    bypass_ch_flg = True
+                    break
                 posb = poss[0]
                 pose = poss[-1]
                 subt = subt[posb:pose]
@@ -94,6 +104,8 @@ with h5py.File(hdf5_fp, "r") as f:
                 subts.append(subt)
                 subds.append(subd)
                 prev = idx + 1
+            if bypass_ch_flg:
+                continue
             subts.append(ts[prev : ].copy())
             subds.append(ds[prev : ].copy())
 
@@ -101,7 +113,6 @@ with h5py.File(hdf5_fp, "r") as f:
 
                 dtt00 = dtt0 + int(subts[xi][0]//1e9)
                 dt = datetime.fromtimestamp(dtt00)
-                print (dt)
 
                 import matplotlib.pyplot as plt
                 # Create a 2x2 grid of subplots
