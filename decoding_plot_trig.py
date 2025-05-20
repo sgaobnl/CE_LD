@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/9/2025 12:40:07 PM
+Last modified: 5/14/2025 4:21:43 PM
 """
 
 #defaut setting for scientific caculation
@@ -37,11 +37,12 @@ while True:
     rawdir = """G:/SiPM/"""
     print ("##################################")
     for root, dirs, files in os.walk(rawdir):
-        #t = datetime.now().strftime("%Y%m%d")
-        t = "Bakata_20250509_12_38"
+        t = datetime.now().strftime("%Y%m%d")
+        #t = "Bakata_20250514_00_00"
         dirs_today = [] 
         for onedir in dirs:
-            if t in onedir:
+            #if (t in onedir) and ("Rawdata_" in onedir):
+            if (t in onedir) and ("Bakata_" in onedir):
                 dirs_today.append(onedir)
         dirs_today.sort(reverse = True)
         break
@@ -64,9 +65,12 @@ while True:
     
     print (onefile)
     print ("##################################")
+    #for onefile in files:
+    #    onefn = latest_dir + onefile
+    
+    
     onefn = latest_dir + onefile
-    
-    
+    print (onefn)
     with open (onefn, "rb") as fs:
         rawdata = pickle.load(fs)
     

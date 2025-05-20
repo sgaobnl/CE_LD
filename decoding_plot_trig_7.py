@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/1/2025 11:35:01 AM
+Last modified: 5/13/2025 5:19:19 PM
 """
 
 #defaut setting for scientific caculation
@@ -30,7 +30,7 @@ import numpy as np
 from fft_chn import chn_fft
 
 
-fn = "D:/uFEMB/SiPM/data_20250501" + "_11_34.bin"
+fn = "G:/SiPM/xxx/uFEMB1_20250513_17_11_00000000000000000035478963124720.bin"
 with open (fn, "rb") as fs:
     trigs_all = pickle.load(fs)
 

@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/13/2025 4:52:07 PM
+Last modified: 5/20/2025 10:20:01 AM
 """
 
 #defaut setting for scientific caculation
@@ -31,7 +31,7 @@ import h5py
 from scipy.signal import find_peaks
 
 
-fm = "C:/Users/sgao.BNL/Documents/GitHub/CE_LD/chn_mapping.csv"
+fm = """D:/GitHub/CE_LD/chn_mapping.csv"""
 dmap = {}
 if os.path.isfile(fm):    
     with open(fm,"r") as f:
@@ -44,10 +44,13 @@ if os.path.isfile(fm):
                 if len(tmps[12]) >= 0:
                     sipmno=tmps[12][0:3] +"_"+ tmps[9] +"_"+tmps[11] +"_" + "CH%02d"%chno + "_FNL" + tmps[4] 
                     dmap[chno] = sipmno
+else:
+    print ("%s doesn't exist"%fm)
+    exit()    
 
 
-rootdir = """D:/tmppp/sipm/new/"""
-subdir = "Rawdata_20250505_15_57/"
+rootdir = """G:/SiPM/"""
+subdir = "Rawdata_20250519_00_00/"
 date_str=subdir[8:-1]
 dt = datetime.strptime(date_str, "%Y%m%d_%H_%M").replace(tzinfo=timezone.utc)
 dtt0 = int(dt.timestamp())
@@ -65,13 +68,18 @@ if not os.path.exists(rst_dir):
 
 for ufemb_id in [1,2]:
     hdf5_fp=rst_dir + "ufemb%d_%s_trigger.hdf5"%(ufemb_id, subdir[8:16])
+    print (hdf5_fp)
+    if os.path.isfile(hdf5_fp):    
+        pass
+    else:
+        continue
 
     with h5py.File(hdf5_fp, "r") as f:
         for ch in range(32):
-        #for ch in [1]:
             key = "CH%02d"%ch
             bypass_ch_flg = False
             dn = dmap[(ufemb_id-1)*32+ch]
+            print (dn)
             plt_dir = rst_dir + dn  + "_plots/Triggers/"
             if not os.path.exists(plt_dir):
                 try:
@@ -116,8 +124,15 @@ for ufemb_id in [1,2]:
     
                 for xi in range(len(subts)):
     
+                    #dtt00 = dtt0 + (int(subts[xi][0]//1e9)%(24*3600))
                     dtt00 = dtt0 + int(subts[xi][0]//1e9)
                     dt = datetime.fromtimestamp(dtt00)
+
+                    #dtm = datetime.fromtimestamp(dtt0)
+                    #print (dtm.strftime("%Y-%m-%d %H:%M:%S"))
+                    #print (dt.strftime("%Y-%m-%d %H:%M:%S"))
+                    #print ("###############")
+                    #continue
     
                     import matplotlib.pyplot as plt
                     # Create a 2x2 grid of subplots
