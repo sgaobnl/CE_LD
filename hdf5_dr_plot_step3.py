@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/23/2025 3:38:22 PM
+Last modified: 5/30/2025 1:20:34 PM
 """
 
 #defaut setting for scientific caculation
@@ -33,8 +33,8 @@ from zoneinfo import ZoneInfo
 import pytz
 
 fm = """D:/GitHub/CE_LD/chn_mapping.csv""" #femb1
-fm = """C:/uFEMB/CE_LD/chn_mapping.csv""" #femb2
-fm = """C:/Users/sgao.BNL/Documents/GitHub/CE_LD/chn_mapping.csv"""
+#fm = """C:/uFEMB/CE_LD/chn_mapping.csv""" #femb2
+#fm = """C:/Users/sgao.BNL/Documents/GitHub/CE_LD/chn_mapping.csv"""
 
 
 dmap = {}
@@ -64,36 +64,38 @@ def create_grp_hdf5(hdf5_fp):
                 sipmno = dmap[onekey]
                 if 'OPEN' not in sipmno:
                     grp = f.create_group(sipmno)
+            dt = h5py.string_dtype(encoding='utf-8')
+            f.create_dataset("file_analyzed", shape=(0,), maxshape=maxshape, dtype=dt, chunks=True)
         print("File and groups created.")
 
 
-rootdir = """H:/SiPM/"""
+rootdir = """G:/SiPM/"""
 drfp = rootdir + "darkrate_vs_time.hdf5"
 create_grp_hdf5(hdf5_fp = drfp)
 
-
-subdirs = [#"Rawdata_20250505_15_57/",
-           # "Rawdata_20250505_17_45/",
-           # "Rawdata_20250506_00_00/",
-           # "Rawdata_20250507_00_00/",
-           # "Rawdata_20250508_00_00/",
-           # "Rawdata_20250509_00_00/",
-           # "Rawdata_20250509_12_35/",
-           # "Rawdata_20250509_12_38/",
-           # "Rawdata_20250509_14_28/",
-           # "Rawdata_20250509_14_34/",
-           # "Rawdata_20250509_14_38/",
-#            "Rawdata_20250510_00_00/",
-#            "Rawdata_20250511_00_00/",
-#            "Rawdata_20250512_00_00/",
-#            "Rawdata_20250513_00_00/",
-#            "Rawdata_20250514_00_00/",
-#            "Rawdata_20250515_00_00/",
-#            "Rawdata_20250516_00_00/",
-#            "Rawdata_20250517_00_00/",
-            "Rawdata_20250518_00_00/",
-#            "Rawdata_20250519_00_00/",
-            ]
+#
+#subdirs = [#"Rawdata_20250505_15_57/",
+#           # "Rawdata_20250505_17_45/",
+#           # "Rawdata_20250506_00_00/",
+#           # "Rawdata_20250507_00_00/",
+#           # "Rawdata_20250508_00_00/",
+#           # "Rawdata_20250509_00_00/",
+#           # "Rawdata_20250509_12_35/",
+#           # "Rawdata_20250509_12_38/",
+#           # "Rawdata_20250509_14_28/",
+#           # "Rawdata_20250509_14_34/",
+#           # "Rawdata_20250509_14_38/",
+##            "Rawdata_20250510_00_00/",
+##            "Rawdata_20250511_00_00/",
+##            "Rawdata_20250512_00_00/",
+##            "Rawdata_20250513_00_00/",
+##            "Rawdata_20250514_00_00/",
+##            "Rawdata_20250515_00_00/",
+##            "Rawdata_20250516_00_00/",
+##            "Rawdata_20250517_00_00/",
+#            "Rawdata_20250518_00_00/",
+##            "Rawdata_20250519_00_00/",
+#            ]
 
 def append_data(hdf5_fp, sipmno, dsetn, dsetd, attrsd):
     with h5py.File(hdf5_fp, 'a') as f:
@@ -107,24 +109,51 @@ def append_data(hdf5_fp, sipmno, dsetn, dsetd, attrsd):
         else:
             pass
 
-for subdir in subdirs:
-    raw_dir = rootdir + subdir
-    ana_dir = rootdir + "Ana" + subdir[4:]
-    rst_dir = rootdir + "Result" + subdir[7:]
-    bak_dir = rootdir + "Bak" + subdir[4:]
+def append_anaed_fp( hdf5_fp, anafp):
+    with h5py.File(hdf5_fp, 'a') as f:
+        dset=f["file_analyzed"]
+        old_size = dset.shape[0]
+        new_size = old_size+1
+        dset.resize((old_size + 1,))
+        dset[old_size:] = anafp
+
+def filter_anaed_file( hdf5_fp, anafp  ):
+    with h5py.File(hdf5_fp, 'r') as f:
+        dset=f["file_analyzed"]
+        fns = dset[:]
+        for fn in fns:
+            if (anafp in str(fn)) and (datetime.now().strftime("%Y%m%d") not in str(fn)):
+                return True
+        return False
+
+for root, dirs, files in os.walk(rootdir):
+    break
+
+rstdirs = []
+for onedir in dirs:
+    #if ("Result_" in onedir) and (datetime.now().strftime("%Y%m%d") not in onedir):
+    if ("Result_" in onedir) :
+        rstdirs.append(onedir)
+
+
+for subdir in rstdirs:
+    rst_dir = rootdir + subdir + "/"
     
     if not os.path.exists(rst_dir):
         print ("folder does not exist")
         exit()
     
     for ufemb_id in [1,2]:
-        hdf5_fp=rst_dir + "ufemb%d_%s_darkrate.hdf5"%(ufemb_id, subdir[8:16])
+        hdf5_fp=rst_dir + "ufemb%d_%s_darkrate.hdf5"%(ufemb_id, subdir[7:15])
         if os.path.isfile(hdf5_fp):    
             print (hdf5_fp)
             pass
         else:
             continue
-    
+
+        if filter_anaed_file(hdf5_fp=drfp, anafp=hdf5_fp  ):
+            print (hdf5_fp, "was analyzed")
+            continue    
     
         with h5py.File(hdf5_fp, "r") as f:
 
@@ -137,13 +166,14 @@ for subdir in subdirs:
             dt0 = datetime.strptime(fn0[7:7+14], "%Y%m%d_%H_%M").replace(tzinfo=ZoneInfo("America/New_York") )#timezone.utc)
             dtt0 = int(dt0.timestamp())
 
-            #for ch in range(32):
-            for ch in [49-32]:
+            for ch in range(32):
+            #for ch in [49-32]:
                 key = "CH%02d"%ch
                 dn = dmap[(ufemb_id-1)*32+ch]
                 if "OPEN" in dn:
                     print (dn, "is ignored")
                     continue
+                print (dn, "is being analyzed")
 
                 plt_dir = rst_dir + dn  + "_plots/DarkRate/"
                 if not os.path.exists(plt_dir):
@@ -182,14 +212,14 @@ for subdir in subdirs:
                         f1hz_1s = []
                         i=0
                         dlt=1
-                        for i in range(h2s):
+                        for i in range(int((subts[-1]-subts[0])//1e9)):
                             ti = subts2[(subts2>i*dlt*1e9)&(subts2<=(i+1)*dlt*1e9)]
                             f1hz_1s.append(len(ti))
                             i = i + 1
                         f1hz_1s2 = np.array(f1hz_1s)  
                         f1hz_1s2 = f1hz_1s2[f1hz_1s2 < cutoffhz]  
         
-                        avghz =  (len(subts)/3600)
+                        avghz =  (len(subds)/((subts[-1]-subts[0])//1e9))
                         avghz2= (f1hz_1s2.sum()/len(f1hz_1s2))
         
                         import matplotlib.pyplot as plt
@@ -199,7 +229,7 @@ for subdir in subdirs:
                         fig.suptitle(dn + dt.strftime(": %Y_%m_%d_%H"))
         
                         # Top-left plot
-                        axes[0, 0].scatter(np.arange(h2s), f1hz_1s, color='red', marker='.')
+                        axes[0, 0].scatter(np.arange(len(f1hz_1s)), f1hz_1s, color='red', marker='.')
                         axes[0, 0].set_title('Dark Rate')
                         axes[0, 0].set_xlabel('Time / s')
                         axes[0, 0].set_ylabel('Dark Rate / Hz')
@@ -273,4 +303,4 @@ for subdir in subdirs:
                         append_data(hdf5_fp=drfp, sipmno=dn, dsetn=dt.strftime("%Y_%m_%d_%H"), dsetd=dsetd, attrsd=attrsd)
 
 
-
+        append_anaed_fp(hdf5_fp=drfp, anafp=hdf5_fp)

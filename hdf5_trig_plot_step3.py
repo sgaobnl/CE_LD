@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/23/2025 2:14:21 PM
+Last modified: 5/28/2025 5:35:38 PM
 """
 
 #defaut setting for scientific caculation
@@ -30,12 +30,15 @@ import shutil
 import numpy as np
 import h5py
 from scipy.signal import find_peaks
-from zoneinfo import ZoneInfo
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
 
 
 fm = """D:/GitHub/CE_LD/chn_mapping.csv""" #femb1
-fm = """C:/uFEMB/CE_LD/chn_mapping.csv""" #femb2
-fm = """C:/Users/sgao.BNL/Documents/GitHub/CE_LD/chn_mapping.csv"""
+#fm = """C:/uFEMB/CE_LD/chn_mapping.csv""" #femb2
+#fm = """C:/Users/sgao.BNL/Documents/GitHub/CE_LD/chn_mapping.csv"""
 
 dmap = {}
 if os.path.isfile(fm):    
@@ -56,7 +59,8 @@ else:
 
 def create_grp_hdf5(hdf5_fp):
     if os.path.exists(hdf5_fp):
-        print("File exists.")   
+        #print("File exists.")   
+        pass
     else:
         with h5py.File(hdf5_fp, 'w') as f:
             maxshape = (None,)
@@ -65,12 +69,14 @@ def create_grp_hdf5(hdf5_fp):
                 sipmno = dmap[onekey]
                 if 'OPEN' not in sipmno:
                     grp = f.create_group(sipmno)
+            dt = h5py.string_dtype(encoding='utf-8')
+            f.create_dataset("file_analyzed", shape=(0,), maxshape=maxshape, dtype=dt, chunks=True)
         print("File and groups created.")
 
+rootdir = """G:/SiPM/"""
+califp = rootdir + "led_cali_vs_time.hdf5"
 
-rootdir = """H:/SiPM/"""
-create_grp_hdf5(hdf5_fp = rootdir + "led_cali_vs_time.hdf5")
-
+create_grp_hdf5(hdf5_fp = califp)
 
 def append_data(hdf5_fp, sipmno, dsetn, dsetd, attrsd):
     with h5py.File(hdf5_fp, 'a') as f:
@@ -84,59 +90,79 @@ def append_data(hdf5_fp, sipmno, dsetn, dsetd, attrsd):
         else:
             pass
 
+def append_anaed_fp( hdf5_fp, anafp):
+    with h5py.File(hdf5_fp, 'a') as f:
+        dset=f["file_analyzed"]
+        old_size = dset.shape[0]
+        new_size = old_size+1
+        dset.resize((old_size + 1,))
+        dset[old_size:] = anafp
 
-subdirs = [ 
-            "Rawdata_20250505_15_57/",
-            "Rawdata_20250505_17_45/",
-            "Rawdata_20250506_00_00/",
-            "Rawdata_20250507_00_00/",
-            "Rawdata_20250508_00_00/",
-            "Rawdata_20250509_00_00/",
-            "Rawdata_20250509_12_35/",
-            "Rawdata_20250509_12_38/",
-            "Rawdata_20250509_14_28/",
-            "Rawdata_20250509_14_34/",
-            "Rawdata_20250509_14_38/",
-            "Rawdata_20250510_00_00/",
-            "Rawdata_20250511_00_00/",
-            "Rawdata_20250512_00_00/",
-            "Rawdata_20250513_00_00/",
-            "Rawdata_20250514_00_00/",
-            "Rawdata_20250515_00_00/",
-            "Rawdata_20250516_00_00/",
-            "Rawdata_20250517_00_00/",
-            "Rawdata_20250518_00_00/",
-            "Rawdata_20250519_00_00/",
-            "Rawdata_20250520_00_00/",
-            "Rawdata_20250521_00_00/",
-            "Rawdata_20250522_00_00/",
-            ]
+def filter_anaed_file( hdf5_fp, anafp  ):
+    with h5py.File(hdf5_fp, 'r') as f:
+        dset=f["file_analyzed"]
+        fns = dset[:]
+        for fn in fns:
+            if (anafp in str(fn)) and (datetime.now().strftime("%Y%m%d") not in str(fn)):
+                return True
+        return False
 
-for subdir in subdirs:
-    print (subdir)
-    date_str=subdir[8:-1]
-    
-    raw_dir = rootdir + subdir
-    ana_dir = rootdir + "Ana" + subdir[4:]
-    rst_dir = rootdir + "Result" + subdir[7:]
-    bak_dir = rootdir + "Bak" + subdir[4:]
-    
-    if not os.path.exists(rst_dir):
-        print ("folder does not exist")
-        exit()
-    
+for root, dirs, files in os.walk(rootdir):
+    break
+
+rstdirs = []
+for onedir in dirs:
+    #if ("Result_" in onedir) and (datetime.now().strftime("%Y%m%d") in onedir):
+    if ("Result_" in onedir) : #and (datetime.now().strftime("%Y%m%d") in onedir):
+        rstdirs.append(onedir)
+#subdirs = [ 
+#            "Rawdata_20250505_15_57/",
+#            "Rawdata_20250505_17_45/",
+#            "Rawdata_20250506_00_00/",
+#            "Rawdata_20250507_00_00/",
+#            "Rawdata_20250508_00_00/",
+#            "Rawdata_20250509_00_00/",
+#            "Rawdata_20250509_12_35/",
+#            "Rawdata_20250509_12_38/",
+#            "Rawdata_20250509_14_28/",
+#            "Rawdata_20250509_14_34/",
+#            "Rawdata_20250509_14_38/",
+#            "Rawdata_20250510_00_00/",
+#            "Rawdata_20250511_00_00/",
+#            "Rawdata_20250512_00_00/",
+#            "Rawdata_20250513_00_00/",
+#            "Rawdata_20250514_00_00/",
+#            "Rawdata_20250515_00_00/",
+#            "Rawdata_20250516_00_00/",
+#            "Rawdata_20250517_00_00/",
+#            "Rawdata_20250518_00_00/",
+#            "Rawdata_20250519_00_00/",
+#            "Rawdata_20250520_00_00/",
+#            "Rawdata_20250521_00_00/",
+#            "Rawdata_20250522_00_00/",
+#            ]
+
+for subdir in rstdirs:
+    rst_dir = rootdir + subdir + "/"
+    print (rst_dir)
     
     for ufemb_id in [1,2]:
-        hdf5_fp=rst_dir + "ufemb%d_%s_trigger.hdf5"%(ufemb_id, subdir[8:16])
+        hdf5_fp=rst_dir + "ufemb%d_%s_trigger.hdf5"%(ufemb_id, subdir[7:15])
         if os.path.isfile(hdf5_fp):    
             print (hdf5_fp)
             pass
         else:
             continue
+
+        if filter_anaed_file(hdf5_fp=califp, anafp=hdf5_fp  ):
+            print (hdf5_fp, "was analyzed")
+            continue
     
         with h5py.File(hdf5_fp, "r") as f:
 
             fns = f["file_analyzed"][:]
+            if len(fns) == 0:
+                continue
             fns.sort()
             fn0 = fns[0]
             fn0 = fn0.decode('utf-8')
@@ -145,14 +171,16 @@ for subdir in subdirs:
             dt0 = datetime.strptime(fn0[7:7+14], "%Y%m%d_%H_%M").replace(tzinfo=ZoneInfo("America/New_York") )#timezone.utc)
             dtt0 = int(dt0.timestamp())
 
-            #for ch in [49-32]:
             for ch in range(32):
+            #for ch in [10]:
                 key = "CH%02d"%ch
                 bypass_ch_flg = False
                 dn = dmap[(ufemb_id-1)*32+ch]
                 if "OPEN" in dn:
                     print (dn, "is ignored")
                     continue
+                print (dn, "is being analyzed")
+
                 plt_dir = rst_dir + dn  + "_plots/Triggers/"
                 if not os.path.exists(plt_dir):
                     try:
@@ -160,7 +188,17 @@ for subdir in subdirs:
                     except OSError:
                         print ("Error to create folder %s"%plt_dir)
                         sys.exit()
-        
+
+                for root, dirs, files in os.walk(plt_dir):
+                    break
+
+                pltfiles = []
+                for tmp in files:
+                    if ".png" in tmp:
+                        pltfiles.append(tmp)
+                pltfiles.sort()
+                pltfiles = pltfiles[0:-1]
+
                 data = f[key]
                 data=data[:]
                 if len(data) > 0:
@@ -192,11 +230,16 @@ for subdir in subdirs:
                     subds.append(ds[prev : ].copy())
         
                     for xi in range(len(subts)):
-        
                         dtt00 = dtt0 + int(subts[xi][0]//1e9) 
                         easten=pytz.timezone("America/New_York")
                         dt = datetime.fromtimestamp(dtt00, tz=easten)
-        
+                        pltexist = dt.strftime("%Y_%m_%d_%H_%M_%S")
+                        pltexist_f = False
+                        for pltfile in pltfiles:
+                            if pltexist  in pltfile:
+                                pltexist_f = True
+                        if pltexist_f:
+                            continue
         
                         vbinw=10
                         # 1) Build histogram
@@ -209,6 +252,9 @@ for subdir in subdirs:
                         bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
                         peak_centers = bin_centers[peaks]
                         peak_heights = counts[peaks]
+
+                        if len(peak_centers) == 0:
+                            continue
 
                         import matplotlib.pyplot as plt
                         # Create a 2x2 grid of subplots
@@ -242,7 +288,7 @@ for subdir in subdirs:
                         axes[1].grid()
 
                         plt.tight_layout()
-                        pltfp = plt_dir + "ufemb%d_CH%d_Trig_%s.png"%(ufemb_id,ch,dt.strftime("%Y_%m_%d_%H_%M_%S"))
+                        pltfp = plt_dir + "Trig_%s_%s.png"%(dn,dt.strftime("%Y_%m_%d_%H_%M_%S"))
         
                         fig.savefig(pltfp, format='png')                 
                         #plt.show()
@@ -253,12 +299,16 @@ for subdir in subdirs:
                         attrsd["Start_TS"] = subts[xi][0] + ts0
                         attrsd["End_TS"] = subts[xi][-1] + ts0
                         attrsd["Total Triggers"] = len(subds[xi])
+                        
                         if (np.max(peak_heights) > len(subds[xi]) *0.8) or (len(peak_heights) < 3) or (np.max(peak_centers) < 20):
                             attrsd["Trigger Type"] = "Charge" 
                         else:
                             attrsd["Trigger Type"] = "LED" 
                         attrsd["Plot_url"] = pltfp
                         dsetd = list(zip(peak_centers, peak_heights))
-                        append_data(hdf5_fp=rootdir + "led_cali_vs_time.hdf5", sipmno=dn, dsetn=dt.strftime("%Y_%m_%d_%H_%M_%S"), dsetd=dsetd, attrsd=attrsd)
+                        append_data(hdf5_fp=califp, sipmno=dn, dsetn=dt.strftime("%Y_%m_%d_%H_%M_%S"), dsetd=dsetd, attrsd=attrsd)
+
+        
+        append_anaed_fp(hdf5_fp=califp, anafp=hdf5_fp)
 
 
