@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/30/2025 1:20:34 PM
+Last modified: 5/30/2025 2:07:59 PM
 """
 
 #defaut setting for scientific caculation
@@ -132,7 +132,9 @@ for root, dirs, files in os.walk(rootdir):
 rstdirs = []
 for onedir in dirs:
     #if ("Result_" in onedir) and (datetime.now().strftime("%Y%m%d") not in onedir):
-    if ("Result_" in onedir) :
+    #if ("Result_" in onedir) :
+    #if ("Result_" in onedir) and (datetime.now().strftime("%Y%m%d") in onedir):
+    if ("Result_" in onedir) and ("20250529" in onedir):
         rstdirs.append(onedir)
 
 
