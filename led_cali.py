@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 6/5/2025 3:19:15 PM
+Last modified: 6/2/2025 12:04:00 PM
 """
 
 #defaut setting for scientific caculation
@@ -62,7 +62,6 @@ def append_structured_data( hdf5_fp, tdszip,anafp,  dtype=np.dtype([("TS","i8"),
         dset.resize((old_size + new_size,))
         dset[old_size:] = nstring
 
-
 def filter_anaed_file( hdf5_fp, anafp  ):
     with h5py.File(hdf5_fp, 'r') as f:
         dset=f["file_analyzed"]
@@ -71,6 +70,7 @@ def filter_anaed_file( hdf5_fp, anafp  ):
             if anafp in str(fn):
                 return True
         return False
+
 
 def STEP2(rootdir, subdir):
 
@@ -145,62 +145,30 @@ def STEP2(rootdir, subdir):
 rootdir = """G:/SiPM/"""
 
 
-from  hdf5_trig_plot_step3 import hdf5_trig_plot_step3
-from  hdf5_dr_plot_step3 import hdf5_dr_plot_step3
-while True:
+if True:
     for root, dirs, files in os.walk(rootdir):
         break
 
     subdirs = []
     dates = datetime.now().strftime("%Y%m%d")
 
-    hr0 = int(datetime.now().strftime("%H"))
-    if hr0 == 2:
-    #if True:
+    if True:
+        yorn = input ("LED cali? (Y/N) (e/E exit): " )
+        if "y" in yorn or "Y" in yorn:
+            print ("One minute quick LED calibration start ...")
+            import sg_control
+            time.sleep(120)
+            print ("One minute quick LED calibration End ...")
+        elif "e" in yorn or "E" in yorn:
+            exit()
+
         for rawd in dirs:
-            if ("Rawdata_" in rawd) and (dates not in rawd) :
+            if ("Rawdata_" in rawd) and (dates in rawd) :
                 STEP2(rootdir, subdir=rawd)
-        print ("Sleep 60 minutes")
-        hdf5_dr_plot_step3 ()
-        time.sleep(3600)
-
-
-
-    for rawd in dirs:
-        if ("Rawdata_" in rawd) and (dates in rawd) :
-            STEP2(rootdir, subdir=rawd)
-
-
-    if (hr0 == 4) or (hr0 == 9) or (hr0 == 22) :
+                cur_dir = rawd
+        from hdf5_trig_plot_step3 import hdf5_trig_plot_step3
         hdf5_trig_plot_step3 ()
-        hdf5_dr_plot_step3 ()
-    print ("Crtl + C to exit if you would like to perform a LED cali")
-    print ('''please run "C:/Users\protoDUNE/anaconda3/python.exe led_cali.py" ''')
-    print ("Sleep 5 minutes")
-    time.sleep(5*60)
-
-#    try: 
-#        print ("Crtl + C if you would like to perform a LED cali")
-#        print ("Sleep 5 minutes")
-#        for i in range(5*60):
-#            time.sleep(1)
-#            dates = datetime.now().strftime("%Y%m%d")
-#        import hdf5_trig_plot_step3
-#    except KeyboardInterrupt:
-#        yorn = input ("LED cali? (Y/N) (e/E exit): " )
-#        if "y" in yorn or "Y" in yorn:
-#            print ("One minute quick LED calibration start ...")
-#            import sg_control
-#            time.sleep(60)
-#            print ("One minute quick LED calibration End ...")
-#        elif "e" in yorn or "E" in yorn:
-#            exit()
-#
-#        for rawd in dirs:
-#            if ("Rawdata_" in rawd) and (dates in rawd) :
-#                STEP2(rootdir, subdir=rawd)
-#                cur_dir = rawd
-#        import hdf5_trig_plot_step3
+        print ("""Done, please re-run 'C:/Users\protoDUNE/anaconda3/python.exe data_2_hdf5_step2.py'""")
 
 
     
