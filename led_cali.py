@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/30/2025 1:43:16 PM
+Last modified: 6/2/2025 12:04:00 PM
 """
 
 #defaut setting for scientific caculation
@@ -166,7 +166,8 @@ if True:
             if ("Rawdata_" in rawd) and (dates in rawd) :
                 STEP2(rootdir, subdir=rawd)
                 cur_dir = rawd
-        import hdf5_trig_plot_step3
+        from hdf5_trig_plot_step3 import hdf5_trig_plot_step3
+        hdf5_trig_plot_step3 ()
         print ("""Done, please re-run 'C:/Users\protoDUNE/anaconda3/python.exe data_2_hdf5_step2.py'""")
 
 

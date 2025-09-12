@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/20/2025 5:09:28 PM
+Last modified: 8/22/2025 10:00:24 AM
 """
 
 #defaut setting for scientific caculation
@@ -36,7 +36,7 @@ while True:
         t = datetime.now().strftime("%Y%m%d")
         dirs_today = [] 
         for onedir in dirs:
-            if (t in onedir) and ("Bakata_" in onedir):
+            if (t in onedir) and ("Rawdata_" in onedir):
                 dirs_today.append(onedir)
         dirs_today.sort(reverse = True)
         break
@@ -76,7 +76,9 @@ while True:
             if plt_flg:
                 import matplotlib.pyplot as plt
                 fig = plt.figure(figsize=(16,8))
-                for ch in range(0+(ufemb_id-1)*32,0+(ufemb_id-1)*64,1):
+                #for ch in range(0+(ufemb_id-1)*32,0+(ufemb_id-1)*32+32,1): #for all 32 chns
+                #for ch in [0]: #ch0
+                for ch in range(32):
                     if ch >=32:
                         i = ch-32
                     else:
@@ -85,7 +87,8 @@ while True:
                         rmsch = np.std(chndata[i][0:30])
                         meanch = int(np.mean(chndata[i]))
                         peakn = meanch - np.min(chndata[i])
-                        plt.plot(chndata[i], marker = 's', label="ch%d_rms%.3f_mean%d_amp%d_ext%d"%( ch, rmsch, meanch,peakn, ext_trigger))
+                        if peakn > 50:
+                            plt.plot(chndata[i], marker = 's', label="ch%d_rms%.3f_mean%d_amp%d_ext%d"%( ch, rmsch, meanch,peakn, ext_trigger))
                 plt.legend(loc=1,fontsize=10)
                 plt.grid()
                 plt.title(dirs_today[0] + ":" + onefile)

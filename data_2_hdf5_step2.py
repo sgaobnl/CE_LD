@@ -5,7 +5,7 @@ Author: GSS
 Mail: gao.hillhill@gmail.com
 Description: 
 Created Time: 3/20/2019 4:50:34 PM
-Last modified: 5/30/2025 1:30:00 PM
+Last modified: 6/16/2025 1:21:54 PM
 """
 
 #defaut setting for scientific caculation
@@ -62,6 +62,7 @@ def append_structured_data( hdf5_fp, tdszip,anafp,  dtype=np.dtype([("TS","i8"),
         dset.resize((old_size + new_size,))
         dset[old_size:] = nstring
 
+
 def filter_anaed_file( hdf5_fp, anafp  ):
     with h5py.File(hdf5_fp, 'r') as f:
         dset=f["file_analyzed"]
@@ -70,7 +71,6 @@ def filter_anaed_file( hdf5_fp, anafp  ):
             if anafp in str(fn):
                 return True
         return False
-
 
 def STEP2(rootdir, subdir):
 
@@ -145,6 +145,8 @@ def STEP2(rootdir, subdir):
 rootdir = """G:/SiPM/"""
 
 
+from  hdf5_trig_plot_step3 import hdf5_trig_plot_step3
+from  hdf5_dr_plot_step3 import hdf5_dr_plot_step3
 while True:
     for root, dirs, files in os.walk(rootdir):
         break
@@ -154,11 +156,15 @@ while True:
 
     hr0 = int(datetime.now().strftime("%H"))
     if hr0 == 2:
+    #if True:
         for rawd in dirs:
             if ("Rawdata_" in rawd) and (dates not in rawd) :
                 STEP2(rootdir, subdir=rawd)
         print ("Sleep 60 minutes")
+        hdf5_dr_plot_step3 ()
+        hdf5_trig_plot_step3 ()
         time.sleep(3600)
+#    exit()
 
 
 
@@ -166,8 +172,10 @@ while True:
         if ("Rawdata_" in rawd) and (dates in rawd) :
             STEP2(rootdir, subdir=rawd)
 
+
     if (hr0 == 4) or (hr0 == 9) or (hr0 == 22) :
-        import hdf5_trig_plot_step3
+        hdf5_trig_plot_step3 ()
+        hdf5_dr_plot_step3 ()
     print ("Crtl + C to exit if you would like to perform a LED cali")
     print ('''please run "C:/Users\protoDUNE/anaconda3/python.exe led_cali.py" ''')
     print ("Sleep 5 minutes")
