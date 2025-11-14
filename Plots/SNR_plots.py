@@ -1,97 +1,156 @@
-#----------------------------
-Before use, run the code SiPm_trigger_data_analysis.py . You should get a .hdf5 file that contains the peaks data (centers, amplitudes, fwhm) , resolution, SNR and PDE.
-#----------------------------
-
+#!/usr/bin/env python3
 import os
-import h5py
-import numpy as np
-import matplotlib.pyplot as plt
 from datetime import datetime
+from typing import Dict, List, Optional
 
-# Paths
-rootdir = "/home/koloina/BNL_Work/Copy/SiPM_LED_hdf5_share/SiPM"
-hdf5_path = os.path.join(rootdir, "AnalysisResults.hdf5")
-output_dir = os.path.join(rootdir, "SNR_plots")
+import h5py
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+# ----------------------------
+# Configuration
+# ----------------------------
+rootdir = "Input path"
+hdf5_path = os.path.join(rootdir, "Trig_Analysis.hdf5")
+output_dir = os.path.join(rootdir, "PDE_vs_hours_plots")
 os.makedirs(output_dir, exist_ok=True)
 
-target_hours = [0, 8, 21]
-colors = {0: "orange", 8: "purple", 21: "blue"}
-labels = {0: "00h", 8: "08h", 21: "21h"}
 
-def get_hour_from_datestr(datestr):
-    dt = datetime.strptime(datestr, "%Y-%m-%d %H:%M:%S")
-    return dt.hour
+# ----------------------------
+# Robust date parser (covers the formats you actually have)
+# ----------------------------
+def parse_date(date_str: str) -> Optional[datetime]:
+    # The keys in your file look like: 2025-11-06 14:30:22
+    # Some may contain microseconds → strip them first
+    clean = date_str.split('.')[0]
+    for fmt in (
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%dT%H:%M:%S",
+        "%Y/%m/%d %H:%M:%S",
+    ):
+        try:
+            return datetime.strptime(clean, fmt)
+        except ValueError:
+            continue
+    # If everything fails, print a warning (helps debugging)
+    print(f"Warning: Could not parse date '{date_str}'")
+    return None
 
-def get_day_number(datestr, ref_date):
-    dt = datetime.strptime(datestr, "%Y-%m-%d %H:%M:%S")
-    delta = dt - ref_date
-    return delta.days + 1
+
+# ----------------------------
+# 1. Gather raw data
+# ----------------------------
+hv_groups: Dict[str, Dict[str, Dict[str, List]]] = {"HV1": {}, "HV2": {}, "HV3": {}}
 
 with h5py.File(hdf5_path, "r") as f:
-    channels = list(f.keys())
-    all_dates = []
-    for ch in channels:
-        grp_ch = f[ch]
-        for ufemb in grp_ch.keys():
-            for date_str in grp_ch[ufemb].keys():
-                all_dates.append(datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S"))
-    if not all_dates:
-        print("No dates found in the HDF5 file.")
-        exit(1)
-    ref_date = min(all_dates)
+    for sipm_key in f.keys():                     # e.g. HV2_CON1_1_CH03_FNLXYZ
+        hv_prefix = sipm_key.split("_")[0]
+        if hv_prefix not in hv_groups:
+            continue
 
-    for ch in channels:
-        plt.figure(figsize=(12, 6))
-        grp_ch = f[ch]
-
-        # snr_data: {hour: {day: snr}}
-        snr_data = {h: {} for h in target_hours}
-
-        for ufemb in grp_ch.keys():
-            for date_str in grp_ch[ufemb].keys():
-                dset = grp_ch[ufemb][date_str]
-                snr_vals = dset.get("snr", None)
-                if snr_vals is None or len(snr_vals) == 0:
+        grp = f[sipm_key]
+        for femb_key in grp.keys():               # uFEMB1 or uFEMB2
+            femb_grp = grp[femb_key]
+            for date_key in femb_grp.keys():
+                dset = femb_grp[date_key]
+                if "envelope_mu" not in dset.attrs:
                     continue
-                snr = snr_vals[0]
-                day = get_day_number(date_str, ref_date)
-                hour = get_hour_from_datestr(date_str)
 
-                if hour in target_hours:
-                    if snr >= 100:
-                        snr_data[hour][day] = np.nan
-                    else:
-                        snr_data[hour][day] = snr
+                # ---- force float ----
+                try:
+                    env_mu = float(dset.attrs["envelope_mu"])
+                except Exception:
+                    continue
+
+                dt = parse_date(date_key)
+                if dt is None:
+                    continue
+
+                chan = hv_groups[hv_prefix].setdefault(
+                    sipm_key, {"dates": [], "mu": []}
+                )
+                chan["dates"].append(dt)
+                chan["mu"].append(env_mu)
 
 
-        # Plot scatter points per hour
-        for hour in target_hours:
-            days = list(snr_data[hour].keys())
-            snrs = [snr_data[hour][d] for d in days]
-            if days:
-                plt.scatter(days, snrs, label=labels[hour], color=colors[hour], alpha=0.7)
+# ----------------------------
+# 2. Per-HV processing
+# ----------------------------
+for hv_prefix, channels in hv_groups.items():
+    if not channels:
+        continue
 
-        # Draw vertical bars linking 00h, 08h, 21h points for the same day
-        all_days = sorted(set().union(*[set(snr_data[h].keys()) for h in target_hours]))
-        for day in all_days:
-            points = []
-            for h in target_hours:
-                snr_val = snr_data[h].get(day, None)
-                if snr_val is not None:
-                    points.append((h, snr_val))
-            if len(points) == len(target_hours):
-                points.sort(key=lambda x: x[0])
-                snr_vals = [p[1] for p in points]
-                plt.vlines(day, min(snr_vals), max(snr_vals), colors='grey', alpha=0.5, linewidth=1)
+    # ---- keep only channels that actually have data ----
+    channels = {k: v for k, v in channels.items() if len(v["dates"]) > 0}
+    if not channels:
+        continue
 
-        plt.title(f"SNR vs Day for Channel {ch}")
-        plt.xlabel("Day")
-        plt.ylabel("SNR")
-        plt.legend()
-        plt.grid(True)
-        plt.tight_layout()
+    # ---- mean per channel (over *all* its timestamps) ----
+    mean_adc: Dict[str, float] = {}
+    for ch, data in channels.items():
+        mean_adc[ch] = float(np.mean(data["mu"]))
 
-        save_path = os.path.join(output_dir, f"SNR_{ch}.png")
-        plt.savefig(save_path)
-        plt.close()
-        print(f"Saved plot: {save_path}")
+    # ---- build time-series (per-channel t0, not global) ----
+    series: Dict[str, Dict[str, np.ndarray]] = {}
+    for ch, data in channels.items():
+        dates = np.array(data["dates"])
+        mu    = np.array(data["mu"], dtype=float)
+
+        order = np.argsort(dates)
+        dates, mu = dates[order], mu[order]
+
+        # **per-channel** reference time
+        t0 = dates[0]
+        hours = np.array([(d - t0).total_seconds() / 3600.0 for d in dates])
+
+        # Normalise: raw / channel_mean → average = 1.0
+        norm = mu / mean_adc[ch]
+
+        series[ch] = {"hours": hours, "norm": norm}
+
+    # ----------------------------
+    # 3. Plot
+    # ----------------------------
+    n_chan = len(series)
+    nrows, ncols = 6, 3
+    fig, axes = plt.subplots(
+        nrows, ncols, figsize=(15, 12), sharex=False, sharey=True
+    )
+    axes = axes.flatten()
+
+    for idx, (ch_name, s) in enumerate(sorted(series.items())):
+        if idx >= len(axes):
+            break
+        ax = axes[idx]
+        ax.plot(s["hours"], s["norm"],
+                marker="o", markersize=3, linestyle="-", linewidth=0.8)
+        ax.set_title(ch_name, fontsize=8)
+        ax.tick_params(axis="x", labelrotation=30, labelsize=7)
+        ax.tick_params(axis="y", labelsize=7)
+        ax.grid(True, linestyle="--", alpha=0.4)
+        ax.set_ylabel("Normalized Envelope ADC", fontsize=8)
+
+    # hide unused sub-plots
+    for j in range(idx + 1, len(axes)):
+        axes[j].axis("off")
+
+    # x-label on bottom row only
+    for ax in axes[-ncols:]:
+        ax.set_xlabel("Hours since first measurement", fontsize=8)
+
+    fig.suptitle(
+        f"Normalized Envelope ADC vs Hours — {hv_prefix}",
+        fontsize=14, fontweight="bold"
+    )
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.subplots_adjust(hspace=0.4, wspace=0.3)
+
+    outfile = os.path.join(
+        output_dir, f"{hv_prefix}_NormalizedEnvelope_vs_Hours.png"
+    )
+    plt.savefig(outfile, dpi=300)
+    plt.close(fig)
+    print(f"Saved: {outfile}")
+
+print("\nAll normalized envelope-vs-hours plots generated.")
