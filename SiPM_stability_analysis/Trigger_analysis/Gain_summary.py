@@ -1,5 +1,6 @@
 import numpy as np
 import h5py
+import os
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 from datetime import datetime
@@ -7,7 +8,10 @@ from datetime import datetime
 # ----------------------------
 # Configuration
 # ----------------------------
+rootdir = "/data/disk1/koloina/waveform_fitting/SIPM/Final_plots2/"
 hdf5_output = "/data/disk1/koloina/waveform_fitting/SIPM/LED_Analysis_Final.hdf5"
+output_dir = os.path.join(rootdir, "Gain_plots")
+os.makedirs(output_dir, exist_ok=True)
 
 # Y-axis limits for raw gain by HV group
 RAW_GAIN_YLIMS = {
@@ -86,6 +90,9 @@ def extract_gains(hdf5_path):
                     timestamps = [timestamps[i] for i in sorted_indices]
                     raw_gains = np.array([raw_gains[i] for i in sorted_indices])
                     
+                    # Convert to hours since start
+                    hours_since_start = np.array([(t - timestamps[0]).total_seconds() / 3600.0 for t in timestamps])
+                    
                     # Normalize to mean of valid measurements
                     valid_gains = raw_gains[~np.isnan(raw_gains)]
                     if len(valid_gains) == 0:
@@ -96,7 +103,7 @@ def extract_gains(hdf5_path):
                     
                     key = f"{sipm_id}/{femb_key}"
                     gains_data[key] = {
-                        'timestamps': timestamps,
+                        'hours': hours_since_start,
                         'raw_gains': raw_gains,
                         'norm_gains': norm_gains,
                         'hv_group': hv_group
@@ -130,47 +137,55 @@ def plot_gains(gains_data):
         ax_raw = axes[0, col_idx]
         
         for sipm_key, data in sipm_list:
-            timestamps = data['timestamps']
+            hours = data['hours']
             raw_gains = data['raw_gains']
             
             label = sipm_key.split("/")[0][:20]
-            ax_raw.plot(timestamps, raw_gains, marker='o', linestyle='-', 
+            ax_raw.plot(hours, raw_gains, marker='o', linestyle='-', 
                        markersize=4, alpha=0.7, label=label)
         
         ax_raw.set_ylabel("Raw Gain [ADC]", fontsize=12)
         ax_raw.set_title(f"{hv_name} SiPMs - Raw Gain", fontsize=12, fontweight='bold')
         ax_raw.grid(True, alpha=0.3)
         ax_raw.set_ylim(RAW_GAIN_YLIMS[hv_name])
-        ax_raw.tick_params(axis='x', rotation=45)
         
-        if len(sipm_list) <= 10:
-            ax_raw.legend(fontsize=7, loc='best')
+        # Always show legend for raw gain plot
+        if len(sipm_list) > 0:
+            ax_raw.legend(fontsize=6, loc='upper left', bbox_to_anchor=(1.02, 1), 
+                         borderaxespad=0, framealpha=0.9)
         
         # Bottom row: Normalized gain
         ax_norm = axes[1, col_idx]
         
         for sipm_key, data in sipm_list:
-            timestamps = data['timestamps']
+            hours = data['hours']
             norm_gains = data['norm_gains']
             
             label = sipm_key.split("/")[0][:20]
-            ax_norm.plot(timestamps, norm_gains, marker='o', linestyle='-', 
+            ax_norm.plot(hours, norm_gains, marker='o', linestyle='-', 
                         markersize=4, alpha=0.7, label=label)
         
-        ax_norm.set_xlabel("Date", fontsize=12)
+        ax_norm.set_xlabel("Hours since start", fontsize=12)
         ax_norm.set_ylabel("Normalized Gain", fontsize=12)
         ax_norm.set_title(f"{hv_name} SiPMs - Normalized", fontsize=12, fontweight='bold')
         ax_norm.grid(True, alpha=0.3)
         ax_norm.set_ylim(NORM_GAIN_YLIM)
         ax_norm.yaxis.set_major_locator(mticker.MultipleLocator(0.05))
         ax_norm.axhline(y=1.0, color='red', linestyle='--', linewidth=1.5, alpha=0.5)
-        ax_norm.tick_params(axis='x', rotation=45)
         
-        if len(sipm_list) <= 10:
-            ax_norm.legend(fontsize=7, loc='best')
+        # Always show legend for normalized gain plot
+        if len(sipm_list) > 0:
+            ax_norm.legend(fontsize=6, loc='upper left', bbox_to_anchor=(1.02, 1), 
+                          borderaxespad=0, framealpha=0.9)
     
-    plt.tight_layout()
-    plt.suptitle("SiPM Gain Analysis: Raw and Normalized", fontsize=16, fontweight='bold', y=1.00)
+    plt.tight_layout(rect=[0, 0, 0.85, 0.96])  # Leave space for legends on right
+    plt.suptitle("SiPM Gain Analysis: Raw and Normalized", fontsize=16, fontweight='bold', y=0.98)
+    
+    # Save figure
+    save_path = os.path.join(output_dir, "gain_analysis_all_HV.png")
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    print(f"\nPlot saved to: {save_path}")
+    
     plt.show()
 
 # ----------------------------
