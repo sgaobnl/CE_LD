@@ -2,18 +2,21 @@
 """
 Compute CN mean & std per channel (SiPM), grouped by HV1/HV2/HV3,
 plot mean CN with error bars showing ±1σ std deviation,
-and save all channel statistics to a text file.
+save all channel statistics to a text file,
+save the plot as an image with HV color legend.
 """
 
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 # ============================================================
 # Paths
 # ============================================================
-HDF5_FILE = "/data/disk1/koloina/CN/SiPM/New_Corr_noise_improved_final.hdf5"
+HDF5_FILE = "/data/disk1/koloina/CN/SiPM/CN.hdf5"
 OUTPUT_TXT = "/data/disk1/koloina/CN/SiPM/CN_channel_statistics.txt"
+OUTPUT_PNG = "/data/disk1/koloina/CN/SiPM/CN_channel_plot.png"
 
 # ============================================================
 # Helper: identify HV from SiPM group name
@@ -89,7 +92,7 @@ for hv in ["HV1", "HV2", "HV3"]:
         markersize=6,
         color=colors[hv],
         alpha=0.9,
-        label=None  # no legend on plot
+        label=hv  # HV color legend
     )
 
 # Annotate std value above each error bar
@@ -109,5 +112,13 @@ plt.xlabel("Channel")
 plt.ylabel("CN Mean ± 1σ")
 plt.title("CN Mean with Standard Deviation per Channel (Full Experiment)")
 plt.grid(True, alpha=0.3)
+
+# Add legend for HV colors
+plt.legend(title="HV Group")
+
+# Adjust layout and save figure
 plt.tight_layout()
+plt.savefig(OUTPUT_PNG, dpi=300)
 plt.show()
+
+print(f"Plot saved as: {OUTPUT_PNG}")
