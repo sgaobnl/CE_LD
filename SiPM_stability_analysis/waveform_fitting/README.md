@@ -6,3 +6,5 @@ The fitting window is chosen once for each channel and you should be prompted to
 
 Once you see the pop up window, zoom in and select the window you want the use for the fitting.
 You should be asked to do so for each channel.
+
+Outputs: .h5 files containing the peaks of the waveform per channel, and their timestamp, per day.
