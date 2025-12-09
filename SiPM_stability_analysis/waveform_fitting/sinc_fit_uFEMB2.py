@@ -2,7 +2,7 @@
 """
 Batch waveform sinc interpolation fit → structured HDF5 per Anaata folder
 ------------------------------------------------------------------------
-- One HDF5 per Anaata folder: uFEMB1_LED_YYYYMMDD.h5
+- One HDF5 per Anaata folder: uFEMB2_LED_YYYYMMDD.h5
 - Combines all .tana files in the folder
 - Saves baseline-subtracted peaks as structured datasets per channel
 - dtype: ("TS","i8"), ("Value","u2")
