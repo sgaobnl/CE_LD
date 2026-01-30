@@ -908,8 +908,8 @@ def DIS_PLOTs(result, rn, link_errs=None, total_fft=[], ntotal_fft=0):
 
     Plot_FFT_Avg(fdir=rn, total_fft=total_fft, ntotal_fft=ntotal_fft)
     
-rawdir = "/home/trj/saut/ce/jan23_2026/data/"
-#rawdir = "/scratch_local/SBND_Installation/data/commissioning/"
+#rawdir = "/home/trj/saut/ce/jan23_2026/data/"
+rawdir = "/scratch_local/SBND_Installation/data/commissioning/"
 #rawdir = "/scratch_local/SBND_Installation/data/commissioning/ce_rampup_tests/"
 #rawdir = "/scratch_local/SBND_Installation/data/sgao/newplot/"
 current_year = str(datetime.now().year)
