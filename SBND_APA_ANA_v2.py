@@ -972,8 +972,9 @@ for d1n in d1ns:
                             continue
 #                        else:
 #                            DIS_PLOTs(result, rn, link_errs, total_fft=total_fft, ntotal_fft=ntotal_fft)
-                    except:
+                    except Exception as etex:
                         print("Caught error.  Possibly EOFError or other error, check disk space")
+                        print(etex)
                         open(skip, 'a').close()
                         continue
         break
