@@ -21,7 +21,7 @@ def main():
                 subprocess.run(["python", "SBND_APA_ANA_v2.py"])
                 subprocess.run(["python", "SBND_RMS_vs_Time.py"])
                 subprocess.run(["python", "myemail.py"])
-                subprocess.run(["python", "myemail2.py"])
+                subprocess.run(["python", "myemail2a.py"])
                 subprocess.run(["python", "myemail3.py"])
                 subprocess.run(["python", "myemail4.py"])
                 iskip = nskip
