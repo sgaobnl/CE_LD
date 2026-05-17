@@ -1,0 +1,22 @@
+From: sbnd
+To: sbnd_cold_electronics-aaaamjjujebziez3xtqixfexxy@shortbaseline.slack.com, sbnd-shift-operations-aaaak3ro3cjdguez5l7glmobwu@shortbaseline.slack.com
+Subject: TimeStamp
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="outer-boundary"
+
+This is a MIME-encoded message. If you are seeing this, your mail
+reader is old.
+--outer-boundary
+Content-Type: text/plain; charset=us-ascii
+
+CE Monitor plots
+
+--outer-boundary
+Content-Type: application/pdf
+Content-Disposition: inline
+Content-Transfer-Encoding: base64
+
+{file0}
+
+
+--outer-boundary--

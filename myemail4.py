@@ -9,7 +9,7 @@ from email.mime.image import MIMEImage
 
 current_year = str(datetime.now().year)
 
-with open('/scratch_local/SBND_Installation/data/commissioning/LD_result/2025/LD_2025_01_07_11_17_16.deadchannels', 'rb') as file:
+with open('/scratch_local/SBND_Installation/data/commissioning/LD_result/2025/LD_2025_08_06_16_58_00.deadchannels', 'rb') as file:
     defaultdcs = pickle.load(file)
 #print(defaultdcs)
 

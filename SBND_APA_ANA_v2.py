@@ -35,8 +35,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-
-def FEMB_CHK(fembdata, rms_f = True, fs="./", rn=""):
+def FEMB_CHK(fembdata, rms_f = True, fs="./", rn="", total_fft=[], ntotal_fft=0):
     RAW_C = RAW_CONV()
     chn_rmss = []
     chn_rmss_filtered = []
@@ -92,6 +91,30 @@ def FEMB_CHK(fembdata, rms_f = True, fs="./", rn=""):
 
             # Remove outliers and surrounding elements
             filtered_data = [achn_ped[i] for i in range(len(achn_ped)) if i not in outliers]
+            
+            # make a second filtered set that replaces the outliers with the median
+            fdata2 = achn_ped[:]
+            for i in range(len(achn_ped)):
+                fdata2[i] = fdata2[i] - adc_median
+                if  fdata2[i] < -10 or fdata2[i] > 10:
+                    fdata2[i] = 0
+
+            yf2 = np.fft.fft(fdata2)
+            nfdata2 = len(fdata2)
+            nfdata2_oneside = nfdata2 // 2
+            # skip the first 5 points -- low frequency stuff usually make the plot hard to read 
+            f_oneside = np.abs(yf2[5:nfdata2_oneside])
+            if len(total_fft) == 0:
+                total_fft = f_oneside
+            else:
+                total_fft += f_oneside
+            ntotal_fft += 1
+
+#            print("fft: ")
+#            print(len(yf2))
+#            print(yf2)
+#            print(ntotal_fft)
+            
             # rare case all elements are removed
             if not filtered_data:
                 filtered_data = achn_ped
@@ -156,7 +179,10 @@ def FEMB_CHK(fembdata, rms_f = True, fs="./", rn=""):
         fn = rn2 + "_" + ff
         fn = fn.replace(".bin", ".png")
         ABFEMB_PLOT(result, plotfs, fn=fn)
-    return result
+#    print("in femb_chk: ")
+#    print(ntotal_fft)
+#    print(len(total_fft))
+    return result,total_fft,ntotal_fft
 
 
 def FEMB_SUB_PLOT(ax, x, y, title, xlabel, ylabel, color='b', marker='.', atwinx=False, ylabel_twx = "", e=None):
@@ -286,7 +312,7 @@ def SBND_Wire_Length():
             lengthmap[int(elements[0])] = length
     return lengthmap
 
-def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
+def SBND_ANA(rawdir, rms_f=False, rn="./result.ln",total_fft=[], ntotal_fft=0):
     fns = []
     for root, dirs, files in os.walk(rawdir):
         for fn in files:
@@ -334,8 +360,11 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
             raw = pickle.load(fs)
         if len(raw) != 8:
             print ("Invalid monitoring data,discard...")
-            return None, None
-        results = FEMB_CHK(raw, rms_f=rms_f, fs=df[3], rn=rn)
+            return None, None, None, None
+        results,total_fft,ntotal_fft = FEMB_CHK(raw, rms_f=rms_f, fs=df[3], rn=rn, total_fft=total_fft, ntotal_fft=ntotal_fft)
+#        print("got back fft: ")
+#        print(ntotal_fft)
+#        print(len(total_fft))
         chn_rmss = results[2][0]
         chn_peds = results[2][1]
         chn_pkps = results[2][2]
@@ -358,7 +387,7 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
     result=dec_chn
     if len(result[0]) < 20:
         rawdatapath = rawdir 
-        Dec_add_cfgs(rawdatapath, result, rn)
+        Dec_add_cfgs(rawdatapath, result, rn, total_fft=total_fft, ntotal_fft=ntotal_fft)
         #fechnregs = []
         #for cfgroot, cfgdirs, cfgfiles in os.walk(rawdatapath):
         #    for cfn in cfgfiles:
@@ -383,7 +412,7 @@ def SBND_ANA(rawdir, rms_f=False, rn="./result.ln"):
     #    fp.write( top_row + "\n")
     #    for x in dec_chn:
     #        fp.write(",".join(str(i) for i in x[0:17]) +  "," + "\n")
-    return result, link_errs
+    return result, link_errs, total_fft, ntotal_fft
 
 def d_dec_plt(dec_chn, n=1):
     #n=63-11-46 "CFGINFO"
@@ -638,6 +667,25 @@ def DIS_PLOT(dec_chn, fdir, title = "RMS Noise Distribution", fn = "SBND_APA_RMS
     #plt.show()
     plt.close()
 
+def Plot_FFT_Avg(fdir,total_fft, ntotal_fft):
+    plt.figure(figsize=(6,6))
+    fig,ax = plt.subplots()
+    for i in range(len(total_fft)):
+        total_fft[i] = total_fft[i]/ntotal_fft
+    xf = range(len(total_fft))
+    n=len(xf)
+    xf1 = [0]*n
+    for i in xf:
+        xf1[i] = 5/(n+5) + i/(n+5)
+    ax.plot(xf1,total_fft)
+    ax.set(xlim=(0,1),xlabel="Frequency [MHz]",ylabel="Average Abs(FFT)")
+    
+    fn = "SBND_APA_FFT_Avg_DIS.png"
+    ffig = fdir[0:-3] + fn 
+    plt.tight_layout( rect=[0.05, 0.05, 0.95, 0.95])
+    plt.savefig(ffig[0:-4] + ".png")
+    plt.close()
+    
 def Plot_RMS_Length(dec_chn, fdir):
     wirelength = SBND_Wire_Length()
 
@@ -814,7 +862,7 @@ def DIS_CHN_PLOT(dec_chn, chnstr="U1"):
             #plt.savefig(fn)
             plt.close()
 
-def Dec_add_cfgs(rawdatapath, result, rn):
+def Dec_add_cfgs(rawdatapath, result, rn, total_fft=[], ntotal_fft=0):
     fechnregs = []
     for cfgroot, cfgdirs, cfgfiles in os.walk(rawdatapath):
         for cfn in cfgfiles:
@@ -832,10 +880,10 @@ def Dec_add_cfgs(rawdatapath, result, rn):
                 break
     with open(rn, 'wb') as f:
         pickle.dump(result, f)
-    DIS_PLOTs(result, rn)
+    DIS_PLOTs(result, rn, total_fft=total_fft, ntotal_fft=ntotal_fft)
 
 
-def DIS_PLOTs(result, rn, link_errs=None):
+def DIS_PLOTs(result, rn, link_errs=None, total_fft=[], ntotal_fft=0):
     DIS_PLOT(dec_chn=result, fdir=rn, title = "RMS Noise Distribution", fn = "SBND_APA_RMS_DIS.png", ns=[5], ylim=[-2,8],note=link_errs)
     DIS_PLOT(dec_chn=result, fdir=rn, title = "Pulse Response Distribution", fn = "SBND_APA_PLS_DIS.png", ns=[2,3,4], ylim=[-100,4000], ylabel="Amplitude / bit")
     DIS_PLOT(dec_chn=result, fdir=rn, title = "FE TST (1:enable, 0:disable) distribution", fn = "SBND_APA_CFG_FE_TST_DIS.png", ns=[63-11-17], ylim=[-2,2], ylabel="FE_TST", note="1:EN, 0:DIS, -1:Bad")
@@ -858,6 +906,9 @@ def DIS_PLOTs(result, rn, link_errs=None):
     DIS_PLOT(dec_chn=result, fdir=rn, title = "WIB TST WFM distribution", fn = "SBND_APA_CFG_WIB_TST_WFM_DIS.png", ns=[63-11-41+4], ylim=[-2,4], ylabel="WIB TST WFM Mode", note="0:from FEMB, 1:Sawtooth,2:CHN-Map, -1:Bad")
     Plot_RMS_Length(dec_chn=result, fdir=rn)
 
+    Plot_FFT_Avg(fdir=rn, total_fft=total_fft, ntotal_fft=ntotal_fft)
+    
+#rawdir = "/home/trj/saut/ce/jan23_2026/data/"
 rawdir = "/scratch_local/SBND_Installation/data/commissioning/"
 #rawdir = "/scratch_local/SBND_Installation/data/commissioning/ce_rampup_tests/"
 #rawdir = "/scratch_local/SBND_Installation/data/sgao/newplot/"
@@ -887,6 +938,8 @@ for d1n in d1ns:
                     continue
                 if (os.path.isfile(skip)):
                     continue
+                total_fft = []
+                ntotal_fft = 0
                 if (os.path.isfile(rn)):
                     if (int(d2n[8:10]) == 2) and (int(d2n[11:13])<16): #before 02/16, .femb and .wib save wrong data, dischard
                         continue 
@@ -902,7 +955,7 @@ for d1n in d1ns:
                             sub2dir = d2n 
                             rawdatapath = result_dir + "/../" + sub1dir + "/" + sub2dir + "/"
                             fechnregs = []
-                            Dec_add_cfgs(rawdatapath, result, rn)
+                            Dec_add_cfgs(rawdatapath, result, rn, total_fft, ntotal_fft)
                         else:
                             print ("Invalid, discard")
                             #pass
@@ -913,14 +966,15 @@ for d1n in d1ns:
                     #rms_f = False
                     rms_f = True
                     try:
-                        result,link_errs = SBND_ANA(anadir, rms_f = rms_f, rn=rn)
+                        result,link_errs,total_fft,ntotal_fft = SBND_ANA(anadir, rms_f = rms_f, rn=rn, total_fft=total_fft, ntotal_fft=ntotal_fft)
                         if result == None:
                             open(skip, 'a').close()
                             continue
 #                        else:
-#                            DIS_PLOTs(result, rn, link_errs)
-                    except EOFError:
-                        print("EOFError, check disk space")
+#                            DIS_PLOTs(result, rn, link_errs, total_fft=total_fft, ntotal_fft=ntotal_fft)
+                    except Exception as etex:
+                        print("Caught error.  Possibly EOFError or other error, check disk space")
+                        print(etex)
                         open(skip, 'a').close()
                         continue
         break
@@ -942,9 +996,3 @@ for d1n in d1ns:
 #        if ("Y" in yns) or ("y" in yns):
 #            exit()
 #
-    
-
-
-
-    
-
