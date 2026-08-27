@@ -722,7 +722,10 @@ def Plot_RMS_Length(dec_chn, fdir):
         drms = i[16] - rms
         #if drms < -0.5:
         #T.Y. Do not include channel 1377. This is a half-channel and its rms fluctuates a lot
-        if drms < -0.5 and ch != 1377:
+        #TRJ:  Skip also 11263 and 11264 as their RMS is low for mysterious reasons.
+        #we will keep an eye on their hit occupancies which sadly cannot be tested with enough
+        #significance with just one data readout here.
+        if drms < -0.5 and ch != 1377 and ch != 11263 and ch != 11264:
             deadch.append(ch)
         if 'E' in i[0] and 'U' in i[9]:
             length_eu.append(this_length)
